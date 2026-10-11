@@ -1,0 +1,29 @@
+name: P1 foundation (manual)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run env:init
+      - run: npm run db:validate
+      - run: npm run db:generate
+      - run: npm run check
+      - run: npm run check:secrets
+      - run: npm run db:up
+      - run: npm run db:check
+      - run: npm run test:db
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Stop only GHIDAI services (keep volumes)
+        if: always()
+        run: docker compose --env-file .env.development.local stop

@@ -6,3 +6,11 @@
 *.log
 coverage/
 dist/
+.env*
+!.env.example
+*.tsbuildinfo
+src/generated/
+playwright-report/
+test-results/
+.npm-cache/
+.multiagents/

@@ -1,0 +1,8 @@
+// P1 connection foundation only. GHIDAI models and migrations await P2/RV-01/RV-02.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+datasource db {
+  provider = "postgresql"
+}
