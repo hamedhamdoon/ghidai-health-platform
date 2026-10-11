@@ -1,8 +1,1624 @@
-// P1 connection foundation only. GHIDAI models and migrations await P2/RV-01/RV-02.
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
+
 datasource db {
   provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AccessGrant {
+  id                                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                          DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt                          DateTime        @default(now()) @db.Timestamptz(6)
+  revision                           Int             @default(1)
+  subjectId                          String          @db.Uuid
+  scopeUserId                        String          @db.Uuid
+  resource                           String
+  action                             GrantAction
+  assignmentId                       String          @db.Uuid
+  consentId                          String          @db.Uuid
+  startsAt                           DateTime        @db.Timestamptz(6)
+  expiresAt                          DateTime        @db.Timestamptz(6)
+  revokedAt                          DateTime?       @db.Timestamptz(6)
+  reason                             String          @db.VarChar(500)
+  grantedBy                          String          @db.Uuid
+  CoachAssignment                    CoachAssignment @relation(fields: [assignmentId, scopeUserId, subjectId, consentId], references: [id, userId, coachId, consentId], onUpdate: NoAction)
+  User_AccessGrant_grantedByToUser   User            @relation("AccessGrant_grantedByToUser", fields: [grantedBy], references: [id], onUpdate: NoAction)
+  User_AccessGrant_scopeUserIdToUser User            @relation("AccessGrant_scopeUserIdToUser", fields: [scopeUserId], references: [id], onUpdate: NoAction)
+  User_AccessGrant_subjectIdToUser   User            @relation("AccessGrant_subjectIdToUser", fields: [subjectId], references: [id], onUpdate: NoAction)
+
+  @@unique([subjectId, scopeUserId, resource, action, assignmentId], map: "grant_active", where: raw("(\"revokedAt\" IS NULL)"))
+  @@index([assignmentId], map: "AccessGrant_assignmentId_scopeUserId_subjectId_consentId_fkey_i")
+  @@index([grantedBy], map: "AccessGrant_grantedBy_fkey_idx")
+  @@index([scopeUserId], map: "AccessGrant_scopeUserId_fkey_idx")
+  @@index([subjectId], map: "AccessGrant_subjectId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AchievementAward {
+  id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt              DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime               @default(now()) @db.Timestamptz(6)
+  revision               Int                    @default(1)
+  userId                 String                 @db.Uuid
+  enrollmentId           String                 @db.Uuid
+  ruleVersionId          String                 @db.Uuid
+  status                 String
+  grantedAt              DateTime               @db.Timestamptz(6)
+  revokedAt              DateTime?              @db.Timestamptz(6)
+  evidence               Json
+  aggregateRevision      Int
+  AchievementRuleVersion AchievementRuleVersion @relation(fields: [ruleVersionId], references: [id], onUpdate: NoAction)
+  Enrollment             Enrollment             @relation(fields: [userId, enrollmentId], references: [userId, id], onUpdate: NoAction)
+  User                   User                   @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  Certificate            Certificate?
+
+  @@unique([userId, enrollmentId, ruleVersionId])
+  @@unique([userId, id])
+  @@index([ruleVersionId], map: "AchievementAward_ruleVersionId_fkey_idx")
+  @@index([userId], map: "AchievementAward_userId_enrollmentId_fkey_idx")
+  @@index([userId], map: "AchievementAward_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AchievementRuleVersion {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt              DateTime                 @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                 @default(now()) @db.Timestamptz(6)
+  revision               Int                      @default(1)
+  code                   String
+  version                Int
+  type                   String
+  config                 Json
+  contentRevisionId      String                   @db.Uuid
+  status                 VersionStatus            @default(DRAFT)
+  AchievementAward       AchievementAward[]
+  ContentRevision        ContentRevision          @relation(fields: [contentRevisionId], references: [id], onUpdate: NoAction)
+  ProgramAchievementRule ProgramAchievementRule[]
+
+  @@unique([code, version])
+  @@index([contentRevisionId], map: "AchievementRuleVersion_contentRevisionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AuditLog {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @db.Timestamptz(6)
+  revision     Int      @default(1)
+  actorId      String?  @db.Uuid
+  action       String
+  targetType   String
+  targetId     String?  @db.Uuid
+  requestId    String   @db.Uuid
+  occurredAt   DateTime @db.Timestamptz(6)
+  reason       String?  @db.VarChar(500)
+  safeMetadata Json     @default("{}")
+  User         User?    @relation(fields: [actorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([actorId], map: "AuditLog_actorId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AuthToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @default(now()) @db.Timestamptz(6)
+  revision  Int       @default(1)
+  userId    String    @db.Uuid
+  kind      String
+  tokenHash String    @unique
+  expiresAt DateTime  @db.Timestamptz(6)
+  usedAt    DateTime? @db.Timestamptz(6)
+  User      User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([userId], map: "AuthToken_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Certificate {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime         @default(now()) @db.Timestamptz(6)
+  revision         Int              @default(1)
+  userId           String           @db.Uuid
+  awardId          String           @unique @db.Uuid
+  serial           String           @unique
+  issuedAt         DateTime         @db.Timestamptz(6)
+  status           String
+  AchievementAward AchievementAward @relation(fields: [userId, awardId], references: [userId, id], onUpdate: NoAction)
+  User             User             @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, awardId])
+  @@unique([userId, id])
+  @@index([userId], map: "Certificate_userId_awardId_fkey_idx")
+  @@index([userId], map: "Certificate_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CoachAssignment {
+  id                                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                          DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt                          DateTime      @default(now()) @db.Timestamptz(6)
+  revision                           Int           @default(1)
+  userId                             String        @db.Uuid
+  coachId                            String        @db.Uuid
+  consentId                          String        @db.Uuid
+  startsAt                           DateTime      @db.Timestamptz(6)
+  expiresAt                          DateTime      @db.Timestamptz(6)
+  revokedAt                          DateTime?     @db.Timestamptz(6)
+  AccessGrant                        AccessGrant[]
+  User_CoachAssignment_coachIdToUser User          @relation("CoachAssignment_coachIdToUser", fields: [coachId], references: [id], onUpdate: NoAction)
+  Consent                            Consent       @relation(fields: [userId, consentId], references: [userId, id], onUpdate: NoAction)
+  User_CoachAssignment_userIdToUser  User          @relation("CoachAssignment_userIdToUser", fields: [userId], references: [id], onUpdate: NoAction)
+  CoachNote                          CoachNote[]
+
+  @@unique([id, userId, coachId, consentId])
+  @@unique([userId, id])
+  @@index([coachId], map: "CoachAssignment_coachId_fkey_idx")
+  @@index([userId], map: "CoachAssignment_userId_consentId_fkey_idx")
+  @@index([userId], map: "CoachAssignment_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CoachNote {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @default(now()) @db.Timestamptz(6)
+  revision        Int             @default(1)
+  userId          String          @db.Uuid
+  coachId         String          @db.Uuid
+  assignmentId    String          @db.Uuid
+  consentId       String          @db.Uuid
+  text            String          @db.VarChar(2000)
+  CoachAssignment CoachAssignment @relation(fields: [assignmentId, userId, coachId, consentId], references: [id, userId, coachId, consentId], onUpdate: NoAction)
+  User            User            @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([assignmentId], map: "CoachNote_assignmentId_userId_coachId_consentId_fkey_idx")
+  @@index([userId], map: "CoachNote_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ConflictExtract {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime       @default(now()) @db.Timestamptz(6)
+  revision       Int            @default(1)
+  conflictId     String         @db.Uuid
+  extractId      String         @db.Uuid
+  SourceConflict SourceConflict @relation(fields: [conflictId], references: [id], onUpdate: NoAction)
+  SourceExtract  SourceExtract  @relation(fields: [extractId], references: [id], onUpdate: NoAction)
+
+  @@unique([conflictId, extractId])
+  @@index([conflictId], map: "ConflictExtract_conflictId_fkey_idx")
+  @@index([extractId], map: "ConflictExtract_extractId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Consent {
+  id                     String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt              DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                @default(now()) @db.Timestamptz(6)
+  revision               Int                     @default(1)
+  userId                 String                  @db.Uuid
+  kind                   ConsentKind
+  policyVersion          String
+  scopeKey               String
+  scope                  Json
+  grantedAt              DateTime                @db.Timestamptz(6)
+  expiresAt              DateTime                @db.Timestamptz(6)
+  revokedAt              DateTime?               @db.Timestamptz(6)
+  CoachAssignment        CoachAssignment[]
+  User                   User                    @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  NotificationPreference NotificationPreference?
+
+  @@unique([userId, id])
+  @@unique([userId, kind, scopeKey], map: "consent_active", where: raw("(\"revokedAt\" IS NULL)"))
+  @@index([userId], map: "Consent_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ContentReview {
+  id                    String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt             DateTime              @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime              @default(now()) @db.Timestamptz(6)
+  revision              Int                   @default(1)
+  revisionId            String                @db.Uuid
+  reviewerId            String                @db.Uuid
+  qualificationId       String                @db.Uuid
+  decision              String
+  rationale             String
+  decidedAt             DateTime              @db.Timestamptz(6)
+  reviewedHash          String                @db.Char(64)
+  ReviewerQualification ReviewerQualification @relation(fields: [qualificationId, reviewerId], references: [id, reviewerId], onUpdate: NoAction)
+  User                  User                  @relation(fields: [reviewerId], references: [id], onUpdate: NoAction)
+  ContentRevision       ContentRevision       @relation(fields: [revisionId], references: [id], onUpdate: NoAction)
+
+  @@index([qualificationId], map: "ContentReview_qualificationId_reviewerId_fkey_idx")
+  @@index([reviewerId], map: "ContentReview_reviewerId_fkey_idx")
+  @@index([revisionId], map: "ContentReview_revisionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ContentRevision {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt              DateTime                 @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                 @default(now()) @db.Timestamptz(6)
+  revision               Int                      @default(1)
+  contentKey             String
+  version                Int
+  kind                   String
+  title                  String
+  bodyText               String
+  contentHash            String                   @db.Char(64)
+  status                 ContentStatus            @default(DRAFT)
+  authorId               String                   @db.Uuid
+  previousRevisionId     String?                  @db.Uuid
+  AchievementRuleVersion AchievementRuleVersion[]
+  ContentReview          ContentReview[]
+  User                   User                     @relation(fields: [authorId], references: [id], onUpdate: NoAction)
+  ContentRevision        ContentRevision?         @relation("ContentRevisionToContentRevision", fields: [previousRevisionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_ContentRevision  ContentRevision[]        @relation("ContentRevisionToContentRevision")
+  ContentSource          ContentSource[]
+  ContentWithdrawal      ContentWithdrawal?
+  Ingredient             Ingredient[]
+  Meal                   Meal?
+  MealAlternative        MealAlternative[]
+  NutritionPlan          NutritionPlan[]
+  PlanMeal               PlanMeal[]
+  ProgramVersion         ProgramVersion[]
+  TaskDefinition         TaskDefinition[]
+
+  @@unique([contentKey, id])
+  @@unique([contentKey, version])
+  @@index([authorId], map: "ContentRevision_authorId_fkey_idx")
+  @@index([previousRevisionId], map: "ContentRevision_previousRevisionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ContentSource {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @default(now()) @db.Timestamptz(6)
+  revision        Int             @default(1)
+  revisionId      String          @db.Uuid
+  extractId       String          @db.Uuid
+  SourceExtract   SourceExtract   @relation(fields: [extractId], references: [id], onUpdate: NoAction)
+  ContentRevision ContentRevision @relation(fields: [revisionId], references: [id], onUpdate: NoAction)
+
+  @@unique([revisionId, extractId])
+  @@index([extractId], map: "ContentSource_extractId_fkey_idx")
+  @@index([revisionId], map: "ContentSource_revisionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ContentWithdrawal {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @default(now()) @db.Timestamptz(6)
+  revision        Int             @default(1)
+  revisionId      String          @unique @db.Uuid
+  authorizedBy    String          @db.Uuid
+  reason          String
+  effectiveAt     DateTime        @db.Timestamptz(6)
+  User            User            @relation(fields: [authorizedBy], references: [id], onUpdate: NoAction)
+  ContentRevision ContentRevision @relation(fields: [revisionId], references: [id], onUpdate: NoAction)
+
+  @@index([authorizedBy], map: "ContentWithdrawal_authorizedBy_fkey_idx")
+  @@index([revisionId], map: "ContentWithdrawal_revisionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CorrectionRequest {
+  id                                      String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                               DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt                               DateTime     @default(now()) @db.Timestamptz(6)
+  revision                                Int          @default(1)
+  userId                                  String       @db.Uuid
+  recordId                                String       @db.Uuid
+  proposedPatchEncrypted                  Bytes
+  reason                                  String       @db.VarChar(500)
+  status                                  String
+  reviewedBy                              String?      @db.Uuid
+  reviewedAt                              DateTime?    @db.Timestamptz(6)
+  User_CorrectionRequest_reviewedByToUser User?        @relation("CorrectionRequest_reviewedByToUser", fields: [reviewedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User_CorrectionRequest_userIdToUser     User         @relation("CorrectionRequest_userIdToUser", fields: [userId], references: [id], onUpdate: NoAction)
+  HealthRecord                            HealthRecord @relation(fields: [userId, recordId], references: [userId, id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([reviewedBy], map: "CorrectionRequest_reviewedBy_fkey_idx")
+  @@index([userId], map: "CorrectionRequest_userId_fkey_idx")
+  @@index([userId], map: "CorrectionRequest_userId_recordId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model DailyReview {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt           DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime            @default(now()) @db.Timestamptz(6)
+  revision            Int                 @default(1)
+  userId              String              @db.Uuid
+  recordId            String              @unique @db.Uuid
+  recordKind          RecordKind          @default(REVIEW)
+  localDate           DateTime            @db.Date
+  schemaVersionId     String              @db.Uuid
+  notes               String?             @db.VarChar(2000)
+  weightKg            Decimal?            @db.Decimal(5, 2)
+  recordedAt          DateTime            @db.Timestamptz(6)
+  ReviewSchemaVersion ReviewSchemaVersion @relation(fields: [schemaVersionId], references: [id], onUpdate: NoAction)
+  User                User                @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  HealthRecord        HealthRecord        @relation(fields: [userId, recordId, recordKind], references: [userId, id, kind], onUpdate: NoAction)
+  ReviewAnswer        ReviewAnswer[]
+
+  @@unique([userId, id])
+  @@unique([userId, id, schemaVersionId])
+  @@unique([userId, localDate])
+  @@unique([userId, recordId, recordKind])
+  @@index([schemaVersionId], map: "DailyReview_schemaVersionId_fkey_idx")
+  @@index([userId], map: "DailyReview_userId_fkey_idx")
+  @@index([userId], map: "DailyReview_userId_recordId_recordKind_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model DeletionLedger {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @db.Timestamptz(6)
+  revision       Int      @default(1)
+  subjectKeyHash String   @unique
+  completedAt    DateTime @db.Timestamptz(6)
+  retainUntil    DateTime @db.Timestamptz(6)
+  backupCutoff   DateTime @db.Timestamptz(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Enrollment {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime           @default(now()) @db.Timestamptz(6)
+  revision         Int                @default(1)
+  userId           String             @db.Uuid
+  programId        String             @db.Uuid
+  versionId        String             @db.Uuid
+  policyVersionId  String             @db.Uuid
+  startDate        DateTime           @db.Date
+  timezoneSnapshot String             @db.VarChar(64)
+  status           String
+  withdrawnAt      DateTime?          @db.Timestamptz(6)
+  AchievementAward AchievementAward[]
+  ProgramVersion   ProgramVersion     @relation(fields: [programId, versionId, policyVersionId], references: [programId, id, policyVersionId], onUpdate: NoAction)
+  User             User               @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  EnrollmentDay    EnrollmentDay[]
+  ReminderRule     ReminderRule[]
+
+  @@unique([userId, id])
+  @@unique([userId, id, versionId])
+  @@unique([userId, programId], map: "enrollment_active", where: raw("(status = ANY (ARRAY['ACTIVE'::text, 'SCHEDULED'::text]))"))
+  @@index([programId], map: "Enrollment_programId_versionId_policyVersionId_fkey_idx")
+  @@index([userId], map: "Enrollment_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model EnrollmentDay {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime         @default(now()) @db.Timestamptz(6)
+  revision        Int              @default(1)
+  userId          String           @db.Uuid
+  enrollmentId    String           @db.Uuid
+  versionId       String           @db.Uuid
+  localDate       DateTime         @db.Date
+  dayIndex        Int
+  state           String
+  exclusionReason String?
+  Enrollment      Enrollment       @relation(fields: [userId, enrollmentId, versionId], references: [userId, id, versionId], onUpdate: NoAction)
+  User            User             @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  ProgramDay      ProgramDay       @relation(fields: [versionId, dayIndex], references: [versionId, dayIndex], onUpdate: NoAction)
+  TaskOccurrence  TaskOccurrence[]
+
+  @@unique([enrollmentId, dayIndex])
+  @@unique([enrollmentId, localDate])
+  @@unique([userId, id])
+  @@unique([userId, id, versionId])
+  @@index([userId], map: "EnrollmentDay_userId_enrollmentId_versionId_fkey_idx")
+  @@index([userId], map: "EnrollmentDay_userId_fkey_idx")
+  @@index([versionId], map: "EnrollmentDay_versionId_dayIndex_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ExerciseLog {
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime     @default(now()) @db.Timestamptz(6)
+  revision     Int          @default(1)
+  userId       String       @db.Uuid
+  recordId     String       @unique @db.Uuid
+  recordKind   RecordKind   @default(EXERCISE)
+  type         String
+  startsAt     DateTime     @db.Timestamptz(6)
+  durationMin  Int
+  localDate    DateTime     @db.Date
+  note         String?      @db.VarChar(2000)
+  deletedAt    DateTime?    @db.Timestamptz(6)
+  User         User         @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  HealthRecord HealthRecord @relation(fields: [userId, recordId, recordKind], references: [userId, id, kind], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, recordId, recordKind])
+  @@index([userId], map: "ExerciseLog_userId_fkey_idx")
+  @@index([userId], map: "ExerciseLog_userId_recordId_recordKind_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model HabitDefinition {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt  DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime   @default(now()) @db.Timestamptz(6)
+  revision   Int        @default(1)
+  userId     String     @db.Uuid
+  title      String     @db.VarChar(120)
+  recurrence Json
+  startsDate DateTime   @db.Date
+  endsDate   DateTime?  @db.Date
+  archivedAt DateTime?  @db.Timestamptz(6)
+  User       User       @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  HabitLog   HabitLog[]
+
+  @@unique([userId, id])
+  @@index([userId], map: "HabitDefinition_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model HabitLog {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @default(now()) @db.Timestamptz(6)
+  revision        Int             @default(1)
+  userId          String          @db.Uuid
+  habitId         String          @db.Uuid
+  localDate       DateTime        @db.Date
+  completedAt     DateTime        @db.Timestamptz(6)
+  User            User            @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  HabitDefinition HabitDefinition @relation(fields: [userId, habitId], references: [userId, id], onUpdate: NoAction)
+
+  @@unique([habitId, localDate])
+  @@unique([userId, id])
+  @@index([userId], map: "HabitLog_userId_fkey_idx")
+  @@index([userId], map: "HabitLog_userId_habitId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model HealthRecord {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt         DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime            @default(now()) @db.Timestamptz(6)
+  revision          Int                 @default(1)
+  userId            String              @db.Uuid
+  kind              RecordKind
+  CorrectionRequest CorrectionRequest[]
+  DailyReview       DailyReview?
+  ExerciseLog       ExerciseLog?
+  User              User                @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  LogRevision       LogRevision[]
+  SleepLog          SleepLog?
+  StepDayLog        StepDayLog?
+  WaterLog          WaterLog?
+
+  @@unique([userId, id])
+  @@unique([userId, id, kind])
+  @@index([userId], map: "HealthRecord_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model IdempotencyRecord {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime @default(now()) @db.Timestamptz(6)
+  revision          Int      @default(1)
+  userId            String   @db.Uuid
+  action            String
+  key               String   @db.Uuid
+  requestHash       String   @db.Char(64)
+  responseEncrypted Bytes
+  expiresAt         DateTime @db.Timestamptz(6)
+  User              User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, action, key])
+  @@unique([userId, id])
+  @@index([userId], map: "IdempotencyRecord_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Ingredient {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt          DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime         @default(now()) @db.Timestamptz(6)
+  revision           Int              @default(1)
+  name               String
+  unitFamily         String
+  metadataRevisionId String?          @db.Uuid
+  ContentRevision    ContentRevision? @relation(fields: [metadataRevisionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  MealIngredient     MealIngredient[]
+
+  @@index([metadataRevisionId], map: "Ingredient_metadataRevisionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model LogRevision {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime     @default(now()) @db.Timestamptz(6)
+  revision        Int          @default(1)
+  userId          String       @db.Uuid
+  recordId        String       @db.Uuid
+  recordRevision  Int
+  beforeEncrypted Bytes?
+  afterEncrypted  Bytes?
+  cause           String
+  recordedAt      DateTime     @db.Timestamptz(6)
+  User            User         @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  HealthRecord    HealthRecord @relation(fields: [userId, recordId], references: [userId, id], onUpdate: NoAction)
+
+  @@unique([recordId, recordRevision])
+  @@unique([userId, id])
+  @@index([userId], map: "LogRevision_userId_fkey_idx")
+  @@index([userId], map: "LogRevision_userId_recordId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Meal {
+  id                                                                         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                                                                  DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt                                                                  DateTime          @default(now()) @db.Timestamptz(6)
+  revision                                                                   Int               @default(1)
+  contentRevisionId                                                          String            @unique @db.Uuid
+  slot                                                                       String
+  ContentRevision                                                            ContentRevision   @relation(fields: [contentRevisionId], references: [id], onUpdate: NoAction)
+  MealAlternative_MealAlternative_alternativeMealId_approvalRevisionIdToMeal MealAlternative[] @relation("MealAlternative_alternativeMealId_approvalRevisionIdToMeal")
+  MealAlternative_MealAlternative_alternativeMealIdToMeal                    MealAlternative[] @relation("MealAlternative_alternativeMealIdToMeal")
+  MealIngredient                                                             MealIngredient[]
+  PlanMeal                                                                   PlanMeal[]
+
+  @@unique([id, contentRevisionId])
+  @@index([contentRevisionId], map: "Meal_contentRevisionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model MealAlternative {
+  id                                                              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                                                       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt                                                       DateTime        @default(now()) @db.Timestamptz(6)
+  revision                                                        Int             @default(1)
+  planMealId                                                      String          @db.Uuid
+  alternativeMealId                                               String          @db.Uuid
+  order                                                           Int
+  approvalRevisionId                                              String          @db.Uuid
+  Meal_MealAlternative_alternativeMealId_approvalRevisionIdToMeal Meal            @relation("MealAlternative_alternativeMealId_approvalRevisionIdToMeal", fields: [alternativeMealId, approvalRevisionId], references: [id, contentRevisionId], onUpdate: NoAction)
+  Meal_MealAlternative_alternativeMealIdToMeal                    Meal            @relation("MealAlternative_alternativeMealIdToMeal", fields: [alternativeMealId], references: [id], onUpdate: NoAction)
+  ContentRevision                                                 ContentRevision @relation(fields: [approvalRevisionId], references: [id], onUpdate: NoAction)
+  PlanMeal                                                        PlanMeal        @relation(fields: [planMealId], references: [id], onUpdate: NoAction)
+  MealSelection                                                   MealSelection[]
+
+  @@unique([planMealId, alternativeMealId])
+  @@index([alternativeMealId], map: "MealAlternative_alternativeMealId_fkey_idx")
+  @@index([approvalRevisionId], map: "MealAlternative_approvalRevisionId_fkey_idx")
+  @@index([planMealId], map: "MealAlternative_planMealId_fkey_idx")
+  @@index([alternativeMealId, approvalRevisionId], map: "alternative_revision_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model MealIngredient {
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime   @default(now()) @db.Timestamptz(6)
+  revision         Int        @default(1)
+  mealId           String     @db.Uuid
+  ingredientId     String     @db.Uuid
+  quantity         Decimal    @db.Decimal(10, 2)
+  unit             String
+  measurementBasis String
+  preparation      String?
+  conversionFactor Decimal?   @db.Decimal(12, 4)
+  Ingredient       Ingredient @relation(fields: [ingredientId], references: [id], onUpdate: NoAction)
+  Meal             Meal       @relation(fields: [mealId], references: [id], onUpdate: NoAction)
+
+  @@index([ingredientId], map: "MealIngredient_ingredientId_fkey_idx")
+  @@index([mealId], map: "MealIngredient_mealId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model MealSelection {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt         DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime         @default(now()) @db.Timestamptz(6)
+  revision          Int              @default(1)
+  userId            String           @db.Uuid
+  occurrenceId      String           @unique @db.Uuid
+  planMealId        String           @db.Uuid
+  alternativeMealId String?          @db.Uuid
+  MealAlternative   MealAlternative? @relation(fields: [planMealId, alternativeMealId], references: [planMealId, alternativeMealId], onUpdate: NoAction)
+  PlanMeal          PlanMeal         @relation(fields: [planMealId], references: [id], onUpdate: NoAction)
+  User              User             @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  TaskOccurrence    TaskOccurrence   @relation(fields: [userId, occurrenceId], references: [userId, id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, occurrenceId])
+  @@index([planMealId], map: "MealSelection_planMealId_alternativeMealId_fkey_idx")
+  @@index([userId], map: "MealSelection_userId_fkey_idx")
+  @@index([userId], map: "MealSelection_userId_occurrenceId_fkey_idx")
+  @@index([planMealId], map: "selection_plan_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model MfaCredential {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @db.Timestamptz(6)
+  revision        Int       @default(1)
+  userId          String    @unique @db.Uuid
+  secretEncrypted Bytes
+  enabledAt       DateTime? @db.Timestamptz(6)
+  recoveryHashes  Json
+  User            User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([userId], map: "MfaCredential_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Notification {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime  @default(now()) @db.Timestamptz(6)
+  revision   Int       @default(1)
+  userId     String    @db.Uuid
+  type       String
+  safeTitle  String    @db.VarChar(120)
+  safeBody   String    @db.VarChar(500)
+  targetKind String
+  targetId   String?   @db.Uuid
+  readAt     DateTime? @db.Timestamptz(6)
+  dedupeKey  String
+  User       User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, dedupeKey])
+  @@unique([userId, id])
+  @@index([userId], map: "Notification_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model NotificationPreference {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime  @default(now()) @db.Timestamptz(6)
+  revision     Int       @default(1)
+  userId       String    @unique @db.Uuid
+  enabledInApp Boolean
+  enabledPush  Boolean
+  quietStart   DateTime? @db.Time(6)
+  quietEnd     DateTime? @db.Time(6)
+  timezone     String    @db.VarChar(64)
+  consentId    String?   @db.Uuid
+  Consent      Consent?  @relation(fields: [userId, consentId], references: [userId, id], onUpdate: NoAction)
+  User         User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, consentId])
+  @@unique([userId, id])
+  @@index([userId], map: "NotificationPreference_userId_consentId_fkey_idx")
+  @@index([userId], map: "NotificationPreference_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model NutritionPlan {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt            DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime               @default(now()) @db.Timestamptz(6)
+  revision             Int                    @default(1)
+  contentRevisionId    String                 @db.Uuid
+  label                String
+  ContentRevision      ContentRevision        @relation(fields: [contentRevisionId], references: [id], onUpdate: NoAction)
+  PlanMeal             PlanMeal[]
+  ProgramNutritionPlan ProgramNutritionPlan[]
+
+  @@index([contentRevisionId], map: "NutritionPlan_contentRevisionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model OperationsReport {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @db.Timestamptz(6)
+  revision     Int      @default(1)
+  kind         String
+  safeMetadata Json
+  performedBy  String   @db.Uuid
+  occurredAt   DateTime @db.Timestamptz(6)
+  User         User     @relation(fields: [performedBy], references: [id], onUpdate: NoAction)
+
+  @@index([performedBy], map: "OperationsReport_performedBy_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model OutboxJob {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @db.Timestamptz(6)
+  revision         Int       @default(1)
+  userId           String    @db.Uuid
+  kind             String
+  payloadEncrypted Bytes
+  dueAt            DateTime  @db.Timestamptz(6)
+  leaseUntil       DateTime? @db.Timestamptz(6)
+  attempts         Int       @default(0)
+  status           JobStatus @default(PENDING)
+  dedupeKey        String    @unique
+  lastErrorCode    String?
+  User             User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([userId], map: "OutboxJob_userId_fkey_idx")
+  @@index([status, dueAt], map: "outbox_claim")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PlanMeal {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime          @default(now()) @db.Timestamptz(6)
+  revision        Int               @default(1)
+  planId          String            @db.Uuid
+  dayIndex        Int
+  slot            String
+  order           Int
+  mealRevisionId  String            @db.Uuid
+  MealAlternative MealAlternative[]
+  MealSelection   MealSelection[]
+  ContentRevision ContentRevision   @relation(fields: [mealRevisionId], references: [id], onUpdate: NoAction)
+  Meal            Meal              @relation(fields: [mealRevisionId], references: [contentRevisionId], onUpdate: NoAction, map: "PlanMeal_mealRevisionId_fkey1")
+  NutritionPlan   NutritionPlan     @relation(fields: [planId], references: [id], onUpdate: NoAction)
+  TaskDefinition  TaskDefinition[]
+
+  @@unique([planId, dayIndex, slot, order])
+  @@index([mealRevisionId], map: "PlanMeal_mealRevisionId_fkey_idx")
+  @@index([planId], map: "PlanMeal_planId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PolicyVersion {
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt            DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime         @default(now()) @db.Timestamptz(6)
+  revision             Int              @default(1)
+  version              Int              @unique
+  lateWindowDays       Int
+  dayBoundary          DateTime         @db.Time(6)
+  streakRule           Json
+  certificateThreshold Decimal          @db.Decimal(5, 2)
+  ProgramVersion       ProgramVersion[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PrivacyRequest {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt               DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt               DateTime  @default(now()) @db.Timestamptz(6)
+  revision                Int       @default(1)
+  userId                  String    @db.Uuid
+  kind                    String
+  status                  JobStatus
+  requestedAt             DateTime  @db.Timestamptz(6)
+  completedAt             DateTime? @db.Timestamptz(6)
+  expiresAt               DateTime? @db.Timestamptz(6)
+  resultLocationEncrypted Bytes?
+  User                    User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, kind], map: "privacy_active", where: raw("(status = ANY (ARRAY['PENDING'::\"JobStatus\", 'RUNNING'::\"JobStatus\"]))"))
+  @@index([userId], map: "PrivacyRequest_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Profile {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @db.Timestamptz(6)
+  revision    Int      @default(1)
+  userId      String   @unique @db.Uuid
+  displayName String   @db.VarChar(80)
+  timezone    String   @db.VarChar(64)
+  locale      String   @db.VarChar(10)
+  cupMl       Int?
+  User        User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([userId], map: "Profile_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Program {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime         @default(now()) @db.Timestamptz(6)
+  revision       Int              @default(1)
+  slug           String           @unique
+  type           String
+  status         ProgramStatus    @default(ACTIVE)
+  ownerId        String           @db.Uuid
+  User           User             @relation(fields: [ownerId], references: [id], onUpdate: NoAction)
+  ProgramVersion ProgramVersion[]
+
+  @@index([ownerId], map: "Program_ownerId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ProgramAchievementRule {
+  id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt              DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime               @default(now()) @db.Timestamptz(6)
+  revision               Int                    @default(1)
+  versionId              String                 @db.Uuid
+  ruleVersionId          String                 @db.Uuid
+  AchievementRuleVersion AchievementRuleVersion @relation(fields: [ruleVersionId], references: [id], onUpdate: NoAction)
+  ProgramVersion         ProgramVersion         @relation(fields: [versionId], references: [id], onUpdate: NoAction)
+
+  @@unique([versionId, ruleVersionId])
+  @@index([ruleVersionId], map: "ProgramAchievementRule_ruleVersionId_fkey_idx")
+  @@index([versionId], map: "ProgramAchievementRule_versionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ProgramDay {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime         @default(now()) @db.Timestamptz(6)
+  revision       Int              @default(1)
+  versionId      String           @db.Uuid
+  dayIndex       Int
+  label          String?
+  EnrollmentDay  EnrollmentDay[]
+  ProgramVersion ProgramVersion   @relation(fields: [versionId], references: [id], onUpdate: NoAction)
+  TaskDefinition TaskDefinition[]
+
+  @@unique([versionId, dayIndex])
+  @@unique([versionId, id])
+  @@index([versionId], map: "ProgramDay_versionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ProgramNutritionPlan {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime       @default(now()) @db.Timestamptz(6)
+  revision       Int            @default(1)
+  versionId      String         @db.Uuid
+  planId         String         @db.Uuid
+  NutritionPlan  NutritionPlan  @relation(fields: [planId], references: [id], onUpdate: NoAction)
+  ProgramVersion ProgramVersion @relation(fields: [versionId], references: [id], onUpdate: NoAction)
+
+  @@unique([versionId, planId])
+  @@index([planId], map: "ProgramNutritionPlan_planId_fkey_idx")
+  @@index([versionId], map: "ProgramNutritionPlan_versionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ProgramVersion {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt              DateTime                 @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime                 @default(now()) @db.Timestamptz(6)
+  revision               Int                      @default(1)
+  programId              String                   @db.Uuid
+  version                Int
+  title                  String
+  descriptionRevisionId  String                   @db.Uuid
+  durationDays           Int
+  startMode              String
+  fixedStartDate         DateTime?                @db.Date
+  reviewSchemaVersionId  String                   @db.Uuid
+  policyVersionId        String                   @db.Uuid
+  status                 VersionStatus            @default(DRAFT)
+  publishedAt            DateTime?                @db.Timestamptz(6)
+  Enrollment             Enrollment[]
+  ProgramAchievementRule ProgramAchievementRule[]
+  ProgramDay             ProgramDay[]
+  ProgramNutritionPlan   ProgramNutritionPlan[]
+  ContentRevision        ContentRevision          @relation(fields: [descriptionRevisionId], references: [id], onUpdate: NoAction)
+  PolicyVersion          PolicyVersion            @relation(fields: [policyVersionId], references: [id], onUpdate: NoAction)
+  Program                Program                  @relation(fields: [programId], references: [id], onUpdate: NoAction)
+  ReviewSchemaVersion    ReviewSchemaVersion      @relation(fields: [reviewSchemaVersionId], references: [id], onUpdate: NoAction)
+  ProgramWithdrawal      ProgramWithdrawal?
+  RecurrenceDefinition   RecurrenceDefinition[]
+  TaskDefinition         TaskDefinition[]
+
+  @@unique([programId, id, policyVersionId])
+  @@unique([programId, version])
+  @@index([descriptionRevisionId], map: "ProgramVersion_descriptionRevisionId_fkey_idx")
+  @@index([policyVersionId], map: "ProgramVersion_policyVersionId_fkey_idx")
+  @@index([programId], map: "ProgramVersion_programId_fkey_idx")
+  @@index([reviewSchemaVersionId], map: "ProgramVersion_reviewSchemaVersionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ProgramWithdrawal {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime        @default(now()) @db.Timestamptz(6)
+  revision       Int             @default(1)
+  versionId      String          @unique @db.Uuid
+  authorizedBy   String          @db.Uuid
+  reason         String
+  safety         Boolean
+  effectiveAt    DateTime        @db.Timestamptz(6)
+  User           User            @relation(fields: [authorizedBy], references: [id], onUpdate: NoAction)
+  ProgramVersion ProgramVersion  @relation(fields: [versionId], references: [id], onUpdate: NoAction)
+  TaskExclusion  TaskExclusion[]
+
+  @@index([authorizedBy], map: "ProgramWithdrawal_authorizedBy_fkey_idx")
+  @@index([versionId], map: "ProgramWithdrawal_versionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model PushSubscription {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt         DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @db.Timestamptz(6)
+  revision          Int       @default(1)
+  userId            String    @db.Uuid
+  endpointHash      String    @unique
+  endpointEncrypted Bytes
+  keysEncrypted     Bytes
+  revokedAt         DateTime? @db.Timestamptz(6)
+  User              User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([userId], map: "PushSubscription_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model RateLimitBucket {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @db.Timestamptz(6)
+  revision  Int      @default(1)
+  keyHash   String
+  window    DateTime @db.Timestamptz(6)
+  count     Int
+  expiresAt DateTime @db.Timestamptz(6)
+
+  @@unique([keyHash, window])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model RecurrenceDefinition {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime       @default(now()) @db.Timestamptz(6)
+  revision       Int            @default(1)
+  versionId      String         @db.Uuid
+  taskTemplate   Json
+  dayIndices     Int[]
+  pattern        String
+  order          Int
+  ProgramVersion ProgramVersion @relation(fields: [versionId], references: [id], onUpdate: NoAction)
+
+  @@index([versionId], map: "RecurrenceDefinition_versionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ReminderRule {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime        @default(now()) @db.Timestamptz(6)
+  revision         Int             @default(1)
+  userId           String          @db.Uuid
+  enrollmentId     String?         @db.Uuid
+  taskDefinitionId String?         @db.Uuid
+  localTime        DateTime        @db.Time(6)
+  channel          String
+  enabled          Boolean
+  TaskDefinition   TaskDefinition? @relation(fields: [taskDefinitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Enrollment       Enrollment?     @relation(fields: [userId, enrollmentId], references: [userId, id], onUpdate: NoAction)
+  User             User            @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([taskDefinitionId], map: "ReminderRule_taskDefinitionId_fkey_idx")
+  @@index([userId], map: "ReminderRule_userId_enrollmentId_fkey_idx")
+  @@index([userId], map: "ReminderRule_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ReviewAnswer {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @default(now()) @db.Timestamptz(6)
+  revision        Int             @default(1)
+  userId          String          @db.Uuid
+  reviewId        String          @db.Uuid
+  schemaVersionId String          @db.Uuid
+  dimensionId     String          @db.Uuid
+  optionId        String          @db.Uuid
+  ReviewOption    ReviewOption    @relation(fields: [dimensionId, optionId], references: [dimensionId, id], onUpdate: NoAction)
+  ReviewDimension ReviewDimension @relation(fields: [schemaVersionId, dimensionId], references: [schemaId, id], onUpdate: NoAction)
+  User            User            @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  DailyReview     DailyReview     @relation(fields: [userId, reviewId, schemaVersionId], references: [userId, id, schemaVersionId], onUpdate: NoAction)
+
+  @@unique([reviewId, dimensionId])
+  @@unique([userId, id])
+  @@index([dimensionId], map: "ReviewAnswer_dimensionId_optionId_fkey_idx")
+  @@index([schemaVersionId], map: "ReviewAnswer_schemaVersionId_dimensionId_fkey_idx")
+  @@index([userId], map: "ReviewAnswer_userId_fkey_idx")
+  @@index([userId], map: "ReviewAnswer_userId_reviewId_schemaVersionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ReviewDimension {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt           DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime            @default(now()) @db.Timestamptz(6)
+  revision            Int                 @default(1)
+  schemaId            String              @db.Uuid
+  key                 String
+  label               String
+  order               Int
+  ReviewAnswer        ReviewAnswer[]
+  ReviewSchemaVersion ReviewSchemaVersion @relation(fields: [schemaId], references: [id], onUpdate: NoAction)
+  ReviewOption        ReviewOption[]
+
+  @@unique([schemaId, id])
+  @@unique([schemaId, key])
+  @@index([schemaId], map: "ReviewDimension_schemaId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ReviewOption {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @default(now()) @db.Timestamptz(6)
+  revision        Int             @default(1)
+  dimensionId     String          @db.Uuid
+  value           Int
+  label           String
+  ReviewAnswer    ReviewAnswer[]
+  ReviewDimension ReviewDimension @relation(fields: [dimensionId], references: [id], onUpdate: NoAction)
+
+  @@unique([dimensionId, id])
+  @@unique([dimensionId, value])
+  @@index([dimensionId], map: "ReviewOption_dimensionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ReviewSchemaVersion {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime          @default(now()) @db.Timestamptz(6)
+  revision        Int               @default(1)
+  version         Int
+  name            String
+  status          VersionStatus     @default(DRAFT)
+  DailyReview     DailyReview[]
+  ProgramVersion  ProgramVersion[]
+  ReviewDimension ReviewDimension[]
+
+  @@unique([name, version])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ReviewerQualification {
+  id                                          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                                   DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt                                   DateTime        @default(now()) @db.Timestamptz(6)
+  revision                                    Int             @default(1)
+  reviewerId                                  String          @db.Uuid
+  scope                                       String
+  evidenceReference                           String
+  verifiedBy                                  String          @db.Uuid
+  validUntil                                  DateTime        @db.Timestamptz(6)
+  status                                      String
+  ContentReview                               ContentReview[]
+  User_ReviewerQualification_reviewerIdToUser User            @relation("ReviewerQualification_reviewerIdToUser", fields: [reviewerId], references: [id], onUpdate: NoAction)
+  User_ReviewerQualification_verifiedByToUser User            @relation("ReviewerQualification_verifiedByToUser", fields: [verifiedBy], references: [id], onUpdate: NoAction)
+
+  @@unique([id, reviewerId])
+  @@index([reviewerId], map: "ReviewerQualification_reviewerId_fkey_idx")
+  @@index([verifiedBy], map: "ReviewerQualification_verifiedBy_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Session {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt         DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @db.Timestamptz(6)
+  revision          Int       @default(1)
+  userId            String    @db.Uuid
+  tokenHash         String    @unique
+  expiresAt         DateTime  @db.Timestamptz(6)
+  lastSeenAt        DateTime  @db.Timestamptz(6)
+  revokedAt         DateTime? @db.Timestamptz(6)
+  reauthenticatedAt DateTime? @db.Timestamptz(6)
+  mfaVerifiedAt     DateTime? @db.Timestamptz(6)
+  User              User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([userId], map: "Session_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This table contains exclusion constraints and requires additional setup for migrations. Visit https://pris.ly/d/exclusion-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SleepLog {
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime     @default(now()) @db.Timestamptz(6)
+  revision         Int          @default(1)
+  userId           String       @db.Uuid
+  recordId         String       @unique @db.Uuid
+  recordKind       RecordKind   @default(SLEEP)
+  startsAt         DateTime     @db.Timestamptz(6)
+  endsAt           DateTime     @db.Timestamptz(6)
+  wakeDate         DateTime     @db.Date
+  timezoneSnapshot String       @db.VarChar(64)
+  deletedAt        DateTime?    @db.Timestamptz(6)
+  User             User         @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  HealthRecord     HealthRecord @relation(fields: [userId, recordId, recordKind], references: [userId, id, kind], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, recordId, recordKind])
+  @@index([userId], map: "SleepLog_userId_fkey_idx")
+  @@index([userId], map: "SleepLog_userId_recordId_recordKind_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SourceConflict {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime          @default(now()) @db.Timestamptz(6)
+  revision        Int               @default(1)
+  conflictKey     String            @unique
+  description     String
+  resolution      String?
+  resolvedBy      String?           @db.Uuid
+  ConflictExtract ConflictExtract[]
+  User            User?             @relation(fields: [resolvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([resolvedBy], map: "SourceConflict_resolvedBy_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SourceExtract {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime          @default(now()) @db.Timestamptz(6)
+  revision        Int               @default(1)
+  imageId         String            @db.Uuid
+  extractKey      String
+  originalText    String
+  section         String
+  confidence      String
+  requiresReview  Boolean
+  ConflictExtract ConflictExtract[]
+  ContentSource   ContentSource[]
+  SourceImage     SourceImage       @relation(fields: [imageId], references: [id], onUpdate: NoAction)
+
+  @@unique([imageId, extractKey])
+  @@index([imageId], map: "SourceExtract_imageId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SourceImage {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt     DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime        @default(now()) @db.Timestamptz(6)
+  revision      Int             @default(1)
+  sourceKey     String          @unique
+  path          String          @unique
+  sha256        String          @db.Char(64)
+  rightsStatus  String
+  SourceExtract SourceExtract[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model StepDayLog {
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime     @default(now()) @db.Timestamptz(6)
+  revision         Int          @default(1)
+  userId           String       @db.Uuid
+  recordId         String       @unique @db.Uuid
+  recordKind       RecordKind   @default(STEPS)
+  localDate        DateTime     @db.Date
+  timezoneSnapshot String       @db.VarChar(64)
+  totalSteps       Int
+  recordedAt       DateTime     @db.Timestamptz(6)
+  source           String
+  deletedAt        DateTime?    @db.Timestamptz(6)
+  User             User         @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  HealthRecord     HealthRecord @relation(fields: [userId, recordId, recordKind], references: [userId, id, kind], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, localDate])
+  @@unique([userId, recordId, recordKind])
+  @@index([userId], map: "StepDayLog_userId_fkey_idx")
+  @@index([userId], map: "StepDayLog_userId_recordId_recordKind_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model TaskCompletion {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @default(now()) @db.Timestamptz(6)
+  revision         Int            @default(1)
+  userId           String         @db.Uuid
+  occurrenceId     String         @unique @db.Uuid
+  completedAt      DateTime       @db.Timestamptz(6)
+  recordedAt       DateTime       @db.Timestamptz(6)
+  isLate           Boolean
+  mode             CompletionMode
+  evidenceRevision Int
+  User             User           @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  TaskOccurrence   TaskOccurrence @relation(fields: [userId, occurrenceId], references: [userId, id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, occurrenceId])
+  @@index([userId], map: "TaskCompletion_userId_fkey_idx")
+  @@index([userId], map: "TaskCompletion_userId_occurrenceId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model TaskDefinition {
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt            DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime         @default(now()) @db.Timestamptz(6)
+  revision             Int              @default(1)
+  versionId            String           @db.Uuid
+  programDayId         String           @db.Uuid
+  key                  String
+  titleRevisionId      String           @db.Uuid
+  type                 TaskType
+  required             Boolean
+  order                Int
+  scheduleKind         String
+  timeStart            DateTime?        @db.Time(6)
+  timeEnd              DateTime?        @db.Time(6)
+  anchorTaskId         String?          @db.Uuid
+  offsetMin            Int?
+  completionMode       String
+  metric               Metric?
+  defaultTarget        Decimal?         @db.Decimal(12, 2)
+  planMealId           String?          @db.Uuid
+  ReminderRule         ReminderRule[]
+  PlanMeal             PlanMeal?        @relation(fields: [planMealId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  TaskDefinition       TaskDefinition?  @relation("TaskDefinitionToTaskDefinition", fields: [programDayId, anchorTaskId], references: [programDayId, id], onUpdate: NoAction)
+  other_TaskDefinition TaskDefinition[] @relation("TaskDefinitionToTaskDefinition")
+  ContentRevision      ContentRevision  @relation(fields: [titleRevisionId], references: [id], onUpdate: NoAction)
+  ProgramVersion       ProgramVersion   @relation(fields: [versionId], references: [id], onUpdate: NoAction)
+  ProgramDay           ProgramDay       @relation(fields: [versionId, programDayId], references: [versionId, id], onUpdate: NoAction)
+  TaskOccurrence       TaskOccurrence[]
+
+  @@unique([programDayId, id])
+  @@unique([programDayId, key])
+  @@unique([programDayId, order])
+  @@unique([versionId, id])
+  @@index([planMealId], map: "TaskDefinition_planMealId_fkey_idx")
+  @@index([programDayId], map: "TaskDefinition_programDayId_anchorTaskId_fkey_idx")
+  @@index([titleRevisionId], map: "TaskDefinition_titleRevisionId_fkey_idx")
+  @@index([versionId], map: "TaskDefinition_versionId_fkey_idx")
+  @@index([versionId], map: "TaskDefinition_versionId_programDayId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model TaskExclusion {
+  id                                    String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                             DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt                             DateTime          @default(now()) @db.Timestamptz(6)
+  revision                              Int               @default(1)
+  userId                                String            @db.Uuid
+  occurrenceId                          String            @unique @db.Uuid
+  reason                                String
+  authorizedBy                          String            @db.Uuid
+  effectiveAt                           DateTime          @db.Timestamptz(6)
+  sourceWithdrawalId                    String            @db.Uuid
+  User_TaskExclusion_authorizedByToUser User              @relation("TaskExclusion_authorizedByToUser", fields: [authorizedBy], references: [id], onUpdate: NoAction)
+  ProgramWithdrawal                     ProgramWithdrawal @relation(fields: [sourceWithdrawalId], references: [id], onUpdate: NoAction)
+  User_TaskExclusion_userIdToUser       User              @relation("TaskExclusion_userIdToUser", fields: [userId], references: [id], onUpdate: NoAction)
+  TaskOccurrence                        TaskOccurrence    @relation(fields: [userId, occurrenceId], references: [userId, id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, occurrenceId])
+  @@index([authorizedBy], map: "TaskExclusion_authorizedBy_fkey_idx")
+  @@index([sourceWithdrawalId], map: "TaskExclusion_sourceWithdrawalId_fkey_idx")
+  @@index([userId], map: "TaskExclusion_userId_fkey_idx")
+  @@index([userId], map: "TaskExclusion_userId_occurrenceId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model TaskOccurrence {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime        @default(now()) @db.Timestamptz(6)
+  revision         Int             @default(1)
+  userId           String          @db.Uuid
+  dayId            String          @db.Uuid
+  versionId        String          @db.Uuid
+  definitionId     String          @db.Uuid
+  scheduledAt      DateTime?       @db.Timestamptz(6)
+  dueAt            DateTime?       @db.Timestamptz(6)
+  requiredSnapshot Boolean
+  targetSnapshot   Decimal?        @db.Decimal(12, 2)
+  metric           Metric?
+  orderSnapshot    Int
+  MealSelection    MealSelection?
+  TaskCompletion   TaskCompletion?
+  TaskExclusion    TaskExclusion?
+  EnrollmentDay    EnrollmentDay   @relation(fields: [userId, dayId, versionId], references: [userId, id, versionId], onUpdate: NoAction)
+  User             User            @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  TaskDefinition   TaskDefinition  @relation(fields: [versionId, definitionId], references: [versionId, id], onUpdate: NoAction)
+
+  @@unique([dayId, definitionId])
+  @@unique([userId, id])
+  @@index([userId], map: "TaskOccurrence_userId_dayId_versionId_fkey_idx")
+  @@index([userId], map: "TaskOccurrence_userId_fkey_idx")
+  @@index([versionId], map: "TaskOccurrence_versionId_definitionId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model User {
+  id                                                           String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                                                    DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt                                                    DateTime                @default(now()) @db.Timestamptz(6)
+  revision                                                     Int                     @default(1)
+  emailNormalized                                              String?                 @unique @db.VarChar(254)
+  passwordHash                                                 String?
+  role                                                         Role
+  status                                                       UserStatus              @default(PENDING)
+  verifiedAt                                                   DateTime?               @db.Timestamptz(6)
+  AccessGrant_AccessGrant_grantedByToUser                      AccessGrant[]           @relation("AccessGrant_grantedByToUser")
+  AccessGrant_AccessGrant_scopeUserIdToUser                    AccessGrant[]           @relation("AccessGrant_scopeUserIdToUser")
+  AccessGrant_AccessGrant_subjectIdToUser                      AccessGrant[]           @relation("AccessGrant_subjectIdToUser")
+  AchievementAward                                             AchievementAward[]
+  AuditLog                                                     AuditLog[]
+  AuthToken                                                    AuthToken[]
+  Certificate                                                  Certificate[]
+  CoachAssignment_CoachAssignment_coachIdToUser                CoachAssignment[]       @relation("CoachAssignment_coachIdToUser")
+  CoachAssignment_CoachAssignment_userIdToUser                 CoachAssignment[]       @relation("CoachAssignment_userIdToUser")
+  CoachNote                                                    CoachNote[]
+  Consent                                                      Consent[]
+  ContentReview                                                ContentReview[]
+  ContentRevision                                              ContentRevision[]
+  ContentWithdrawal                                            ContentWithdrawal[]
+  CorrectionRequest_CorrectionRequest_reviewedByToUser         CorrectionRequest[]     @relation("CorrectionRequest_reviewedByToUser")
+  CorrectionRequest_CorrectionRequest_userIdToUser             CorrectionRequest[]     @relation("CorrectionRequest_userIdToUser")
+  DailyReview                                                  DailyReview[]
+  Enrollment                                                   Enrollment[]
+  EnrollmentDay                                                EnrollmentDay[]
+  ExerciseLog                                                  ExerciseLog[]
+  HabitDefinition                                              HabitDefinition[]
+  HabitLog                                                     HabitLog[]
+  HealthRecord                                                 HealthRecord[]
+  IdempotencyRecord                                            IdempotencyRecord[]
+  LogRevision                                                  LogRevision[]
+  MealSelection                                                MealSelection[]
+  MfaCredential                                                MfaCredential?
+  Notification                                                 Notification[]
+  NotificationPreference                                       NotificationPreference?
+  OperationsReport                                             OperationsReport[]
+  OutboxJob                                                    OutboxJob[]
+  PrivacyRequest                                               PrivacyRequest[]
+  Profile                                                      Profile?
+  Program                                                      Program[]
+  ProgramWithdrawal                                            ProgramWithdrawal[]
+  PushSubscription                                             PushSubscription[]
+  ReminderRule                                                 ReminderRule[]
+  ReviewAnswer                                                 ReviewAnswer[]
+  ReviewerQualification_ReviewerQualification_reviewerIdToUser ReviewerQualification[] @relation("ReviewerQualification_reviewerIdToUser")
+  ReviewerQualification_ReviewerQualification_verifiedByToUser ReviewerQualification[] @relation("ReviewerQualification_verifiedByToUser")
+  Session                                                      Session[]
+  SleepLog                                                     SleepLog[]
+  SourceConflict                                               SourceConflict[]
+  StepDayLog                                                   StepDayLog[]
+  TaskCompletion                                               TaskCompletion[]
+  TaskExclusion_TaskExclusion_authorizedByToUser               TaskExclusion[]         @relation("TaskExclusion_authorizedByToUser")
+  TaskExclusion_TaskExclusion_userIdToUser                     TaskExclusion[]         @relation("TaskExclusion_userIdToUser")
+  TaskOccurrence                                               TaskOccurrence[]
+  UserGoal                                                     UserGoal[]
+  WaterLog                                                     WaterLog[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This table contains exclusion constraints and requires additional setup for migrations. Visit https://pris.ly/d/exclusion-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model UserGoal {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @default(now()) @db.Timestamptz(6)
+  revision      Int       @default(1)
+  userId        String    @db.Uuid
+  metric        Metric
+  value         Decimal   @db.Decimal(12, 2)
+  effectiveDate DateTime  @db.Date
+  endDate       DateTime? @db.Date
+  User          User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, metric, effectiveDate])
+  @@index([userId], map: "UserGoal_userId_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model WaterLog {
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt        DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime     @default(now()) @db.Timestamptz(6)
+  revision         Int          @default(1)
+  userId           String       @db.Uuid
+  recordId         String       @unique @db.Uuid
+  recordKind       RecordKind   @default(WATER)
+  occurredAt       DateTime     @db.Timestamptz(6)
+  recordedAt       DateTime     @db.Timestamptz(6)
+  localDate        DateTime     @db.Date
+  timezoneSnapshot String       @db.VarChar(64)
+  amountMl         Int
+  inputUnit        String
+  cupMlSnapshot    Int?
+  deletedAt        DateTime?    @db.Timestamptz(6)
+  User             User         @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  HealthRecord     HealthRecord @relation(fields: [userId, recordId, recordKind], references: [userId, id, kind], onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@unique([userId, recordId, recordKind])
+  @@index([userId], map: "WaterLog_userId_fkey_idx")
+  @@index([userId], map: "WaterLog_userId_recordId_recordKind_fkey_idx")
+}
+
+enum CompletionMode {
+  MANUAL
+  DERIVED
+}
+
+enum ConsentKind {
+  PRIVACY
+  NOTIFICATIONS
+  COACH
+}
+
+enum ContentStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum GrantAction {
+  READ
+  NOTE
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+  CANCELLED
+}
+
+enum Metric {
+  WATER_ML
+  STEPS
+  EXERCISE_MIN
+  SLEEP_MIN
+}
+
+enum ProgramStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum RecordKind {
+  WATER
+  STEPS
+  EXERCISE
+  SLEEP
+  REVIEW
+}
+
+enum Role {
+  USER
+  COACH
+  ADMIN
+}
+
+enum TaskType {
+  MEAL
+  WATER
+  STEPS
+  EXERCISE
+  SLEEP
+  HABIT
+  MANUAL
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DELETION_PENDING
+  DELETED
+}
+
+enum VersionStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  WITHDRAWN
 }

@@ -88,3 +88,18 @@ G01..09 مصدرها الصور في التحليل، A01..12 قرارات ال�
 | P1-F05 / R21/24 | .github/workflows/p1-ci.yml وdocs/LOCAL-DEVELOPMENT | تشغيل يدوي فقط؛ GitHub CI لم ينفذ | إعداد جزئي؛ الحصة غير متحققة |
 
 R01..17 لا وظائف منفذة. R23 لا PWA/offline. نتائج هذا الملحق لا تحول أي متطلب شامل إلى مكتمل؛ تقرير P1 يربط نطاق الشيفرة والاختبارات والقيود.
+
+## ملحق P2 — تتبع التنفيذ
+
+المصدر تكليف المالك P2 وAGENTS §7/8/17/18/19/20 وDATABASE_DESIGN/API_SPECIFICATION/TEC-02/03/04/08. جميع البنود التالية أولوية P2؛ قبول البنية لا يقبل وظائف المراحل التالية.
+
+| المعرف | الوحدة والملفات | اختبار القبول | الحالة |
+|---|---|---|---|
+| P2-D01 / RV-02 | DB: prisma/schema.prisma وprisma/migrations | validate/generate/replay، FK/unique/ownership/version/options/time | بنية منفذة مختبرة |
+| P2-S01 / RV-01 / R03 | Security: AccessGrant/Consent/Assignment وRLS SQL | A/B/admin/coach scope/expiry/revoke السلبية | أساس مختبر؛ A-11 مفتوح |
+| P2-S02 / TEC-02 | src/server/db/context.ts | non-owner/non-super/bypass denied، pool commit/rollback وPrisma | أساس مختبر؛ لا auth |
+| P2-C01 / API / TEC-04 | src/server/contracts/p2.ts، IdempotencyRecord/OutboxJob | unit allowlist/revision/errors وunique races | عقود وتخزين فقط؛ services مؤجلة |
+| P2-O01 / TEC-08 / R18 | prisma.config.ts، scripts/p2-database.ts، local-database.ts | local identity/preflight/checksum وproduction CLI denied | محلي مختبر؛ لا backup/production |
+| P2-Q01 / R21 | tests/integration/p2-database.ts وtests/unit/p2-contracts.test.ts | P2-TEST-RESULTS:42 integration/21unit/21E2E | منفذ، audit dev5high مفتوح |
+
+لا تتحول R01..R17 الشاملة إلى مكتملة بهذا الملحق؛ الخدمات والمصادقة والواجهات والأهداف الصحية والاعتمادات والقبول الإنتاجي تظل وفق مراحلها.

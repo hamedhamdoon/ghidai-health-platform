@@ -1,0 +1,151 @@
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { readFileSync,readdirSync } from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import { Pool, type PoolClient } from 'pg';
+import { localPool, preflight } from '../../scripts/p2-database';
+import { withActor, type VerifiedActor } from '../../src/server/db/context';
+import { safeError } from '../../src/server/contracts/p2';
+import { assertLocalDatabase,assertLocalAppDatabase } from '../../src/server/db/local-database';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '../../src/generated/prisma/client';
+
+let passed=0;
+async function check(name:string,run:()=>Promise<void>) {await run();passed++;console.log(`PASS ${name}`);}
+const {pool:admin}=await localPool('test');
+const schema=`p2_test_${Date.now()}`;
+const ids=Object.fromEntries(['a','b','coach','admin','consent','assignment','grant','wa','wb','ra','rb','content','policy','reviewSchema','program','version','day','task','enrollment','ed','occurrence','dimension','option'].map(k=>[k,randomUUID()]));
+const fixtureActor=(id:string)=>({id}) as VerifiedActor; // Test-only; not exported into production.
+let app:Pool|undefined;
+try {
+  await preflight(admin);
+  await admin.query(`CREATE SCHEMA "${schema}" AUTHORIZATION ghidai_owner; GRANT USAGE ON SCHEMA "${schema}" TO ghidai_app,ghidai_policy`);
+  const setup=await admin.connect();
+  try {
+    await setup.query(`SET search_path="${schema}",public`);
+    for(const migration of readdirSync('prisma/migrations').filter(n=>/^20261011000[1-9]_p2_/.test(n)).sort()) await setup.query(readFileSync(`prisma/migrations/${migration}/migration.sql`,'utf8').replaceAll('public',schema));
+    await check('fresh migration replay without deleting database or volume',async()=>{const n=(await setup.query('SELECT count(*)::int n FROM pg_tables WHERE schemaname=$1',[schema])).rows[0].n;assert(n>=60);});
+    await setup.query('BEGIN');
+    for(const [key,role] of [['a','USER'],['b','USER'],['coach','COACH'],['admin','ADMIN']])await setup.query('INSERT INTO "User"(id,role,status) VALUES($1,$2,\'ACTIVE\')',[ids[key],role]);
+    await setup.query('INSERT INTO "Consent"(id,"userId",kind,"policyVersion","scopeKey",scope,"grantedAt","expiresAt") VALUES($1,$2,\'COACH\',\'synthetic-p2\',\'synthetic-read\',$3,now()-interval \'1 hour\',now()+interval \'1 hour\')',[ids.consent,ids.a,JSON.stringify({resources:['WaterLog'],actions:['READ']})]);
+    await setup.query('INSERT INTO "CoachAssignment"(id,"userId","coachId","consentId","startsAt","expiresAt") VALUES($1,$2,$3,$4,now()-interval \'1 hour\',now()+interval \'1 hour\')',[ids.assignment,ids.a,ids.coach,ids.consent]);
+    await setup.query('INSERT INTO "AccessGrant"(id,"subjectId","scopeUserId",resource,action,"assignmentId","consentId","startsAt","expiresAt",reason,"grantedBy") VALUES($1,$2,$3,\'WaterLog\',\'READ\',$4,$5,now()-interval \'1 hour\',now()+interval \'1 hour\',\'synthetic fixture only\',$6)',[ids.grant,ids.coach,ids.a,ids.assignment,ids.consent,ids.admin]);
+    for(const [user,record,water] of [[ids.a,ids.ra,ids.wa],[ids.b,ids.rb,ids.wb]]) {
+      await setup.query('INSERT INTO "HealthRecord"(id,"userId",kind) VALUES($1,$2,\'WATER\')',[record,user]);
+      await setup.query('INSERT INTO "WaterLog"(id,"userId","recordId","occurredAt","recordedAt","localDate","timezoneSnapshot","amountMl","inputUnit") VALUES($1,$2,$3,now(),now(),(now() AT TIME ZONE \'Asia/Muscat\')::date,\'Asia/Muscat\',250,\'ML\')',[water,user,record]);
+    }
+    await setup.query('INSERT INTO "ContentRevision"(id,"contentKey",version,kind,title,"bodyText","contentHash","authorId") VALUES($1,\'synthetic-p2\',1,\'MOTIVATION\',\'synthetic draft\',\'synthetic only\',$2,$3)',[ids.content,'0'.repeat(64),ids.admin]);
+    await setup.query('INSERT INTO "PolicyVersion"(id,version,"lateWindowDays","dayBoundary","streakRule","certificateThreshold") VALUES($1,1,0,\'00:00\',\'{}\',0)',[ids.policy]);
+    await setup.query('INSERT INTO "ReviewSchemaVersion"(id,version,name) VALUES($1,1,\'synthetic\')',[ids.reviewSchema]);
+    await setup.query('INSERT INTO "Program"(id,slug,type,"ownerId") VALUES($1,\'synthetic-p2\',\'CUSTOM\',$2)',[ids.program,ids.admin]);
+    await setup.query('INSERT INTO "ProgramVersion"(id,"programId",version,title,"descriptionRevisionId","durationDays","startMode","reviewSchemaVersionId","policyVersionId") VALUES($1,$2,1,\'synthetic draft\',$3,2,\'FLEXIBLE\',$4,$5)',[ids.version,ids.program,ids.content,ids.reviewSchema,ids.policy]);
+    await setup.query('INSERT INTO "ProgramDay"(id,"versionId","dayIndex") VALUES($1,$2,1)',[ids.day,ids.version]);
+    await setup.query('INSERT INTO "TaskDefinition"(id,"versionId","programDayId",key,"titleRevisionId",type,required,"order","scheduleKind","completionMode") VALUES($1,$2,$3,\'synthetic-task\',$4,\'MANUAL\',true,1,\'NONE\',\'MANUAL\')',[ids.task,ids.version,ids.day,ids.content]);
+    await setup.query('INSERT INTO "Enrollment"(id,"userId","programId","versionId","policyVersionId","startDate","timezoneSnapshot",status) VALUES($1,$2,$3,$4,$5,current_date,\'Asia/Muscat\',\'ACTIVE\')',[ids.enrollment,ids.a,ids.program,ids.version,ids.policy]);
+    await setup.query('INSERT INTO "EnrollmentDay"(id,"userId","enrollmentId","versionId","localDate","dayIndex",state) VALUES($1,$2,$3,$4,current_date,1,\'OPEN\')',[ids.ed,ids.a,ids.enrollment,ids.version]);
+    await setup.query('INSERT INTO "TaskOccurrence"(id,"userId","dayId","versionId","definitionId","requiredSnapshot","orderSnapshot") VALUES($1,$2,$3,$4,$5,true,1)',[ids.occurrence,ids.a,ids.ed,ids.version,ids.task]);
+    await setup.query('INSERT INTO "ReviewDimension"(id,"schemaId",key,label,"order") VALUES($1,$2,\'ENERGY\',\'synthetic\',1)',[ids.dimension,ids.reviewSchema]);
+    await setup.query('INSERT INTO "ReviewOption"(id,"dimensionId",value,label) VALUES($1,$2,1,\'synthetic\')',[ids.option,ids.dimension]);
+    await setup.query('COMMIT');
+  } finally {setup.release();}
+  const appUrl=assertLocalAppDatabase(readFileSync('.env.p2.test.local','utf8').trim().replace('P2_APP_DATABASE_URL=',''),'test');
+  app=new Pool({connectionString:appUrl,max:1,options:`-c search_path=${schema},public`});
+  const runtime=app;
+  const as=(id:string,fn:(c:PoolClient)=>Promise<void>)=>withActor(runtime,fixtureActor(id),fn);
+  const count=async(c:PoolClient)=>(await c.query('SELECT count(*)::int n FROM "WaterLog"')).rows[0].n;
+  const negative=async(sql:string,args:unknown[],code:string)=>{const c=await admin.connect();try{await c.query('BEGIN');await c.query(`SET LOCAL search_path="${schema}",public`);await assert.rejects(()=>c.query(sql,args),(e:unknown)=>!!e&&typeof e==='object'&&'code' in e&&e.code===code);}finally{await c.query('ROLLBACK');c.release();}};
+  await check('application account is non-owner / non-superuser / NOBYPASSRLS',async()=>{const r=(await runtime.query('SELECT rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user')).rows[0];assert.equal(r.rolsuper,false);assert.equal(r.rolbypassrls,false);assert.equal((await runtime.query('SELECT count(*)::int n FROM pg_tables WHERE schemaname=$1 AND tableowner=current_user',[schema])).rows[0].n,0);});
+  await check('default deny without actor',async()=>assert.equal((await runtime.query('SELECT count(*)::int n FROM "WaterLog"')).rows[0].n,0));
+  await check('A sees own only; B sees own only',async()=>{await as(ids.a,async c=>{assert.equal(await count(c),1);assert.equal((await c.query('SELECT id FROM "WaterLog"')).rows[0].id,ids.wa);});await as(ids.b,async c=>assert.equal((await c.query('SELECT id FROM "WaterLog"')).rows[0].id,ids.wb));});
+  await check('ADMIN has no health access',async()=>as(ids.admin,async c=>assert.equal(await count(c),0)));
+  await check('coach scoped grant allows A only',async()=>as(ids.coach,async c=>{assert.equal(await count(c),1);assert.equal((await c.query('SELECT id FROM "WaterLog"')).rows[0].id,ids.wa);}));
+  await check('coach cannot write personal health',async()=>as(ids.coach,async c=>assert.equal((await c.query('UPDATE "WaterLog" SET "amountMl"=500 WHERE id=$1',[ids.wa])).rowCount,0)));
+  await check('cross-user UPDATE denied',async()=>as(ids.a,async c=>assert.equal((await c.query('UPDATE "WaterLog" SET "amountMl"=500 WHERE id=$1',[ids.wb])).rowCount,0)));
+  await check('cross-user INSERT denied',async()=>{await assert.rejects(()=>as(ids.a,async c=>{await c.query('INSERT INTO "HealthRecord"("userId",kind) VALUES($1,\'WATER\')',[ids.b]);}),(e:unknown)=>!!e&&typeof e==='object'&&'code'in e&&e.code==='42501');});
+  const update=async(sql:string,args:unknown[]=[])=>{const c=await admin.connect();try{await c.query(`SET search_path="${schema}",public`);await c.query(sql,args);}finally{c.release();}};
+  await check('expired coach grant denies immediately',async()=>{await update('UPDATE "AccessGrant" SET "expiresAt"=now()-interval \'1 second\' WHERE id=$1',[ids.grant]);await as(ids.coach,async c=>assert.equal(await count(c),0));await update('UPDATE "AccessGrant" SET "expiresAt"=now()+interval \'1 hour\' WHERE id=$1',[ids.grant]);});
+  await check('consent resource scope limits otherwise valid grant',async()=>{await update('UPDATE "Consent" SET scope=\'{}\' WHERE id=$1',[ids.consent]);await as(ids.coach,async c=>assert.equal(await count(c),0));await update('UPDATE "Consent" SET scope=$2 WHERE id=$1',[ids.consent,JSON.stringify({resources:['WaterLog'],actions:['READ']})]);});
+  await check('withdrawn consent denies immediately',async()=>{await update('UPDATE "Consent" SET "revokedAt"=now() WHERE id=$1',[ids.consent]);await as(ids.coach,async c=>assert.equal(await count(c),0));await update('UPDATE "Consent" SET "revokedAt"=NULL WHERE id=$1',[ids.consent]);});
+  await check('revoked assignment denies immediately',async()=>{await update('UPDATE "CoachAssignment" SET "revokedAt"=now() WHERE id=$1',[ids.assignment]);await as(ids.coach,async c=>assert.equal(await count(c),0));});
+  await check('pool reuse clears context after commit and rollback',async()=>{await as(ids.a,async c=>assert.equal(await count(c),1));assert.equal((await runtime.query('SELECT count(*)::int n FROM "WaterLog"')).rows[0].n,0);await assert.rejects(()=>as(ids.b,async()=>{throw new Error('synthetic failure');}));assert.equal((await runtime.query('SELECT count(*)::int n FROM "WaterLog"')).rows[0].n,0);});
+  await check('Prisma model queries honor transaction-local RLS',async()=>{const prisma=new PrismaClient({adapter:new PrismaPg({connectionString:appUrl,max:1,options:`-c search_path=${schema},public`},{schema})});try{await prisma.$transaction(async tx=>{await tx.$executeRaw`SELECT set_config('app.user_id',${ids.a},true)`;const rows=await tx.waterLog.findMany();assert.equal(rows.length,1);assert.equal(rows[0].id,ids.wa);});assert.equal((await prisma.waterLog.findMany()).length,0);}finally{await prisma.$disconnect();}});
+  await check('ownership FK rejects wrong record owner',async()=>negative('UPDATE "WaterLog" SET "userId"=$1 WHERE id=$2',[ids.b,ids.wa],'23503'));
+  await check('occurrence ownership FK',async()=>negative('INSERT INTO "TaskCompletion"("userId","occurrenceId","completedAt","recordedAt","isLate",mode,"evidenceRevision") VALUES($1,$2,now(),now(),false,\'MANUAL\',1)',[ids.b,ids.occurrence],'23503'));
+  await check('duplicate program day unique',async()=>negative('INSERT INTO "ProgramDay"("versionId","dayIndex") VALUES($1,1)',[ids.version],'23505'));
+  await check('day outside duration',async()=>negative('INSERT INTO "ProgramDay"("versionId","dayIndex") VALUES($1,3)',[ids.version],'23514'));
+  await check('version FK rejects mismatched enrollment policy',async()=>negative('UPDATE "Enrollment" SET "policyVersionId"=$1 WHERE id=$2',[randomUUID(),ids.enrollment],'23503'));
+  await check('unapproved content blocked',async()=>negative('UPDATE "ContentRevision" SET status=\'APPROVED\' WHERE id=$1',[ids.content],'23514'));
+  await check('publication blocked until publishing implementation',async()=>negative('UPDATE "ProgramVersion" SET status=\'PUBLISHED\' WHERE id=$1',[ids.version],'23514'));
+  await check('policy immutable',async()=>negative('UPDATE "PolicyVersion" SET "lateWindowDays"=1 WHERE id=$1',[ids.policy],'23514'));
+  await check('source joins and independent hash-bound content approval',async()=>{
+    const image=randomUUID(),extract=randomUUID(),conflict=randomUUID(),qualification=randomUUID(),plan=randomUUID();
+    await update('INSERT INTO "SourceImage"(id,"sourceKey",path,sha256,"rightsStatus") VALUES($1,\'synthetic-p2\',\'synthetic://fixture\',$2,\'UNKNOWN\')',[image,'0'.repeat(64)]);
+    await update('INSERT INTO "SourceExtract"(id,"imageId","extractKey","originalText",section,confidence,"requiresReview") VALUES($1,$2,\'synthetic\',\'synthetic only\',\'fixture\',\'LOW\',true)',[extract,image]);
+    await update('INSERT INTO "SourceConflict"(id,"conflictKey",description) VALUES($1,\'synthetic-p2\',\'synthetic only\')',[conflict]);
+    await update('INSERT INTO "ConflictExtract"("conflictId","extractId") VALUES($1,$2)',[conflict,extract]);
+    await update('INSERT INTO "ContentSource"("revisionId","extractId") VALUES($1,$2)',[ids.content,extract]);
+    await update('INSERT INTO "NutritionPlan"(id,"contentRevisionId",label) VALUES($1,$2,\'synthetic only\')',[plan,ids.content]);
+    await update('INSERT INTO "ReviewerQualification"(id,"reviewerId",scope,"evidenceReference","verifiedBy","validUntil",status) VALUES($1,$2,\'MOTIVATION\',\'synthetic fixture qualification\',$3,now()+interval \'1 hour\',\'ACTIVE\')',[qualification,ids.coach,ids.admin]);
+    const authorQualification=randomUUID();
+    await update('INSERT INTO "ReviewerQualification"(id,"reviewerId",scope,"evidenceReference","verifiedBy","validUntil",status) VALUES($1,$2,\'MOTIVATION\',\'synthetic fixture qualification\',$3,now()+interval \'1 hour\',\'ACTIVE\')',[authorQualification,ids.admin,ids.coach]);
+    await negative('INSERT INTO "ContentReview"("revisionId","reviewerId","qualificationId",decision,rationale,"decidedAt","reviewedHash") VALUES($1,$2,$3,\'APPROVED\',\'synthetic\',now(),$4)',[ids.content,ids.admin,authorQualification,'0'.repeat(64)],'23514');
+    await negative('INSERT INTO "ContentReview"("revisionId","reviewerId","qualificationId",decision,rationale,"decidedAt","reviewedHash") VALUES($1,$2,$3,\'APPROVED\',\'synthetic\',now(),$4)',[ids.content,ids.coach,qualification,'1'.repeat(64)],'23514');
+    await update('UPDATE "ReviewerQualification" SET "validUntil"=now()-interval \'1 hour\' WHERE id=$1',[qualification]);
+    await negative('INSERT INTO "ContentReview"("revisionId","reviewerId","qualificationId",decision,rationale,"decidedAt","reviewedHash") VALUES($1,$2,$3,\'APPROVED\',\'synthetic\',now(),$4)',[ids.content,ids.coach,qualification,'0'.repeat(64)],'23514');
+    await update('UPDATE "ReviewerQualification" SET "validUntil"=now()+interval \'1 hour\' WHERE id=$1',[qualification]);
+    await update('INSERT INTO "ContentReview"("revisionId","reviewerId","qualificationId",decision,rationale,"decidedAt","reviewedHash") VALUES($1,$2,$3,\'APPROVED\',\'synthetic\',now(),$4)',[ids.content,ids.coach,qualification,'0'.repeat(64)]);
+    await update('UPDATE "ContentRevision" SET status=\'APPROVED\' WHERE id=$1',[ids.content]);
+    await negative('UPDATE "ContentRevision" SET "bodyText"=\'changed\' WHERE id=$1',[ids.content],'23514');
+    await negative('UPDATE "NutritionPlan" SET label=\'changed\' WHERE id=$1',[plan],'23514');
+    await negative('UPDATE "SourceExtract" SET "originalText"=\'changed\' WHERE id=$1',[extract],'23514');
+  });
+  await check('invalid water CHECK',async()=>negative('UPDATE "WaterLog" SET "amountMl"=-1 WHERE id=$1',[ids.wa],'23514'));
+  await check('meal/alternative version consistency and ingredient immutability',async()=>{
+    const revisions=[randomUUID(),randomUUID(),randomUUID()],meals=[randomUUID(),randomUUID()],plan=randomUUID(),slot=randomUUID(),ingredient=randomUUID(),qualification=randomUUID();
+    for(let i=0;i<3;i++)await update('INSERT INTO "ContentRevision"(id,"contentKey",version,kind,title,"bodyText","contentHash","authorId") VALUES($1,$2,1,$3,\'synthetic only\',\'synthetic only\',$4,$5)',[revisions[i],`synthetic-meal-${i}`,i<2?'MEAL':'GUIDANCE','0'.repeat(64),ids.admin]);
+    for(let i=0;i<2;i++)await update('INSERT INTO "Meal"(id,"contentRevisionId",slot) VALUES($1,$2,\'OTHER\')',[meals[i],revisions[i]]);
+    await update('INSERT INTO "NutritionPlan"(id,"contentRevisionId",label) VALUES($1,$2,\'synthetic only\')',[plan,revisions[2]]);
+    await negative('INSERT INTO "PlanMeal"("planId","dayIndex",slot,"order","mealRevisionId") VALUES($1,1,\'OTHER\',1,$2)',[plan,revisions[2]],'23503');
+    await update('INSERT INTO "PlanMeal"(id,"planId","dayIndex",slot,"order","mealRevisionId") VALUES($1,$2,1,\'OTHER\',1,$3)',[slot,plan,revisions[0]]);
+    await negative('INSERT INTO "MealAlternative"("planMealId","alternativeMealId","order","approvalRevisionId") VALUES($1,$2,1,$3)',[slot,meals[1],revisions[0]],'23503');
+    await update('INSERT INTO "MealAlternative"("planMealId","alternativeMealId","order","approvalRevisionId") VALUES($1,$2,1,$3)',[slot,meals[1],revisions[1]]);
+    await update('INSERT INTO "Ingredient"(id,name,"unitFamily") VALUES($1,\'synthetic ingredient\',\'COUNT\')',[ingredient]);
+    await update('INSERT INTO "MealIngredient"("mealId","ingredientId",quantity,unit,"measurementBasis") VALUES($1,$2,1,\'PIECE\',\'UNSPECIFIED\')',[meals[0],ingredient]);
+    await update('INSERT INTO "ReviewerQualification"(id,"reviewerId",scope,"evidenceReference","verifiedBy","validUntil",status) VALUES($1,$2,\'MEAL\',\'synthetic only\',$3,now()+interval \'1 hour\',\'ACTIVE\')',[qualification,ids.coach,ids.admin]);
+    await update('INSERT INTO "ContentReview"("revisionId","reviewerId","qualificationId",decision,rationale,"decidedAt","reviewedHash") VALUES($1,$2,$3,\'APPROVED\',\'synthetic only\',now(),$4)',[revisions[0],ids.coach,qualification,'0'.repeat(64)]);
+    await update('UPDATE "ContentRevision" SET status=\'APPROVED\' WHERE id=$1',[revisions[0]]);
+    await negative('UPDATE "Ingredient" SET name=\'changed\' WHERE id=$1',[ingredient],'23514');
+  });
+  await check('cup snapshot cannot be null',async()=>negative('UPDATE "WaterLog" SET "inputUnit"=\'CUP\',"cupMlSnapshot"=NULL WHERE id=$1',[ids.wa],'23514'));
+  await check('local calendar mismatch rejected',async()=>negative('UPDATE "WaterLog" SET "localDate"="localDate"+1 WHERE id=$1',[ids.wa],'23514'));
+  await check('WINDOW schedule requires end time',async()=>negative('UPDATE "TaskDefinition" SET "scheduleKind"=\'WINDOW\',"timeStart"=\'09:00\',"timeEnd"=NULL WHERE id=$1',[ids.task],'23514'));
+  await check('goal overlap exclusion',async()=>{await update('INSERT INTO "UserGoal"("userId",metric,value,"effectiveDate","endDate") VALUES($1,\'STEPS\',100,current_date,current_date+2)',[ids.a]);await negative('INSERT INTO "UserGoal"("userId",metric,value,"effectiveDate","endDate") VALUES($1,\'STEPS\',200,current_date+1,current_date+3)',[ids.a],'23P01');});
+  await check('all 68 data tables enforce RLS',async()=>{const rows=(await admin.query('SELECT relrowsecurity,relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname=$1 AND c.relkind=\'r\'',[schema])).rows;assert.equal(rows.length,68);assert(rows.every(r=>r.relrowsecurity&&r.relforcerowsecurity));});
+  await check('app cannot become table owner or policy reader',async()=>{for(const role of ['ghidai_owner','ghidai_policy'])await assert.rejects(()=>runtime.query(`SET ROLE ${role}`),(e:unknown)=>!!e&&typeof e==='object'&&'code'in e&&e.code==='42501');});
+  await check('sleep overlap exclusion on real PostgreSQL',async()=>{
+    const records=[randomUUID(),randomUUID()];
+    for(const record of records)await update('INSERT INTO "HealthRecord"(id,"userId",kind) VALUES($1,$2,\'SLEEP\')',[record,ids.a]);
+    await update('INSERT INTO "SleepLog"("userId","recordId","startsAt","endsAt","wakeDate","timezoneSnapshot") VALUES($1,$2,\'2026-10-10T22:00:00Z\',\'2026-10-11T06:00:00Z\',\'2026-10-11\',\'Asia/Muscat\')',[ids.a,records[0]]);
+    await negative('INSERT INTO "SleepLog"("userId","recordId","startsAt","endsAt","wakeDate","timezoneSnapshot") VALUES($1,$2,\'2026-10-11T05:00:00Z\',\'2026-10-11T07:00:00Z\',\'2026-10-11\',\'Asia/Muscat\')',[ids.a,records[1]],'23P01');
+  });
+  await check('review option and schema composite foreign keys',async()=>{
+    const record=randomUUID(),review=randomUUID(),otherSchema=randomUUID(),otherDim=randomUUID();
+    await update('INSERT INTO "HealthRecord"(id,"userId",kind) VALUES($1,$2,\'REVIEW\')',[record,ids.a]);
+    await update('INSERT INTO "DailyReview"(id,"userId","recordId","localDate","schemaVersionId","recordedAt") VALUES($1,$2,$3,current_date,$4,now())',[review,ids.a,record,ids.reviewSchema]);
+    await update('INSERT INTO "ReviewSchemaVersion"(id,version,name) VALUES($1,2,\'synthetic\')',[otherSchema]);
+    await update('INSERT INTO "ReviewDimension"(id,"schemaId",key,label,"order") VALUES($1,$2,\'ENERGY\',\'synthetic\',1)',[otherDim,otherSchema]);
+    await negative('INSERT INTO "ReviewAnswer"("userId","reviewId","schemaVersionId","dimensionId","optionId") VALUES($1,$2,$3,$4,$5)',[ids.a,review,ids.reviewSchema,otherDim,ids.option],'23503');
+    await update('INSERT INTO "ReviewAnswer"("userId","reviewId","schemaVersionId","dimensionId","optionId") VALUES($1,$2,$3,$4,$5)',[ids.a,review,ids.reviewSchema,ids.dimension,ids.option]);
+  });
+  await check('grant ownership composite FK rejects B consent',async()=>negative('UPDATE "AccessGrant" SET "scopeUserId"=$1 WHERE id=$2',[ids.b,ids.grant],'23503'));
+  await check('audit append-only and metadata excludes health text',async()=>{const c=await admin.connect();try{await c.query(`SET search_path="${schema}",public`);const rows=(await c.query('SELECT "safeMetadata" FROM "AuditLog"')).rows;assert(rows.length>0);assert(rows.every(r=>Object.keys(r.safeMetadata).every(k=>k==='revision')));}finally{c.release();}await negative('UPDATE "AuditLog" SET reason=\'changed\'',[],'23514');await assert.rejects(()=>runtime.query('SELECT * FROM "AuditLog"'),(e:unknown)=>!!e&&typeof e==='object'&&'code'in e&&e.code==='42501');});
+  await check('concurrent idempotency key admits one transaction',async()=>{const key=randomUUID();const other=new Pool({connectionString:appUrl,max:1,options:`-c search_path=${schema},public`});try{const writes=await Promise.allSettled([runtime,other].map(p=>withActor(p,fixtureActor(ids.a),async c=>{await c.query('INSERT INTO "IdempotencyRecord"("userId",action,key,"requestHash","responseEncrypted","expiresAt") VALUES($1,\'water.create\',$2,$3,$4,now()+interval \'1 hour\')',[ids.a,key,'0'.repeat(64),Buffer.from('synthetic')]);})));assert.equal(writes.filter(r=>r.status==='fulfilled').length,1);const rejected=writes.find(r=>r.status==='rejected');assert(rejected?.status==='rejected'&&rejected.reason.code==='23505');}finally{await other.end();}});
+  await check('concurrent optimistic update exactly one winner',async()=>{const other=new Pool({connectionString:appUrl,max:1,options:`-c search_path=${schema},public`});try{const writes=await Promise.all([runtime,other].map(p=>withActor(p,fixtureActor(ids.a),async c=>(await c.query('UPDATE "WaterLog" SET revision=revision+1 WHERE id=$1 AND revision=1',[ids.wa])).rowCount)));assert.equal(writes.reduce((a,b)=>a!+b!,0),1);}finally{await other.end();}});
+  await check('transaction rollback preserves data',async()=>{await assert.rejects(()=>as(ids.a,async c=>{await c.query('UPDATE "WaterLog" SET "amountMl"=999 WHERE id=$1',[ids.wa]);throw new Error('rollback');}));await as(ids.a,async c=>assert.equal((await c.query('SELECT "amountMl" FROM "WaterLog" WHERE id=$1',[ids.wa])).rows[0].amountMl,250));});
+  await check('production URLs rejected before connection/write',async()=>{for(const url of ['postgresql://x:y@cloud.example:55433/ghidai_test','postgresql://x:y@127.0.0.1:5432/production'])assert.throws(()=>assertLocalDatabase(url,'test'));});
+  await check('Prisma migration CLI rejects production URL before engine connection',async()=>{const result=spawnSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy'],{env:{...process.env,GHIDAI_ENV:'test',DATABASE_URL:'postgresql://fixture:fixture@production.invalid:5432/production'},encoding:'utf8'});assert.notEqual(result.status,0);assert.match(result.stderr,/Only the dedicated GHIDAI loopback database is allowed/);assert(!result.stderr.includes('fixture:fixture'));});
+  await check('errors do not expose health/SQL/secrets',async()=>assert(!JSON.stringify(safeError(new Error('SQL password synthetic health'),'fixture')).match(/SQL|password|synthetic health/)));
+  console.log(`PASS P2 PostgreSQL integration: ${passed} checks; retained synthetic schema ${schema}. No data or volumes deleted.`);
+} catch(error) {
+  console.error(`FAIL P2 integration after ${passed} checks:`,error instanceof Error?error.message.replace(/postgresql:\/\/\S+/g,'[REDACTED]'):'unknown');process.exitCode=1;
+} finally {await app?.end();await admin.end();}

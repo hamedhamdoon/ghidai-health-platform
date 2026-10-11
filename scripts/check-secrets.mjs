@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
-const secrets = ['.env.development.local', '.env.test.local'].flatMap(path => {
+const secrets = ['.env.development.local', '.env.test.local','.env.p2.development.local','.env.p2.test.local'].flatMap(path => {
   if (!existsSync(path)) return [];
   return readFileSync(path, 'utf8').split(/\r?\n/).flatMap(line => {
     const index = line.indexOf('=');

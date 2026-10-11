@@ -144,3 +144,9 @@ prefix `/coach` يتطلب COACH أو ADMIN لديه grant مماثل، ولاي
 ## حالات الفشل والاختبارات
 
 T-01tokenreplay/expiry/passwordreset/revoke/MFA ؛ T-03 كل CRUD ب UUID لغيره+roleinjection+pool ؛ T-05joinconcurrency/versionwithdraw ؛ T-06completionreplay/stale； T-08waterXOR/cup/negative/delete/replay ؛ T-09stepreplacement ؛ T-10sleepcrossmidnight/overlap/DST ؛ T-11schemaoptionmismatch ؛ T-12zeroN/targets/future/late ؛ T-14quiettime/revokedconsent/jobdoubleclaim/providerfailure ؛ T-16exportexpired/private/deletionretry ؛ T-17selfapproval/hashchanged/unqualifiedreview/publishdraft ؛ T-20CSRF/XSS/rate/unknownfields；T-24quotareached→503 دون data loss. OpenAPI3.1JSONschemas ومولد client مرحلة التنفيذ من هذه العقود، لا generatedspec يدعي التنفيذ الآن.
+
+## ملحق عقود P2 المحلية
+
+نفذت allowlists وDTOs وinput/revision/ownership/idempotency/error helpers في src/server/contracts/p2.ts، مع قيود DB في Prisma/SQL؛ لا endpoint وظيفي جديد. userId/role غير مقبولين؛ If-Match صيغة quoted positive integer، stale409 وmissing428. ownership denial404 ورسائل عامة بلاSQL. idempotency يُربط actor (userId مخزَّن خادميًا)/action/key وhash normalized DTO، وuniqueRace مختبر؛ TTL/replay/encryption ليست خدمات منفذة بعد.
+
+Exercise type allowlist التقنية في P2: WALK/RUN/STRENGTH/OTHER، وليست توصية تمرين. Program policy/late window/goal eligibility والتوقيت المستقبلي والتصحيح وIf-None-Match lifecycle مفحوصة عند تنفيذ الخدمات ذات الصلة؛ RV-07/08/10 تبقى مفتوحة قبلها. رفض publishing وخدمات الكتابة غير المنفذة في DB يمنع اعتبار عقود التأليف والمشاركة متاحة الآن. [التفاصيل](P2-DATABASE-IMPLEMENTATION.md).
