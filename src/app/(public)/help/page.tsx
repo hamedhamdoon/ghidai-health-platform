@@ -1,0 +1,3 @@
+import { PageHeading } from '@/components/ui';
+import Link from 'next/link';
+export default function Help() { return <><PageHeading eyebrow="عن GHIDAI" title="بداية واضحة، وخطوات مدروسة">منصة عربية للتغذية والنشاط والمتابعة اليومية، قيد التطوير المحلي.</PageHeading><section className="content-card"><h2>المرحلة الأولى</h2><p>المتاح الآن هو أساس الواجهة العربية والتصميم المتجاوب والتنقل. لا توجد حسابات أو برامج منشورة أو سجلات محفوظة في هذه النسخة.</p><h2>المراحل القادمة</h2><p>تحتاج الحسابات والبرامج والسجلات والتحليل إلى تنفيذ واختبارات مستقلة. لا تتوفر توصيات غذائية أو تعليمات علاجية في هذه المرحلة.</p><Link className="text-link" href="/">العودة إلى الصفحة الترحيبية</Link></section></>; }
