@@ -1,13 +1,14 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
-const secrets = ['.env.development.local', '.env.test.local','.env.p2.development.local','.env.p2.test.local'].flatMap(path => {
+const secrets = ['.env.development.local', '.env.test.local','.env.p2.development.local','.env.p2.test.local','.env.p3.development.local','.env.p3.test.local'].flatMap(path => {
   if (!existsSync(path)) return [];
   return readFileSync(path, 'utf8').split(/\r?\n/).flatMap(line => {
     const index = line.indexOf('=');
     const key = line.slice(0,index);
     const value = line.slice(index+1);
     if (key.includes('PASSWORD')) return [value];
+    if (key==='P3_KEY') return [value];
     if (key.endsWith('DATABASE_URL')) return [new URL(value).password];
     return [];
   });

@@ -1,5 +1,13 @@
 # Changelog
 
+## P3 — 2026-10-12
+
+- مصادقة محلية فعلية بـArgon2id وopaque sessions وemail verification/reset وreauth وTOTP/recovery وCSRF/rate limiting.
+- Mailpit محلي مقيد loopback، encrypted outbox وإعادة محاولة؛ اختبار انقطاع واستعادة دون حذف موارد.
+- ملف عربي RTL وتفضيلات وأهداف اختيارية وموافقات قابلة للسحب، خلف VerifiedActor وRLS وPrisma.
+- ثلاث migrations إضافية؛ حفظ migrations P2 وAGENTS؛ RV03/04/07 مسوّاة ضمنP3 فقط.
+- اختبارات PostgreSQL/Playwright سلبية وتزامن وregression وتقارير تسليم؛ لاP4/mainmerge/cloud/deploy أوإغلاقA02/A08/A12.
+
 ## P2 — 2026-10-11
 
 - 68 نموذج Prisma وتسع migrations ذرية، ownership/version FK وRLS وgrants/consents/audit وidempotency/outbox.

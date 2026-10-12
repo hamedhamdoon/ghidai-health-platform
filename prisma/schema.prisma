@@ -109,16 +109,19 @@ model AuditLog {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model AuthToken {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime  @default(now()) @db.Timestamptz(6)
-  revision  Int       @default(1)
-  userId    String    @db.Uuid
-  kind      String
-  tokenHash String    @unique
-  expiresAt DateTime  @db.Timestamptz(6)
-  usedAt    DateTime? @db.Timestamptz(6)
-  User      User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime   @default(now()) @db.Timestamptz(6)
+  revision       Int        @default(1)
+  userId         String     @db.Uuid
+  kind           String
+  tokenHash      String     @unique
+  expiresAt      DateTime   @db.Timestamptz(6)
+  usedAt         DateTime?  @db.Timestamptz(6)
+  candidateEmail String?    @db.VarChar(254)
+  AuthMail       AuthMail[]
+  ownedMail      AuthMail[] @relation("MailTokenOwner")
+  User           User       @relation(fields: [userId], references: [id], onUpdate: NoAction)
 
   @@unique([userId, id])
   @@index([userId], map: "AuthToken_userId_fkey_idx")
@@ -695,6 +698,8 @@ model MfaCredential {
   secretEncrypted Bytes
   enabledAt       DateTime? @db.Timestamptz(6)
   recoveryHashes  Json
+  lastStep        BigInt    @default(-1)
+  setupExpiresAt  DateTime? @db.Timestamptz(6)
   User            User      @relation(fields: [userId], references: [id], onUpdate: NoAction)
 
   @@unique([userId, id])
@@ -873,6 +878,7 @@ model Profile {
   timezone    String   @db.VarChar(64)
   locale      String   @db.VarChar(10)
   cupMl       Int?
+  preferences Json     @default("{\"reducedMotion\": false}")
   User        User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
 
   @@unique([userId, id])
@@ -1437,7 +1443,7 @@ model User {
   revision                                                     Int                     @default(1)
   emailNormalized                                              String?                 @unique @db.VarChar(254)
   passwordHash                                                 String?
-  role                                                         Role
+  role                                                         Role                    @default(USER)
   status                                                       UserStatus              @default(PENDING)
   verifiedAt                                                   DateTime?               @db.Timestamptz(6)
   AccessGrant_AccessGrant_grantedByToUser                      AccessGrant[]           @relation("AccessGrant_grantedByToUser")
@@ -1445,6 +1451,8 @@ model User {
   AccessGrant_AccessGrant_subjectIdToUser                      AccessGrant[]           @relation("AccessGrant_subjectIdToUser")
   AchievementAward                                             AchievementAward[]
   AuditLog                                                     AuditLog[]
+  AuthChallenge                                                AuthChallenge[]
+  AuthMail                                                     AuthMail[]
   AuthToken                                                    AuthToken[]
   Certificate                                                  Certificate[]
   CoachAssignment_CoachAssignment_coachIdToUser                CoachAssignment[]       @relation("CoachAssignment_coachIdToUser")
@@ -1537,6 +1545,37 @@ model WaterLog {
   @@unique([userId, recordId, recordKind])
   @@index([userId], map: "WaterLog_userId_fkey_idx")
   @@index([userId], map: "WaterLog_userId_recordId_recordKind_fkey_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AuthChallenge {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime  @db.Timestamptz(6)
+  attempts  Int       @default(0)
+  usedAt    DateTime? @db.Timestamptz(6)
+  User      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId], map: "challenge_user_idx")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AuthMail {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String    @db.Uuid
+  tokenId          String    @db.Uuid
+  payloadEncrypted Bytes
+  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
+  sentAt           DateTime? @db.Timestamptz(6)
+  attempts         Int       @default(0)
+  expiresAt        DateTime  @db.Timestamptz(6)
+  AuthToken        AuthToken @relation(fields: [tokenId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  AuthTokenOwner   AuthToken @relation("MailTokenOwner", fields: [userId, tokenId], references: [userId, id], onUpdate: NoAction, map: "mail_token_owner")
+  User             User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([createdAt], map: "mail_pending_idx", where: raw("(\"sentAt\" IS NULL)"))
 }
 
 enum CompletionMode {

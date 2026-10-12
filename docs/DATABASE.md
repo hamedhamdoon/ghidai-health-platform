@@ -1,5 +1,9 @@
 # قاعدة بيانات GHIDAI — سجل الأساس P1 وملحق P2
 
+## ملحق P3
+
+العدد الحالي70نموذجًا،12migration (9P2محفوظة +3إضافيةP3). AuthChallenge وAuthMail وحقول candidateEmail/preferences/MFA replay/setup expiry، ومفتاح مركب لملكية البريد والرمز. ghidai_auth غير مالك/غير superuser/غير bypass ولاhealth privileges، وghidai_app يظل RLS. Profile query عبرPrisma وwrites/goals/consents عبرمعاملاتSQLمقيدة. التفاصيل في [P3-AUTH-IMPLEMENTATION](P3-AUTH-IMPLEMENTATION.md). dev/test مستقلتان؛ fixtures فيschemasمعزولةمحفوظة ولاحذف أوreset. الفقرات التالية تاريخP1/P2.
+
 التصميم المستقبلي [DATABASE_DESIGN](DATABASE_DESIGN.md)، وبوابة RV-01/RV-02 في [IMPLEMENTATION-READINESS](IMPLEMENTATION-READINESS.md).
 
 حاويتان PostgreSQL 17.6 منفصلتان؛ loopback 55432/55433، volume تطوير جديد وtmpfs للاختبار، healthchecks. الصورة مثبتة بـdigest في compose.yaml. حسابا التهيئة محليان؛ لا يستخدمان كتفويض تطبيق أو برهان RLS. لا جداول GHIDAI أو migrations أو seed.

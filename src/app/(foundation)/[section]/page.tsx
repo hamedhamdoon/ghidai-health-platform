@@ -1,12 +1,11 @@
 import { notFound } from 'next/navigation';
-import { CalendarDays, ClipboardList, ChartNoAxesCombined, CircleUserRound, Leaf } from 'lucide-react';
+import { CalendarDays, ClipboardList, ChartNoAxesCombined, Leaf } from 'lucide-react';
 import { EmptyState, PageHeading } from '@/components/ui';
 const sections = {
   today: { label: 'اليوم', title: 'لا توجد مهام يومية بعد', text: 'ستظهر هنا مهمتك القادمة بعد تنفيذ البرامج والمشاركة. تسجيل الماء والخطوات غير متاح في المرحلة الأولى.', icon: CalendarDays },
   'my-programs': { label: 'برنامجي', title: 'لا توجد برامج متاحة حاليًا', text: 'لم يُنفذ محرك البرامج أو الانضمام بعد. لن يُعرض محتوى غذائي قبل مراجعته واعتماده.', icon: Leaf },
   logs: { label: 'سجلاتي', title: 'لا توجد سجلات محفوظة', text: 'تسجيل الماء والنشاط والنوم سيُنفذ في مرحلة لاحقة. هذه الشاشة لا تحفظ أي بيانات.', icon: ClipboardList },
   progress: { label: 'تقدمي', title: 'لا توجد بيانات لعرض التقدم', text: 'ستعتمد الإحصائيات على سجلاتك الفعلية بعد تنفيذها. لا نعرض نسبًا أو رسومًا افتراضية.', icon: ChartNoAxesCombined },
-  account: { label: 'حسابي', title: 'الحسابات غير متاحة بعد', text: 'التسجيل وتسجيل الدخول والملف الشخصي خارج نطاق المرحلة الأولى. لا تدخل معلومات شخصية في هذه النسخة.', icon: CircleUserRound },
 };
 export function generateStaticParams() { return Object.keys(sections).map((section) => ({ section })); }
 export default async function FoundationPage({ params }: { params: Promise<{ section: string }> }) {

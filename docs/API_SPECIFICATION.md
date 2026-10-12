@@ -150,3 +150,23 @@ T-01tokenreplay/expiry/passwordreset/revoke/MFA ؛ T-03 كل CRUD ب UUID لغي
 نفذت allowlists وDTOs وinput/revision/ownership/idempotency/error helpers في src/server/contracts/p2.ts، مع قيود DB في Prisma/SQL؛ لا endpoint وظيفي جديد. userId/role غير مقبولين؛ If-Match صيغة quoted positive integer، stale409 وmissing428. ownership denial404 ورسائل عامة بلاSQL. idempotency يُربط actor (userId مخزَّن خادميًا)/action/key وhash normalized DTO، وuniqueRace مختبر؛ TTL/replay/encryption ليست خدمات منفذة بعد.
 
 Exercise type allowlist التقنية في P2: WALK/RUN/STRENGTH/OTHER، وليست توصية تمرين. Program policy/late window/goal eligibility والتوقيت المستقبلي والتصحيح وIf-None-Match lifecycle مفحوصة عند تنفيذ الخدمات ذات الصلة؛ RV-07/08/10 تبقى مفتوحة قبلها. رفض publishing وخدمات الكتابة غير المنفذة في DB يمنع اعتبار عقود التأليف والمشاركة متاحة الآن. [التفاصيل](P2-DATABASE-IMPLEMENTATION.md).
+
+## ملحق عقود P3 الفعلية — 2026-10-12
+
+مصدر التنفيذ تكليف P3؛ [التنفيذ](P3-AUTH-IMPLEMENTATION.md). `/api/v1` يستخدم envelope العام data/meta والخطأ error، و204 بلاbody. CSRF GET يعيد `data.csrfToken`. جميع mutations تحقق Origin/Host+CSRF+JSON32KB. no-store و429Retry-After. هوية self من Session فقط.
+
+| المورد / العملية | عقد P3 |
+|---|---|
+| register | displayName,email,password,privacyAccepted=true,policyVersion=synthetic-local-p3-v1؛ USER/PENDING فقط؛202عام |
+| login/challenge | data.needsMfa؛ لا actor DTO قبل MFA؛ الملف والدور والحالة تقرأ من GET /me بعد الجلسة الكاملة |
+| email/change POST | fresh/CSRF؛ email؛202، candidateEmail مربوط بـhash، البريد الحالي ثابت |
+| email/confirm POST | token؛200، conflict409، invalid400، نجاح يبطل الجلسات/التحديات/الرموز |
+| me GET | profile(displayName,timezone,locale,cupMl,preferences,revision),emailNormalized,role,status,mfaEnabled؛ أهداف وموافقات وجلسات عبر قوائمها المنفصلة |
+| profile PATCH | جزئي غير فارغ؛ displayName/timezone/locale ar/cupMl null أو1..2000/preferences={reducedMotion:boolean}؛ If-Match واجب؛200+ETag |
+| goals POST/PATCH/DELETE | POST كامل؛ PATCH جزئي غير فارغ؛ metric/value/effectiveDate/endDate nullable؛ مستقبل فقط وفق timezone؛ If-Match علىPATCH/DELETE؛404لغير المملوك/409stale أوoverlap/428missing |
+| consents POST/DELETE | kind PRIVACY أوNOTIFICATIONS،policyVersion محلي،scope={localSynthetic:true}؛ scopeKey محلي؛201؛ DELETEIf-Match يسجلrevokedAt ولا يمحو السجل؛404/409/428 |
+| security commands | password PUT وsession revoke وMFA DELETE تغييرات أمنية مؤمّنة بـfresh، وMFA عند تفعيله؛ لاIf-Match لعملية الإبطال لأنها لا تستبدل محتوى بإصدار قديم؛ logoutCSRF؛204عند الإبطال |
+
+حدود الأهداف **تقنية للاختبار وليست توصيات**: STEPS1..200000،WATER_ML1..20000،EXERCISE_MIN/SLEEP_MIN1..1440. لا افتراض لهدف أوقيمة كوب. قيم DECIMAL كـstring. إكمال التهيئة اختياري، ولا تبنى مشاركةبرنامج فيP3.
+
+RV-03 عولج لهذه الدورة؛ RV-04 تحدي محلي محدد دون إغلاق bootstrapA-12؛ RV-07 مسوّى لعمليات P3 فقط. بقية العقد خارج المصادقة/الملف تصميم مستقبلي. لاOpenAPI مولد كامل أوpolicy إنتاج معتمدة فيP3. النتائج الفعلية في [P3-TEST-RESULTS](P3-TEST-RESULTS.md).
