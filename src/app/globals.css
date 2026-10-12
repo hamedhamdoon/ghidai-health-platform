@@ -53,3 +53,17 @@ footer { text-align:center; font-size:12px; color:#526556; padding:24px; }
 @media (max-width:900px) { .app-shell { display:block; padding:24px; }.navigation { position:fixed; bottom:0; right:0; left:0; z-index:5; background:white; border-top:1px solid #dfe3d8; flex-direction:row; justify-content:space-around; gap:0; padding:6px 4px max(8px,env(safe-area-inset-bottom)); }.navigation a { flex:1; flex-direction:column; gap:2px; font-size:12px; padding:8px 2px; border-radius:10px; }footer { padding-bottom:110px; }.header { padding:18px 24px; } }
 @media (max-width:600px) { .app-shell { padding:20px 16px; }.header { padding:18px 16px; }.hero { display:block; }.hero-copy { padding:30px 24px; }.hero-art { min-height:220px; }.leaf-mark { width:120px; height:120px; }.leaf-mark svg { width:84px; height:84px; }.orbit { width:190px; height:190px; }.orbit-two { width:240px; height:240px; }.intro-grid { grid-template-columns:1fr; gap:16px; }.notice { padding:20px; }.brand b { font-size:20px; }.page-heading h1 { font-size:28px; }.empty-state { padding:36px 20px; } }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; } }
+.auth-card { max-width:640px; margin-inline:auto; }
+.auth-field { display:flex; flex-direction:column; gap:6px; margin-bottom:18px; font-weight:600; }
+.auth-field input,.auth-field select { width:100%; min-height:48px; border:1px solid #718674; border-radius:10px; padding:10px 12px; background:white; color:var(--text); font:inherit; }
+input:focus-visible,select:focus-visible { outline:3px solid #a32929; outline-offset:3px; }
+.auth-check { display:flex; gap:12px; align-items:center; margin:16px 0; }
+.auth-check input { width:24px; height:24px; flex-shrink:0; }
+.auth-links { display:flex; flex-wrap:wrap; gap:16px; }
+.form-error { color:#902525; margin-block:14px; }
+.form-status { color:#16432e; margin-block:14px; }
+.local-notice { background:#f1d7dc; color:#49343a; padding:16px; border-radius:12px; }
+.account-grid { display:grid; gap:20px; }
+.account-grid .content-card .content-card { margin-top:14px; }
+.sensitive-value code { display:block; overflow-wrap:anywhere; user-select:all; }
+button:disabled { opacity:.65; cursor:wait; }

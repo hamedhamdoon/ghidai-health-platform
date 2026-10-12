@@ -119,3 +119,7 @@ FK ON DELETE RESTRICT لمراجع البرامج المستخدمة/المرا�
 ## خطة اختبار قاعدة البيانات
 
 T-03 RLS مع appnonowner ومستخدمين وتبديل pool/coachrevocation ؛ T-05joinduplicate بالتزامن؛ T-06completionduplicate ؛ T-08waterreplay/delete ؛ T-09stepssnapshot ؛ T-10sleepexclusion وعبور اليوم؛ T-11option من schema آخر؛ T-12 مقام صفر واختياري وهدف صفر؛ T-17 نشر غير مراجع/hashchanged ؛ T-18restoreFks/counts/isolation ؛ T-16export/delete/ledger. المقاييس والاختبارات مستقبلية ولم تنفذ الآن.
+
+## ملحق تنفيذ P2 — 2026-10-11
+
+بموجب تكليف المالك P2، حُسما RV-01 وRV-02 تقنيًا ونفذا محليًا: grants بموافقة ونطاق/انتهاء/سحب، وعلاقات مركبة ومصادر/تعارض/سحب ونسخ. التفاصيل والأسباب في [P2-DATABASE-IMPLEMENTATION](P2-DATABASE-IMPLEMENTATION.md)، والأدلة في [P2-TEST-RESULTS](P2-TEST-RESULTS.md). لا يغلق ذلك A-01..A-12 أو بقية RV ولا يجيز P3 أو حسابات حقيقية أو نشرًا. أي عبارة سابقة «غير منفذ» تصف مرحلة الوثيقة التاريخية.

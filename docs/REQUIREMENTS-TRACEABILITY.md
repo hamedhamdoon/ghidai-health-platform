@@ -88,3 +88,36 @@ G01..09 مصدرها الصور في التحليل، A01..12 قرارات ال�
 | P1-F05 / R21/24 | .github/workflows/p1-ci.yml وdocs/LOCAL-DEVELOPMENT | تشغيل يدوي فقط؛ GitHub CI لم ينفذ | إعداد جزئي؛ الحصة غير متحققة |
 
 R01..17 لا وظائف منفذة. R23 لا PWA/offline. نتائج هذا الملحق لا تحول أي متطلب شامل إلى مكتمل؛ تقرير P1 يربط نطاق الشيفرة والاختبارات والقيود.
+
+## ملحق P2 — تتبع التنفيذ
+
+المصدر تكليف المالك P2 وAGENTS §7/8/17/18/19/20 وDATABASE_DESIGN/API_SPECIFICATION/TEC-02/03/04/08. جميع البنود التالية أولوية P2؛ قبول البنية لا يقبل وظائف المراحل التالية.
+
+| المعرف | الوحدة والملفات | اختبار القبول | الحالة |
+|---|---|---|---|
+| P2-D01 / RV-02 | DB: prisma/schema.prisma وprisma/migrations | validate/generate/replay، FK/unique/ownership/version/options/time | بنية منفذة مختبرة |
+| P2-S01 / RV-01 / R03 | Security: AccessGrant/Consent/Assignment وRLS SQL | A/B/admin/coach scope/expiry/revoke السلبية | أساس مختبر؛ A-11 مفتوح |
+| P2-S02 / TEC-02 | src/server/db/context.ts | non-owner/non-super/bypass denied، pool commit/rollback وPrisma | أساس مختبر؛ لا auth |
+| P2-C01 / API / TEC-04 | src/server/contracts/p2.ts، IdempotencyRecord/OutboxJob | unit allowlist/revision/errors وunique races | عقود وتخزين فقط؛ services مؤجلة |
+| P2-O01 / TEC-08 / R18 | prisma.config.ts، scripts/p2-database.ts، local-database.ts | local identity/preflight/checksum وproduction CLI denied | محلي مختبر؛ لا backup/production |
+| P2-Q01 / R21 | tests/integration/p2-database.ts وtests/unit/p2-contracts.test.ts | P2-TEST-RESULTS:42 integration/21unit/21E2E | منفذ، audit dev5high مفتوح |
+
+لا تتحول R01..R17 الشاملة إلى مكتملة بهذا الملحق؛ الخدمات والمصادقة والواجهات والأهداف الصحية والاعتمادات والقبول الإنتاجي تظل وفق مراحلها.
+
+## ملحق P3 — 2026-10-12
+
+المصدر تكليف المالك P3، AGENTS§8/17/18/21، R01/02/03/19/20/21/22، API وUX S02..07/S26/S29، وTEC02/06/08. الأولوية P3 فقط؛ لا اعتماد سياسات صحية أوإنتاجية.
+
+| المعرف / المصدر | الوحدة والملفات | اختبار القبول | الحالة |
+|---|---|---|---|
+| P3-A01 / R01 / T01 | auth/service/crypto/http، api/v1، AuthToken/Session | p3-auth integration:register/verify/login/expiry/reuse/password/revoke؛ E2E Mailpit cycle | تنفيذ محلي؛ النتائج فيP3-TEST-RESULTS |
+| P3-A02 / RV04 / T01/20 | AuthChallenge، MFA crypto/service | partial denial/attempts/expiry/TOTP vectors/replay/recovery races؛ UI codes once | حل محلي؛ bootstrapA12 مفتوح |
+| P3-A03 / RV03 / T01/02 | candidateEmail/AuthMail وemail/change/confirm | oldemail untilconfirm/duplicate rollback/session revoke | تنفيذ محلي فقط |
+| P3-P01 / R02 / T02 | Prisma Profile، profilePatch وaccount-panel | partial/null/IANA/preferences/revision/concurrent save/reload | اختياري؛ لا هدف صحي افتراضي |
+| P3-P02 / RV07 / R02 | UserGoal/Consent services/RLS/additive migrations | A/B owner denial/stale/missing revision/future/overlap/revocation | عقودP3؛ بقيةRV07مؤجلة |
+| P3-S01 / R03/20 / T03/20 | ghidai_auth/ghidai_app/VerifiedActor/withActor | SQL privilege/roleinjection/RLS/Prisma/pool commit+rollback/CSRF/limits | بوابة خادم محلية مختبرة |
+| P3-M01 / A09 / T01/24 | Mailpit/compose/AuthMail/mail.ts/p3-outages | رسالة مستلمة، pendingencrypted، outage+retry؛ DBpause safe503 | محلي؛ لا بريد إنتاج/جدولة |
+| P3-U01 / R19/22 / T19/22 | auth/account/privacy/onboarding/sharedP1UI | Playwright360/768/1280/axe/keyboard/overflow/functionalforms | النتيجة النهائية فيتقريرP3 |
+| P3-Q01 / R21 | unit/integration/e2e/CI scripts | type/lint/build/29unit/42P2/23P3 +E2E، audit/secrets | auditdev5high مفتوح؛ CImanualلم ينفذ |
+
+الأرقام أعلاه تحدد نطاق الاختبار، ولا تحول النظام الشامل إلى جاهز إنتاجيًا. A02/A08/A12 غير مغلقة، وصور الغذاء لا تصبح محتوى منشورًا.
