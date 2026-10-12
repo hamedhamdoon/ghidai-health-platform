@@ -1,0 +1,31 @@
+import type { PoolClient } from 'pg';
+import { object,uuid,integer,revision,assertRevision } from '../contracts/p2';
+import { text,choice,fail,contentHash } from './contracts';
+import { AuthError } from '../auth/contracts';
+export async function nutritionCommand(db:PoolClient,path:string,method:string,input:unknown,actor:string,match:string|null):Promise<unknown|undefined>{
+ if(path==='admin/nutrition-plans'&&method==='GET'){const plans=(await db.query('SELECT n.id,n.label,n."contentRevisionId",c.status,c.title FROM "NutritionPlan" n JOIN "ContentRevision" c ON c.id=n."contentRevisionId" ORDER BY n."createdAt" DESC LIMIT 100')).rows;for(const p of plans)p.meals=(await db.query('SELECT id,"dayIndex",slot,"mealRevisionId" FROM "PlanMeal" WHERE "planId"=$1 ORDER BY "dayIndex","order"',[p.id])).rows;return plans;}
+ if(path==='admin/meals'&&method==='GET')return (await db.query('SELECT m.id,m.slot,c.id AS "revisionId",c.title,c.status,c.revision FROM "Meal" m JOIN "ContentRevision" c ON c.id=m."contentRevisionId" ORDER BY c."createdAt" DESC LIMIT 100')).rows;
+ if(path==='admin/meals'&&method==='POST'){
+  const d=object(input,['contentRevisionId','slot','ingredients']);const c=(await db.query('SELECT * FROM "ContentRevision" WHERE id=$1 FOR UPDATE',[uuid(d.contentRevisionId)])).rows[0];if(!c)throw new AuthError('NOT_FOUND',404);assertRevision(revision(match),c.revision);if(c.authorId!==actor||c.status!=='DRAFT'||c.kind!=='MEAL')throw new AuthError('DRAFT_REQUIRED',409);if(!Array.isArray(d.ingredients)||!d.ingredients.length||d.ingredients.length>50)fail();
+  const slot=choice(d.slot,['BREAKFAST','LUNCH','DINNER','SNACK','OTHER']);const meal=(await db.query('INSERT INTO "Meal"("contentRevisionId",slot) VALUES($1,$2) RETURNING *',[c.id,slot])).rows[0];
+  for(const item of (d.ingredients as unknown[])){const i=object(item,['name','unitFamily','quantity','unit','measurementBasis','preparation','conversionFactor']);const family=choice(i.unitFamily,['MASS','VOLUME','COUNT']),unit=choice(i.unit,['G','ML','PIECE','SPOON','HANDFUL']),basis=choice(i.measurementBasis,['RAW','COOKED','UNSPECIFIED']);const quantity=decimalQuantity(i.quantity),factor=i.conversionFactor==null?null:integer(i.conversionFactor,1,100000);if(unit==='G'&&family!=='MASS'||unit==='ML'&&family!=='VOLUME'||unit==='PIECE'&&family!=='COUNT')fail();if(factor!==null)throw new AuthError('APPROVED_CONVERSION_REQUIRED',409);
+   const ingredient=(await db.query('INSERT INTO "Ingredient"(name,"unitFamily") VALUES($1,$2) RETURNING id',[text(i.name,120),family])).rows[0];await db.query('INSERT INTO "MealIngredient"("mealId","ingredientId",quantity,unit,"measurementBasis",preparation,"conversionFactor") VALUES($1,$2,$3,$4,$5,$6,$7)',[meal.id,ingredient.id,quantity,unit,basis,i.preparation==null?null:text(i.preparation,500),factor]);}
+  await db.query('UPDATE "ContentRevision" SET revision=revision+1 WHERE id=$1',[c.id]);return {...meal,revision:c.revision+1};
+ }
+ if(path==='admin/nutrition-plans'&&method==='POST'){
+  const d=object(input,['contentRevisionId','label','meals']);const c=(await db.query('SELECT * FROM "ContentRevision" WHERE id=$1 FOR UPDATE',[uuid(d.contentRevisionId)])).rows[0];if(!c)throw new AuthError('NOT_FOUND',404);assertRevision(revision(match),c.revision);if(c.authorId!==actor||c.status!=='DRAFT')throw new AuthError('DRAFT_REQUIRED',409);if(!Array.isArray(d.meals)||d.meals.length>366)fail();const plan=(await db.query('INSERT INTO "NutritionPlan"("contentRevisionId",label) VALUES($1,$2) RETURNING *',[c.id,text(d.label,120)])).rows[0];
+  for(const item of (d.meals as unknown[])){const m=object(item,['dayIndex','slot','order','mealRevisionId','alternatives']);const meal=(await db.query('INSERT INTO "PlanMeal"("planId","dayIndex",slot,"order","mealRevisionId") VALUES($1,$2,$3,$4,$5) RETURNING id',[plan.id,integer(m.dayIndex,1,366),choice(m.slot,['BREAKFAST','LUNCH','DINNER','SNACK','OTHER']),integer(m.order,1,100),uuid(m.mealRevisionId)])).rows[0];if(!Array.isArray(m.alternatives)||m.alternatives.length>20)fail();let order=0;for(const alternative of (m.alternatives as unknown[])){const id=uuid(alternative);if(id===m.mealRevisionId)fail();const a=(await db.query('SELECT id FROM "Meal" WHERE "contentRevisionId"=$1',[id])).rows[0];if(!a)fail();await db.query('INSERT INTO "MealAlternative"("planMealId","alternativeMealId","order","approvalRevisionId") VALUES($1,$2,$3,$4)',[meal.id,a.id,++order,id]);}}
+  await db.query('UPDATE "ContentRevision" SET revision=revision+1 WHERE id=$1',[c.id]);return {...plan,revision:c.revision+1};
+ }
+ if(/^admin\/meals\/[\w-]+$/.test(path)&&method==='GET'){const meal=(await db.query('SELECT m.*,c.title,c."bodyText",c.status FROM "Meal" m JOIN "ContentRevision" c ON c.id=m."contentRevisionId" WHERE m.id=$1',[uuid(path.split('/')[2])])).rows[0];if(!meal)throw new AuthError('NOT_FOUND',404);return {...meal,ingredients:(await db.query('SELECT i.name,i."unitFamily",mi.quantity,mi.unit,mi."measurementBasis",mi.preparation FROM "MealIngredient" mi JOIN "Ingredient" i ON i.id=mi."ingredientId" WHERE mi."mealId"=$1',[meal.id])).rows};}
+ return undefined;
+}
+export async function hashContent(db:PoolClient,id:string){
+ const c=(await db.query('SELECT "contentKey",version,kind,title,"bodyText","syntheticOnly" FROM "ContentRevision" WHERE id=$1',[id])).rows[0];
+ const sources=(await db.query('SELECT "extractId" FROM "ContentSource" WHERE "revisionId"=$1 ORDER BY "extractId"',[id])).rows;
+ const ingredients=(await db.query('SELECT m.slot,i.name,i."unitFamily",mi.quantity,mi.unit,mi."measurementBasis",mi.preparation,mi."conversionFactor" FROM "Meal" m JOIN "MealIngredient" mi ON mi."mealId"=m.id JOIN "Ingredient" i ON i.id=mi."ingredientId" WHERE m."contentRevisionId"=$1 ORDER BY mi.id',[id])).rows;
+ const plans=(await db.query('SELECT n.label,p."dayIndex",p.slot,p."order",p."mealRevisionId",a."approvalRevisionId",a."order" AS "alternativeOrder" FROM "NutritionPlan" n LEFT JOIN "PlanMeal" p ON p."planId"=n.id LEFT JOIN "MealAlternative" a ON a."planMealId"=p.id WHERE n."contentRevisionId"=$1 ORDER BY p."dayIndex",p."order",a."order"',[id])).rows;
+ return contentHash({c,sources,ingredients,plans});
+}
+
+function decimalQuantity(v:unknown){if(typeof v!=='number'||!Number.isFinite(v)||v<=0||v>100000||Math.abs(v*100-Math.round(v*100))>0.00001)return fail();return v;}

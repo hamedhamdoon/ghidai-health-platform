@@ -25,3 +25,10 @@
 - أدوات type/lint/unit/E2E، وفحوص وصول آلية وCI يدوي دون نشر.
 
 الحالة النهائية ونتائج التنفيذ في docs/P1-IMPLEMENTATION-REPORT.md وdocs/P1-TEST-RESULTS.md.
+
+## P4 — 2026-10-12 (local development)
+
+- Dynamic program/version authoring, flexible duration, recurrence and relative schedules backed by PostgreSQL.
+- Independent hash-bound content review with immutable qualification evidence, meal/alternative graphs and synthetic-only publication gates.
+- Arabic RTL authoring/review/publication UI, temporary local permissions, RLS, optimistic concurrency and encrypted idempotency receipts.
+- Additional migrations only; P1–P3 regression and documented P4 validation. Real health publication and P5 remain blocked pending owner authorization.

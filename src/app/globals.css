@@ -67,3 +67,12 @@ input:focus-visible,select:focus-visible { outline:3px solid #a32929; outline-of
 .account-grid .content-card .content-card { margin-top:14px; }
 .sensitive-value code { display:block; overflow-wrap:anywhere; user-select:all; }
 button:disabled { opacity:.65; cursor:wait; }
+.p4-admin { max-width:960px; min-width:0; overflow-wrap:anywhere; }
+.p4-admin form { margin-block:24px; padding:18px; border:1px solid #718674; border-radius:12px; }
+.p4-admin button { min-height:44px; padding:10px 16px; margin:4px; border:1px solid #718674; border-radius:8px; color:#16432e; background:#faf7f0; font:inherit; }
+.p4-admin nav { display:flex; flex-wrap:wrap; gap:8px; margin-block:20px; }
+.p4-admin textarea { width:100%; min-height:120px; border:1px solid #718674; border-radius:8px; padding:12px; font:inherit; }
+.p4-admin select { max-width:100%; min-height:44px; font:inherit; }
+.p4-admin button:focus-visible,.p4-admin textarea:focus-visible { outline:3px solid #a32929; outline-offset:3px; }
+.p4-admin [role=alert] { color:#902525; }
+.p4-admin [role=status] { padding:12px; background:#eef0e6; }

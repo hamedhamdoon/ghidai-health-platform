@@ -1,0 +1,12 @@
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {localPool} from './p2-database';
+const environment=process.argv[2];if(environment!=='development'&&environment!=='test')throw new Error('LOCAL_ONLY');
+const {pool}=await localPool(environment);
+try {
+ const client=await pool.connect();try{await client.query('BEGIN');const analysis=readFileSync('docs/IMAGE_CONTENT_ANALYSIS.md','utf8');
+  for(let i=1;i<=6;i++){const number=String(i).padStart(2,'0'),sourceKey=`IMG-${number}`,path=`references/images/reference-${number}.jpg`,hash=createHash('sha256').update(readFileSync(path)).digest('hex');const image=(await client.query('INSERT INTO "SourceImage"("sourceKey",path,sha256,"rightsStatus") VALUES($1,$2,$3,\'UNKNOWN\') ON CONFLICT("sourceKey") DO UPDATE SET sha256="SourceImage".sha256 RETURNING id,sha256',[sourceKey,path,hash])).rows[0];if(image.sha256!==hash)throw new Error('SOURCE_HASH_MISMATCH');const section=analysis.split(`## ${sourceKey} —`)[1]?.split('\n## ')[0];if(!section)throw new Error('ANALYSIS_SECTION_MISSING');await client.query('INSERT INTO "SourceExtract"("imageId","extractKey","originalText",section,confidence,"requiresReview") VALUES($1,\'DESIGN_ANALYSIS_V1\',$2,\'Approved design analysis; reference only, not new OCR\',\'MEDIUM\',true) ON CONFLICT("imageId","extractKey") DO NOTHING',[image.id,section.trim()]);}
+  const conflicts=analysis.split('\n').filter(line=>/^\| DIF-\d{2}/.test(line));if(conflicts.length!==17)throw new Error('CONFLICT_BASELINE_MISMATCH');for(const line of conflicts){const cells=line.split('|').slice(1,-1).map(v=>v.trim());const conflict=(await client.query('INSERT INTO "SourceConflict"("conflictKey",description) VALUES($1,$2) ON CONFLICT("conflictKey") DO UPDATE SET description="SourceConflict".description RETURNING id',[cells[0],cells.slice(1).join(' | ')])).rows[0];const images=[...line.matchAll(/IMG-(\d{2})/g)].map(m=>`IMG-${m[1]}`);for(const key of new Set(images))await client.query('INSERT INTO "ConflictExtract"("conflictId","extractId") SELECT $1,e.id FROM "SourceExtract" e JOIN "SourceImage" i ON i.id=e."imageId" WHERE i."sourceKey"=$2 ON CONFLICT DO NOTHING',[conflict.id,key]);}
+  await client.query('COMMIT');console.log('PASS 6 image hashes and 17 unresolved conflicts imported as reference-only; rights UNKNOWN; no content published.');
+ }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
+}finally{await pool.end();}

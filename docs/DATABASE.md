@@ -15,3 +15,7 @@ check-database يتحقق من identity ومخطط public فارغ وround-trip 
 النص أعلاه يوثق P1 تاريخيًا. نفذت P2 عدد68 جدولًا و9 migrations مع RLS وقيود ملكية/نسخ/زمن؛ [التنفيذ والتشغيل](P2-DATABASE-IMPLEMENTATION.md) و[الاختبارات](P2-TEST-RESULTS.md). public في dev/test بلا مستخدمين، والـfixtures في schemas اختبار اصطناعية باقية. حساب ghidai_app منفصل غير مالك ولاSuperuser/BYPASSRLS، وحسابا P1 لمهاجرات/probes محلية فقط.
 
 check-database يفحص الآن identity وbaseline migrations وtemporary round-trip. preflight يفحص الجداول وخلوها وchecksums قبل deploy؛ حواجز URL تمنع إنتاجًا أوحسابًا/منفذًا غير مطابق. auth وخدمات المستخدم ليست منفذة، ولاجاهزية إنتاج أوreset أوحذفvolume.
+
+## ملحق P4
+
+ست migrations إضافية 202610120004..202610120009؛ لا تعديل للمهاجرات التاريخية. أضيف P4LocalCapability وContentRevision.syntheticOnly وContentReview.qualificationSnapshot، وسياسات التأليف والنشر ومراجعة مستقلة وأقفال graph وثبات الهوية والدليل. تغيير صلاحية التأهيل لا يمحو حالته المحفوظة وقت القرار. [المراجعة](P4-CONTENT-REVIEW.md) و[الأمن](P4-SECURITY-VALIDATION.md). لا حذف مخططات الاختبار أو volumes؛ النسخ الجديدة معزولة ومحفوظة أثناء التشغيل.
