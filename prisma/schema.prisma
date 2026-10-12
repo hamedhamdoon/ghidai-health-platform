@@ -238,6 +238,7 @@ model Consent {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ContentReview {
+  qualificationSnapshot Json                  @default("{}")
   id                    String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt             DateTime              @default(now()) @db.Timestamptz(6)
   updatedAt             DateTime              @default(now()) @db.Timestamptz(6)
@@ -261,6 +262,7 @@ model ContentReview {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ContentRevision {
+  syntheticOnly          Boolean                  @default(false)
   id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt              DateTime                 @default(now()) @db.Timestamptz(6)
   updatedAt              DateTime                 @default(now()) @db.Timestamptz(6)
@@ -1437,6 +1439,7 @@ model TaskOccurrence {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model User {
+  P4LocalCapability                                            P4LocalCapability?
   id                                                           String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt                                                    DateTime                @default(now()) @db.Timestamptz(6)
   updatedAt                                                    DateTime                @default(now()) @db.Timestamptz(6)
@@ -1660,4 +1663,11 @@ enum VersionStatus {
   IN_REVIEW
   PUBLISHED
   WITHDRAWN
+}
+
+model P4LocalCapability {
+  userId    String   @id @db.Uuid
+  expiresAt DateTime @db.Timestamptz(6)
+  purpose   String
+  User      User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
 }

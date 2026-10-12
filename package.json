@@ -13,7 +13,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/p4-e2e.mjs",
     "test:db": "tsx scripts/check-database.ts test",
     "test:p2": "tsx tests/integration/p2-database.ts",
     "test:p3": "tsx scripts/p3-test-schema.ts && tsx tests/integration/p3-auth.ts",
@@ -30,7 +30,13 @@
     "db:up": "docker compose --env-file .env.development.local up -d --wait",
     "db:stop": "docker compose --env-file .env.development.local stop",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "test:p4": "tsx scripts/p4-test-schema.ts && tsx tests/integration/p4-programs.ts",
+    "db:migrate:p4:dev": "tsx scripts/p4-setup.ts development",
+    "db:migrate:p4:test": "tsx scripts/p4-setup.ts test",
+    "audit:p4": "node scripts/p4-audit.mjs",
+    "fixtures:p4:dev": "tsx scripts/p4-local-fixtures.ts development",
+    "sources:p4:dev": "tsx scripts/p4-import-sources.ts development"
   },
   "dependencies": {
     "@fontsource/cairo": "5.3.0",

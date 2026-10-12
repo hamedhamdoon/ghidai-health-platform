@@ -121,3 +121,17 @@ R01..17 لا وظائف منفذة. R23 لا PWA/offline. نتائج هذا ال
 | P3-Q01 / R21 | unit/integration/e2e/CI scripts | type/lint/build/29unit/42P2/23P3 +E2E، audit/secrets | auditdev5high مفتوح؛ CImanualلم ينفذ |
 
 الأرقام أعلاه تحدد نطاق الاختبار، ولا تحول النظام الشامل إلى جاهز إنتاجيًا. A02/A08/A12 غير مغلقة، وصور الغذاء لا تصبح محتوى منشورًا.
+
+## سجل تنفيذ P4 — 2026-10-12
+
+| ID | المصدر والأولوية | التنفيذ | اختبار القبول | الحالة |
+|---|---|---|---|---|
+| R-04 | تكليف P4؛ AG19؛ IMG03/04/05/06؛ P0 | src/server/programs/service.ts وcontracts.ts؛ migrations P4؛ program-admin.tsx | tests/integration/p4-programs.ts؛ unit/p4-programs.test.ts؛ e2e/p4-programs.spec.ts | محرك محلي منفذ؛ لا P5 |
+| R-07 | تكليف P4؛ AG5/9؛ الصور الست؛ P0 | nutrition.ts؛ Meal/PlanMeal/MealAlternative وhash graph | كميات ووحدات وبديل ذاتي ومراجعة ونشر اصطناعي وسحب البديل | مسودات ومراجعة ونشر اصطناعي؛ A-01/A-05 محجوبان |
+| R-15 | تكليف P4؛ UX S44..S49؛ P0 | /admin/programs و/admin/content؛ API أوامر حقيقية | E2E التأليف والمراجعة والنشر والنسخ والسحب ووجبات/بدائل | أفعال P4 منفذة؛ بقية الإدارة لاحقة |
+| R-17 | AG9/24؛ IMG01..06 وDIF01..17؛ P0 | p4-import-sources.ts؛ SourceExtract/Conflict وContentReview.qualificationSnapshot | hash مستقل وتأهيل منتهٍ/self-review وصلاحية المصدر والهوية | مراجع محفوظة وغير محسومة؛ A-01/A-10/A-12 مفتوحة |
+| R-03/R-20 | AG6/8/18؛ P0 | جلسات P3، P4LocalCapability وRLS/MFA وscope | USER/COACH/ADMIN، انتهاء capability، SQL وواجهات رفض | تحقق محلي اصطناعي؛ لا صلاحيات إنتاجية |
+| R-19/R-22 | AG21/25؛ UX؛ P0 | RTL وlabels واضحة وأهداف لمس ولوحة مفاتيح | Chromium360/768/1280 وaxe | تحقق آلي؛ قارئ شاشة وجهازان يدويان غير مثبتين |
+| R-21 | AG11/23؛ P0 | scripts npm وP4-TEST-RESULTS | TypeScript/Lint/Build/Unit/Integration/E2E/secrets | النتائج الفعلية في التقرير؛ لا قبول إنتاج |
+
+هذا الملحق لا يغير المصدر الأصلي للمتطلبات أو يدعي أن نجاح fixtures يغلق قرارات المالك.

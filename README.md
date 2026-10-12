@@ -43,3 +43,7 @@ P1/P2 paragraphs above describe their historical checkpoints. P3 implements real
 Use `npm run db:migrate:p3:dev`, `npm run db:migrate:p3:test`, `npm run db:generate`, then `npm run dev`. Start project-scoped PostgreSQL/Mailpit only after checking ports and existing resources. Open the app at http://127.0.0.1:3000 and Mailpit at http://127.0.0.1:8025. Keep all local env files private.
 
 See [P3 implementation](docs/P3-AUTH-IMPLEMENTATION.md), [security validation](docs/P3-SECURITY-VALIDATION.md), [actual test results](docs/P3-TEST-RESULTS.md), and [handoff with exact setup/test/retry commands](docs/P3-HANDOFF.md).
+
+## P4 — المحرك المحلي
+
+محرك البرامج والإصدارات والمحتوى والمراجعة والوجبات والبدائل منفذ على فرع P4. التشغيل والتأهيل الاصطناعي المؤقت، الاختبارات، والقيود في [P4-HANDOFF](docs/P4-HANDOFF.md). لا مشاركة أو جدول مستخدم فعلي أو P5/P6؛ المحتوى الحقيقي محجوب حتى اعتماد المالك والمختص.

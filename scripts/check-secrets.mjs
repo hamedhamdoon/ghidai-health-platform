@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
 const secrets = ['.env.development.local', '.env.test.local','.env.p2.development.local','.env.p2.test.local','.env.p3.development.local','.env.p3.test.local'].flatMap(path => {
   if (!existsSync(path)) return [];
@@ -13,6 +13,10 @@ const secrets = ['.env.development.local', '.env.test.local','.env.p2.developmen
     return [];
   });
 }).filter(value => value.length >= 16);
+for (const path of readdirSync('.').filter(name=>/^\.env\.p4\.fixtures-\d+\.local$/.test(name))) {
+  const fixture=JSON.parse(readFileSync(path,'utf8'));
+  for(const user of fixture.users??[])if(typeof user.password==='string'&&user.password.length>=16)secrets.push(user.password);
+}
 const suspicious = files.filter(path => {
   if (/(^|\/)\.env/.test(path) && path !== '.env.example') return true;
   if (!existsSync(path)) return false;

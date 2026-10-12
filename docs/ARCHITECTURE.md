@@ -7,3 +7,7 @@ App Router يحتفظ بأساس P1، ويضيف صفحات الحساب وRoute
 المرجع التصميمي [SYSTEM_ARCHITECTURE](SYSTEM_ARCHITECTURE.md). تطبيق موحد Next.js App Router؛ صفحات عامة في src/app/(public)، ووجهات تأسيسية في (foundation)، ومكونات مشتركة في src/components. Navigation يحتاج client state لتمييز المسار؛ عرض الصفحات Server Components. health يفحص عملية التطبيق فقط ويعلن database=not-checked.
 
 Prisma والاتصال في scripts منفصلان عن العرض؛ لا مكونات تصل DB، ولا API صحي أو جلسات بعد. PostgreSQL مستقل للتطوير والاختبار عبر Compose، والخادم loopback. مخطط Prisma خالٍ من نماذج GHIDAI؛ لا migrations/RLS/auth في P1. قرارات A وRV تظل مفتوحة.
+
+## ملحق P4
+
+خدمات src/server/programs تعمل من Route Handler نفسه بعد حل جلسة P3، داخل withActor وRLS؛ DTOs محدودة وأقفال معاملات وإيصالات مشفرة ونسخ ثابتة. P4LocalCapability مستقل ومؤقت ومحلي فقط. تفاصيل دورة الحالة في [P4-PROGRAM-ENGINE](P4-PROGRAM-ENGINE.md). لا تغيير إلى خدمات منفصلة أو مزود سحابي، ولا مشاركة مستخدم أو مجدول.

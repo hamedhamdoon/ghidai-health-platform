@@ -170,3 +170,7 @@ Exercise type allowlist التقنية في P2: WALK/RUN/STRENGTH/OTHER، ولي
 حدود الأهداف **تقنية للاختبار وليست توصيات**: STEPS1..200000،WATER_ML1..20000،EXERCISE_MIN/SLEEP_MIN1..1440. لا افتراض لهدف أوقيمة كوب. قيم DECIMAL كـstring. إكمال التهيئة اختياري، ولا تبنى مشاركةبرنامج فيP3.
 
 RV-03 عولج لهذه الدورة؛ RV-04 تحدي محلي محدد دون إغلاق bootstrapA-12؛ RV-07 مسوّى لعمليات P3 فقط. بقية العقد خارج المصادقة/الملف تصميم مستقبلي. لاOpenAPI مولد كامل أوpolicy إنتاج معتمدة فيP3. النتائج الفعلية في [P3-TEST-RESULTS](P3-TEST-RESULTS.md).
+
+## ملحق API المنفذ في P4
+
+العقود الفعلية في [P4-PROGRAM-ENGINE](P4-PROGRAM-ENGINE.md) و[P4-CONTENT-REVIEW](P4-CONTENT-REVIEW.md)، والخدمة src/server/programs/service.ts. الاسم النصي في payload هو bodyText؛ كل المحتوى يخضع للمراجعة ولا يقبل requiresReview من العميل. POST يحتاج Idempotency-Key UUID، والتعديلات والأوامر الموجهة تحتاج If-Match مقتبسًا. معاينة النسخة تعيد references وchecks لنقص الأيام والاعتمادات والمصادر والوجبات. أضيفت recurrence وreturn-to-draft وmeals/nutrition-plans، والتأهيل محلي اصطناعي فقط. أوامر الغذاء تستخدم revision المحتوى الأب لمنع تعارض تعديل graph؛ النص والمكونات يتجمدان عند IN_REVIEW. لا APIs مشاركة أو سجلات يومية جديدة في P4.
