@@ -18,7 +18,8 @@ const ids=Object.fromEntries(['a','b','coach','admin','consent','assignment','gr
 const fixtureActor=(id:string)=>({id}) as VerifiedActor; // Test-only; not exported into production.
 let app:Pool|undefined;
 try {
-  await preflight(admin);
+  const publicAuditBefore=(await admin.query('SELECT count(*)::int AS n FROM public."AuditLog"')).rows[0].n;
+  await preflight(admin,true); // Isolated regression retains the approved operational audit ledger.
   await admin.query(`CREATE SCHEMA "${schema}" AUTHORIZATION ghidai_owner; GRANT USAGE ON SCHEMA "${schema}" TO ghidai_app,ghidai_policy`);
   const setup=await admin.connect();
   try {
@@ -145,7 +146,8 @@ try {
   await check('production URLs rejected before connection/write',async()=>{for(const url of ['postgresql://x:y@cloud.example:55433/ghidai_test','postgresql://x:y@127.0.0.1:5432/production'])assert.throws(()=>assertLocalDatabase(url,'test'));});
   await check('Prisma migration CLI rejects production URL before engine connection',async()=>{const result=spawnSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy'],{env:{...process.env,GHIDAI_ENV:'test',DATABASE_URL:'postgresql://fixture:fixture@production.invalid:5432/production'},encoding:'utf8'});assert.notEqual(result.status,0);assert.match(result.stderr,/Only the dedicated GHIDAI loopback database is allowed/);assert(!result.stderr.includes('fixture:fixture'));});
   await check('errors do not expose health/SQL/secrets',async()=>assert(!JSON.stringify(safeError(new Error('SQL password synthetic health'),'fixture')).match(/SQL|password|synthetic health/)));
-  console.log(`PASS P2 PostgreSQL integration: ${passed} checks; retained synthetic schema ${schema}. No data or volumes deleted.`);
+  assert.equal((await admin.query('SELECT count(*)::int AS n FROM public."AuditLog"')).rows[0].n,publicAuditBefore,'Approved operational audit ledger must remain unchanged.');
+  console.log(`PASS P2 PostgreSQL integration: ${passed} checks; retained synthetic schema ${schema}. Operational audit preserved; no data or volumes deleted.`);
 } catch(error) {
   console.error(`FAIL P2 integration after ${passed} checks:`,error instanceof Error?error.message.replace(/postgresql:\/\/\S+/g,'[REDACTED]'):'unknown');process.exitCode=1;
 } finally {await app?.end();await admin.end();}

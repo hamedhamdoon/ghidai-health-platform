@@ -1,6 +1,10 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {participantFixtures} from '../integration/participant-fixtures';
+import {TrackingService} from '../../src/server/tracking/service';
+import {localDate,localInstant,addDays} from '../../src/server/participation/rules';
+import {randomUUID} from 'node:crypto';
+test.beforeEach(async({page})=>{page.on('pageerror',error=>console.error('P6 browser error:',error.message));});
 let fixture:Awaited<ReturnType<typeof participantFixtures>>;
 test.beforeAll(async()=>{fixture=await participantFixtures();await fixture.program();});
 test.afterAll(async()=>{await fixture.close();});
@@ -16,4 +20,27 @@ test('save failures and lost committed responses remain visible and safe to retr
  await context.addCookies([{name:'ghidai_session',value:fixture.b.token,domain:'127.0.0.1',path:'/',httpOnly:true,sameSite:'Strict'}]);await page.goto('/logs');await expect(page.getByLabel('اليوم',{exact:true})).not.toHaveValue('');await page.getByLabel('الماء بالمليلتر',{exact:true}).fill('315');
  await page.route('**/api/v1/logs/water',async route=>{if(route.request().method()==='POST')await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:{code:'SERVICE_UNAVAILABLE',message:'تعذر حفظ الاختبار'}})});else await route.continue();});await page.getByRole('button',{name:'حفظ الماء',exact:true}).click();await expect(page.locator('main p[role=alert]').first()).toContainText('تعذر حفظ الاختبار');await expect(page.locator('article').filter({hasText:'315 ml'})).toHaveCount(0);await page.unroute('**/api/v1/logs/water');
  let first=true;await page.route('**/api/v1/logs/water',async route=>{if(first&&route.request().method()==='POST'){first=false;await route.fetch();await route.abort('failed');}else await route.continue();});await page.getByRole('button',{name:'حفظ الماء',exact:true}).click();await expect(page.locator('main p[role=alert]').first()).toBeVisible();await page.getByRole('button',{name:'حفظ الماء',exact:true}).click();await expect(page.locator('article').filter({hasText:'315 ml'})).toHaveCount(1);const saved=await fixture.owner.query('SELECT id FROM "WaterLog" WHERE "userId"=$1 AND "amountMl"=315 AND "deletedAt" IS NULL',[fixture.b.id]);expect(saved.rowCount).toBe(1);
+});
+test('different daily reviews and delayed reads never cross the selected date',async({page,context})=>{
+ const user=await fixture.user(),service=new TrackingService(fixture.auth),today=localDate(new Date(),'Asia/Muscat'),previous=addDays(today,-1);
+ const options=(await fixture.owner.query('SELECT id,"dimensionId" FROM "ReviewOption" WHERE "dimensionId"=ANY($1::uuid[]) AND value=3',[fixture.answers.map(a=>a.dimensionId)])).rows;
+ const answersB=fixture.answers.map(a=>({dimensionId:a.dimensionId,optionId:options.find(o=>o.dimensionId===a.dimensionId)!.id}));
+ for(const [date,notes,answers,totalSteps] of [[previous,'ملاحظات اليوم أ',fixture.answers,11],[today,'ملاحظات اليوم ب',answersB,22]] as const){
+  await service.execute('reviews/'+date,'PUT',{schemaVersionId:fixture.schema.id,notes,answers},user.token,null,randomUUID(),'*');
+  await service.execute('logs/steps/'+date,'PUT',{totalSteps,recordedForTime:localInstant(date,'00:00:00','Asia/Muscat').toISOString()},user.token,null,randomUUID(),'*');
+ }
+ await context.addCookies([{name:'ghidai_session',value:user.token,domain:'127.0.0.1',path:'/',httpOnly:true,sameSite:'Strict'}]);await page.goto('/logs');await expect(page.getByLabel('ملاحظات اليوم',{exact:true})).toHaveValue('ملاحظات اليوم ب');
+ await page.getByLabel('اليوم',{exact:true}).fill(previous);await expect(page.getByLabel('ملاحظات اليوم',{exact:true})).toHaveValue('ملاحظات اليوم أ');await page.getByLabel('ملاحظات اليوم',{exact:true}).fill('مسودة أ غير محفوظة');
+ await page.getByLabel('اليوم',{exact:true}).fill(today);await expect(page.getByLabel('ملاحظات اليوم',{exact:true})).toHaveValue('ملاحظات اليوم ب');await expect(page.locator(`select[name="${fixture.answers[0].dimensionId}"]`)).toHaveValue(answersB[0].optionId);
+ let release:()=>void=()=>{},held=false;await page.route(`**/api/v1/logs?date=${previous}`,async route=>{const response=await route.fetch();held=true;await new Promise<void>(resolve=>{release=resolve;});await route.fulfill({response});});
+ await page.getByLabel('اليوم',{exact:true}).fill(previous);await expect.poll(()=>held).toBe(true);await page.getByLabel('اليوم',{exact:true}).fill(today);await expect(page.locator('article').filter({hasText:'22 خطوة'})).toHaveCount(1);release();await page.waitForResponse(response=>response.url().endsWith('logs?date='+previous));await expect(page.locator('article').filter({hasText:'22 خطوة'})).toHaveCount(1);await expect(page.locator('article').filter({hasText:'11 خطوة'})).toHaveCount(0);
+ await page.locator('article').filter({hasText:'22 خطوة'}).getByRole('button',{name:'حذف السجل',exact:true}).click();await expect(page.locator('article').filter({hasText:'22 خطوة'})).toHaveCount(0);const rows=(await fixture.owner.query('SELECT "localDate"::text AS date,"deletedAt" FROM "StepDayLog" WHERE "userId"=$1 ORDER BY "localDate"',[user.id])).rows;expect(rows.find(r=>r.date===previous)!.deletedAt).toBeNull();expect(rows.find(r=>r.date===today)!.deletedAt).not.toBeNull();
+});
+test('committed incomplete draft never crashes daily review rendering or saving',async({page,context})=>{
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));const user=await fixture.user();
+ const partial=(await fixture.owner.query('INSERT INTO "ReviewSchemaVersion"(version,name,status) SELECT COALESCE(max(version),0)+1,$1,\'DRAFT\' FROM "ReviewSchemaVersion" RETURNING id',[`synthetic-local-browser-partial-${randomUUID()}`])).rows[0];
+ await fixture.owner.query('INSERT INTO "ReviewDimension"("schemaId",key,label,"order") VALUES($1,\'ENERGY\',\'بُعد مسودة بلا خيارات\',1)',[partial.id]);
+ await context.addCookies([{name:'ghidai_session',value:user.token,domain:'127.0.0.1',path:'/',httpOnly:true,sameSite:'Strict'}]);await page.goto('/logs');await expect(page.getByLabel('ملاحظات اليوم',{exact:true})).toBeVisible();await expect(page.getByText('بُعد مسودة بلا خيارات',{exact:true})).toHaveCount(0);
+ await page.getByLabel('ملاحظات اليوم',{exact:true}).fill('حفظ اصطناعي مع مسودة أخرى غير مكتملة');await page.getByRole('button',{name:'حفظ التقييم اليومي',exact:true}).click();await expect(page.locator('main p[role=status]').first()).toContainText('تم حفظ البيانات');await page.reload();await expect(page.getByLabel('ملاحظات اليوم',{exact:true})).toHaveValue('حفظ اصطناعي مع مسودة أخرى غير مكتملة');expect(errors).toEqual([]);
+ const review=(await fixture.owner.query('SELECT "schemaVersionId",notes FROM "DailyReview" WHERE "userId"=$1',[user.id])).rows[0];expect(review.schemaVersionId).not.toBe(partial.id);expect(review.notes).toBe('حفظ اصطناعي مع مسودة أخرى غير مكتملة');expect((await fixture.owner.query('SELECT status FROM "ReviewSchemaVersion" WHERE id=$1',[partial.id])).rows[0].status).toBe('DRAFT');
 });
