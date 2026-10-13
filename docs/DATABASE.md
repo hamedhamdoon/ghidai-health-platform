@@ -19,3 +19,9 @@ check-database يفحص الآن identity وbaseline migrations وtemporary roun
 ## ملحق P4
 
 ست migrations إضافية 202610120004..202610120009؛ لا تعديل للمهاجرات التاريخية. أضيف P4LocalCapability وContentRevision.syntheticOnly وContentReview.qualificationSnapshot، وسياسات التأليف والنشر ومراجعة مستقلة وأقفال graph وثبات الهوية والدليل. تغيير صلاحية التأهيل لا يمحو حالته المحفوظة وقت القرار. [المراجعة](P4-CONTENT-REVIEW.md) و[الأمن](P4-SECURITY-VALIDATION.md). لا حذف مخططات الاختبار أو volumes؛ النسخ الجديدة معزولة ومحفوظة أثناء التشغيل.
+
+## إضافة P5–P7 المحلية — 2026-10-13
+
+Enrollment يحفظ النسخة والسياسة والمنطقة والأهداف؛ EnrollmentDay وTaskOccurrence تولدان ذريًا ويمنع تغيير snapshot. TaskCompletion يدوي أو مشتق من سجلات المستخدم، والتصحيح يعيد احتسابه دون ازدواج. السجلات الشخصية مستقلة؛ StepDayLog.recordedForTime مرساة UTC، وExerciseLog وDailyReview يحملان timezoneSnapshot، والحذف المنطقي يبقي revision وتاريخ LogRevision المشفر.
+
+AchievementRuleVersion مرتبطة قبل نشر البرنامج؛ AchievementAward وCertificate يطابقان aggregateRevision الحالي، والسحب يشملهما في معاملة المصدر. المهاجرات010–014 إضافية فقط: مشاركة، تتبع، استحقاق، انتهاء تمرين، ونموذج تقييم كامل منشور أو تاريخي خاص بالمالك. Published schema وأطفاله ثابتون بقيود P2؛ لا تظهر مسودة ناقصة. 23 مهاجرة مطبقة بمجموعتي GHIDAI المحليتين دون تعديل السابق أو حذف البيانات. [تفاصيل وأدلة التكامل](P5-P7-INTEGRATION-REPORT.md).

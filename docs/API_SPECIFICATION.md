@@ -1,5 +1,7 @@
 # مواصفات API v1
 
+تحديث التنفيذ المحلي2026-10-13: عقود P3/P4 والمشارك P5–P7 منفذة ضمن حدودها الموثقة. جداول الإصدار1.0 أدناه خط أساس التصميم؛ ملحق P5–P7 المنفذ في نهاية الوثيقة و[تقرير التكامل](P5-P7-INTEGRATION-REPORT.md) يحددان الردود والقيود الحالية، ولا يفترض تنفيذ jobs أو cursor أو تصحيح إداري أو إنتاج من وصف التصميم.
+
 1.0 — 2026-10-11. عقود تصميمية، ليست endpoints منفذة. الأساس `/api/v1` و JSON UTF-8 و same-origin. [المتطلبات](PROJECT_REQUIREMENTS.md)، [البيانات](DATABASE_DESIGN.md)، [الشاشات](UX_UI_SPECIFICATION.md) تحدد المعنى. هوية المالك من session فقط؛ `userId` غير مقبول في عمليات self. UUID في path يحدد موردًا ويخضع للتفويض.
 
 ## العقد العام
@@ -174,3 +176,30 @@ RV-03 عولج لهذه الدورة؛ RV-04 تحدي محلي محدد دون �
 ## ملحق API المنفذ في P4
 
 العقود الفعلية في [P4-PROGRAM-ENGINE](P4-PROGRAM-ENGINE.md) و[P4-CONTENT-REVIEW](P4-CONTENT-REVIEW.md)، والخدمة src/server/programs/service.ts. الاسم النصي في payload هو bodyText؛ كل المحتوى يخضع للمراجعة ولا يقبل requiresReview من العميل. POST يحتاج Idempotency-Key UUID، والتعديلات والأوامر الموجهة تحتاج If-Match مقتبسًا. معاينة النسخة تعيد references وchecks لنقص الأيام والاعتمادات والمصادر والوجبات. أضيفت recurrence وreturn-to-draft وmeals/nutrition-plans، والتأهيل محلي اصطناعي فقط. أوامر الغذاء تستخدم revision المحتوى الأب لمنع تعارض تعديل graph؛ النص والمكونات يتجمدان عند IN_REVIEW. لا APIs مشاركة أو سجلات يومية جديدة في P4.
+
+## عقد P5–P7 المنفذ محليًا
+
+الملحق الحالي يحدد التصرف الفعلي فوق الجداول التصميمية السابقة. هوية المالك من جلسة P3؛ لا يقبل userId في الجسم أو الفلاتر. الردود private/no-store وتستخدم غلاف data/meta، والأخطاء العربية لا تعرض SQL/stack. خدمات المصدر `participation/service.ts` و`tracking/service.ts` و`analytics/service.ts`.
+
+| الطريقة والمسار بعد /api/v1 | المدخل/المخرج الفعلي | التفويض والقيد |
+|---|---|---|
+| GET participant/programs وparticipant/programs/:id | كتالوج وتفاصيل النسخ المنشورة المسموحة والأيام | جلسة مصادق عليها؛ بوابة مراجعة P4، لا محتوى مسحوب |
+| POST enrollments | programId/versionId/startDate/goalOverrides[] → المشاركة | سياسة محلية syntheticOnly؛ goalOverrides غير الفارغة محجوبة بسجل سياسة معتمد؛ مجموعة أيام كاملة ذرية |
+| GET enrollments وenrollments/:id | كل مشاركات المالك، metadata النسخة الثابتة، الحالات والأيام | snapshot المنطقة والسياسة والنسخة لا يعاد تفسيره من الملف |
+| GET today?date=&enrollmentId= وenrollments/:id/days/:date | occurrences والمهمة القادمة/counts/saveWindow | المالك، تاريخ ضمن المشاركة؛ القادم لا يسمح بإتمام يوم مستقبل |
+| PUT occurrences/:id/completion | completed/occurredAt → إتمام أو تراجع وrevision | MANUAL فقط؛ THRESHOLD يرجع USE_LOG؛ If-Match للـoccurrence |
+| POST enrollments/:id/withdraw | reason? → WITHDRAWN | If-Match للمشاركة؛ locks وتاريخ محفوظ، لا حذف |
+| GET logs?from=&to= أو date= | قوائم سجلات شخصية غير محذوفة؛≤366 يومًا | يظل التسجيل الشخصي دون مشاركة مسموحًا |
+| POST logs/water، PATCH/DELETE logs/water/:id | amountMl أو cupCount/cupMl وoccurredAt | XOR ووحدة وحجم snapshot، تعديل/حذف منطقي مع إعادة DERIVED |
+| GET/PUT/DELETE logs/steps/:date | totalSteps/recordedForTime → snapshot أو غياب | إجمالي بديل، 0 صريح؛ DELETE يحفظ revision لاستعادة صحيحة |
+| POST logs/exercise، PATCH/DELETE logs/exercise/:id | type/startsAt/durationMin/note? | يبدأ وينتهي قبل وقت الخادم؛ لا تمرين مستقبلي مكتمل |
+| POST logs/sleep، PATCH/DELETE logs/sleep/:id | startsAt/endsAt | مدة صحيحة وعدم تداخل؛ wakeDate في snapshot |
+| GET/POST habits، PATCH habits/:id، PUT habits/:id/days/:date | تعريف أيام الأسبوع وحدود وعادة/إتمام يوم | habitDefinition ملكية وrevision؛ singleton اليوم بلا مستقبل |
+| GET/PUT reviews/:date | schemaVersionId/answers/notes?/weightKg? | مخطط منشور مكتمل أو تاريخ خاص مسموح وخيارات مطابقة، revision هذا التاريخ، لا عرض مسودة جزئية أو تعديل جواب يوم باستجابة يوم آخر |
+| GET analytics?from=&to=&enrollmentId= | daily C/N، due/final/weekly/streak، metrics والتقييمات |≤366 يومًا، فلاتر allowlist بلا تكرار، نسخة/title/timezone خاص بالمشاركة، لا متوسط مخططات مختلفة |
+| GET achievements | awards وإصدار القاعدة والإثبات والحالة وشهادة الاختبار المرتبطة | يعيد التقييم من المصدر؛ لا endpoint لإنشاء استحقاق يدوي |
+| GET certificates/:id | serial TEST-/status/evidence/verification/syntheticOnly/watermark | المالك فقط؛ فحص حي وإصدار مصدر،409CERTIFICATE_REVOKED بعد حفظ السحب |
+
+كل mutation مشاركة/تتبع تحتاج CSRF وIdempotency-Key UUID؛ المفتاح مرتبط بالفاعل وpath/method/input/preconditions. If-Match `"revision"` مطلوب للتعديل والحذف والتراجع، وIf-None-Match:* لإنشاء خطوات/تقييم/عادة يوم جديدة؛ إذا بقي singleton محذوف منطقيًا تستعاد بإصداره المحفوظ. غياب precondition يرجع428، الإصدار القديم أو مفتاح الجسم المختلف409، validation422، المورد غير المرئي404، وانقطاع DB503.
+
+أوامر P5–P7 الحالية تعيد نجاحًا200 مع JSON، بما فيه الحذف المنطقي وإصداره؛ ليست جميع رموز201/204 في جدول التصميم العام منفذة في هذه الخدمات. قوائم logs محدودة500 لكل نوع داخل الفترة وليست cursor API كاملة. تقارير تصحيح إداري خارج النافذة، محرر قواعد إنتاجي، شهادات PDF موقعة/عامة، وتنبيهات لم تنفذ بهذا النطاق؛ لا زر أو مسار يوحي بها. النتائج والانحدار والقيود في [التكامل](P5-P7-INTEGRATION-REPORT.md).

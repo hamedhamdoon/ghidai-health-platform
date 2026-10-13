@@ -2,6 +2,14 @@
 
 A mobile-first digital health and lifestyle platform.
 
+## الحالة الحالية — P5–P7 محليًا
+
+تجربة المشارك تحفظ في PostgreSQL: استعراض البرامج المسموحة والانضمام لنسخة ثابتة، اليوم والجدول والإتمام والتراجع، سجلات شخصية للماء والخطوات والرياضة والنوم والعادات والتقييم، وتحليل وشارات وشهادات JSON خاصة للاختبار. الواجهات عربية RTL بخمس وجهات. الأقسام P1–P4 أدناه توثق نقاطها التاريخية.
+
+بعد إعداد الأسرار المحلية وتشغيل حاويات المشروع الموجودة، استخدم `npm run db:migrate:participant:dev` و`npm run db:migrate:participant:test` و`npm run db:generate` ثم `npm run dev`. الرابط المحلي `http://127.0.0.1:3000`. لا تعِد إنشاء حاوية الاختبار أو تحذف مخططاتها عند إعادة الفحص.
+
+راجع [تقرير التكامل والنتائج وحدودها](docs/P5-P7-INTEGRATION-REPORT.md)، وتسليم [P5](docs/P5-HANDOFF.md)، [P6](docs/P6-HANDOFF.md)، [P7](docs/P7-HANDOFF.md). سياسات A-03/A-04 وأهداف ومحتوى الاستخدام الحقيقي لم تعتمد؛ كل أمثلة المشاركة والاستحقاق اصطناعية ومحلية. جميع A-01..A-12 تحتفظ بحالتها. لا P8 أو إنتاج أو تسجيل عام على الإنترنت أو دمج main.
+
 ## Technology
 - Next.js
 - TypeScript
@@ -36,7 +44,7 @@ See [local development](docs/LOCAL-DEVELOPMENT.md), [P1 environment audit](docs/
 68 Prisma models, local migrations and tested RLS isolation. Authentication and feature APIs remain unimplemented. After starting Docker, run `npm run db:migrate:dev`, `npm run db:migrate:test`, `npm run db:generate`, and `npm run test:p2`.
 See [implementation and commands](docs/P2-DATABASE-IMPLEMENTATION.md), [security](docs/P2-SECURITY-VALIDATION.md), [test results](docs/P2-TEST-RESULTS.md), and [handoff](docs/P2-HANDOFF.md). No cloud database or deployment.
 
-## P3 local authentication and profile (current)
+## P3 local authentication and profile (historical checkpoint)
 
 P1/P2 paragraphs above describe their historical checkpoints. P3 implements real local registration, Mailpit verification/reset email, Argon2id login, opaque sessions, reauthentication, TOTP/recovery codes, profile/preferences, optional future goals and revocable consents. Synthetic accounts only; A-02/A-08/A-12 remain open. No programs, tracking, public deployment or admin bootstrap.
 
@@ -44,6 +52,6 @@ Use `npm run db:migrate:p3:dev`, `npm run db:migrate:p3:test`, `npm run db:gener
 
 See [P3 implementation](docs/P3-AUTH-IMPLEMENTATION.md), [security validation](docs/P3-SECURITY-VALIDATION.md), [actual test results](docs/P3-TEST-RESULTS.md), and [handoff with exact setup/test/retry commands](docs/P3-HANDOFF.md).
 
-## P4 — المحرك المحلي
+## P4 — المحرك المحلي (نقطة تاريخية)
 
 محرك البرامج والإصدارات والمحتوى والمراجعة والوجبات والبدائل منفذ على فرع P4. التشغيل والتأهيل الاصطناعي المؤقت، الاختبارات، والقيود في [P4-HANDOFF](docs/P4-HANDOFF.md). لا مشاركة أو جدول مستخدم فعلي أو P5/P6؛ المحتوى الحقيقي محجوب حتى اعتماد المالك والمختص.

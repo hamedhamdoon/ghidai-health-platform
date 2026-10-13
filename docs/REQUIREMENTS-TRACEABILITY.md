@@ -135,3 +135,23 @@ R01..17 لا وظائف منفذة. R23 لا PWA/offline. نتائج هذا ال
 | R-21 | AG11/23؛ P0 | scripts npm وP4-TEST-RESULTS | TypeScript/Lint/Build/Unit/Integration/E2E/secrets | النتائج الفعلية في التقرير؛ لا قبول إنتاج |
 
 هذا الملحق لا يغير المصدر الأصلي للمتطلبات أو يدعي أن نجاح fixtures يغلق قرارات المالك.
+
+## سجل تنفيذ P5–P7 — 2026-10-13
+
+المصدر تكليف المالك المشترك P5/P6/P7، AGENTS§18–21/24/25، وBR-01..12؛ نطاقه تجربة المشارك المحلية فقط. الجدول الأصلي وصف التصميم، وهذا الملحق يربط التنفيذ الحالي بأدلة قابلة لإعادة التشغيل.
+
+| ID / أولوية | المصدر والوظيفة | التنفيذ | اختبار القبول | الحالة والبوابة |
+|---|---|---|---|---|
+| R-05 / P0 | AG5/19/20، UX S08–13؛ نسخة وبداية وانسحاب | `src/server/participation/service.ts`، `participant-programs.tsx`، migration010 | `p5-participation.ts`:7/15/21، مرن/ثابت، replay، A/B، ثبات snapshot وتعدد البرامج | محلي منفذ؛ A-03/A-05 للاستخدام الحقيقي |
+| R-06 / P0 | AG20/21، IMG01–03/05/06؛ أيام وأوقات وإتمام | `participation/rules.ts`، `participant-today.tsx`، EnrollmentDay/TaskOccurrence | unit P5، native P5، `p5-participant.spec.ts`:القادمة/تراجع/رفض المستقبل/فقد استجابة/360–1280 | محلي منفذ؛ لا تعليمات صور غير معتمدة |
+| R-08 / P0 | AG5/9/20، IMG01/02/03/05/06؛ ماء وكوب | `tracking/service.ts` و`derived.ts`، `participant-logs.tsx`، migration011 | `p6-tracking.ts` وE2E:كوب snapshot، تعديل/حذف/تزامن/replay وتصحيح إتمام | محلي منفذ؛ المقادير اصطناعية، A-05 مفتوحة |
+| R-09 / P0 | AG5/20، IMG01–06؛ خطوات ورياضة | StepDayLog.recordedForTime، TrackingService، migration013 | استبدال/0/غياب/حذف واستعادة؛ رفض تمرين لم ينتهِ في الخدمة وSQL | محلي منفذ؛ لا جمع snapshots أو هدف صحي موحد |
+| R-10 / P0 | AG5/20، IMG01–03/05/06؛ نوم وعادات | SleepLog/HabitDefinition/HabitLog، UTC/snapshot، UI logs | عبور منتصف الليل/تداخل/DST/عادات شخصية وبرنامج وتراجع | محلي منفذ؛ سجلات بلا مشاركة مسموحة |
+| R-11 / P0 | AG5، IMG01/02/05/06؛ تقييم وملاحظات ووزن | DailyReview/ReviewAnswer، مخططات ثابتة، LogRevision مشفر | native P6؛ E2E تبديل يومين ورفض استجابة قديمة؛ خيارات وإصدار منفصل | محلي منفذ؛ بيانات ومخططات اختبار فقط |
+| R-12 / P0 | AG20، BR03–08، UX S22/24؛ C/N وإحصاء | `analytics/calculations.ts` و`service.ts`، `participant-progress.tsx` | unit P7 وnative P7:اختيارية/N0/وزن المقام/مستقبل/حذف؛ فلاتر ورسوم E2E | حساب فعلي؛ سياسة الاستمرارية/التأخر A-03/A-04 مفتوحة |
+| R-13 / P1 | AG5/20، BR09؛ شارات وشهادة خاصة | AchievementRuleVersion/Award/Certificate، migration012 | مصدر وإصدار حالي، سحب ذري، SQL تزوير، تنزيل JSON وفحصه ورفضه بعد التراجع | آلية اختبارية؛ لا شهادة نهائية أو اعتماد A-04/A-10 |
+| R-03/R-20 / P0 | AG8/18؛ عزل وتزامن وتدقيق | جلسات P3/withActor/RLS، أقفال actor ثم الموارد، receipts مشفرة | A/B/ADMIN/COACH غير مخولين؛ revision مفقود/قديم، نفس المفتاح، فشل DB | خادم وPostgreSQL؛ لا userId من العميل |
+| R-19/R-22 / P0 | AG21/25؛ خمس وجهات وRTL وإتاحة | Today/Programs/Logs/Progress/Account، جداول تمرير معنونة وقابلة للتركيز | E2E360/768/1280، axe صفر، keyboard/overflow وحفظ حقيقي | آلي محلي؛ قارئ شاشة يدوي/جهازان/قياس إنتاج غير مثبت |
+| R-21/R-23 / P0 | AG11/23/25؛ انحدار وفشل حفظ | scripts/participant-test-schema وparticipant-e2e وoutages | Type/Lint/Build/Unit/PG/E2E/503 ثم تعافٍ وإعادة حفظ | نتائج كل دورة في [التكامل](P5-P7-INTEGRATION-REPORT.md)؛ لا offline sync |
+
+RV-07/RV-08/RV-09 وحالات مشاركة RV-10 مسواة تقنيًا في النطاق الحالي. قبول التشغيل الحقيقي لسياساتها مستقل. R-14 وواجهات P8+ وR-16/18 الإنتاجية لا تتحول إلى مكتملة بهذا الجدول؛ جميع A-01..A-12 تحتفظ بحالتها.
