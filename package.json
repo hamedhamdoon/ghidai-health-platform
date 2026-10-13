@@ -32,6 +32,7 @@
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "check:secrets": "node scripts/check-secrets.mjs",
     "test:p4": "tsx scripts/p4-test-schema.ts && tsx tests/integration/p4-programs.ts",
+    "test:p5": "tsx scripts/participant-test-schema.ts 5 && tsx tests/integration/p5-participation.ts",
     "db:migrate:p4:dev": "tsx scripts/p4-setup.ts development",
     "db:migrate:p4:test": "tsx scripts/p4-setup.ts test",
     "audit:p4": "node scripts/p4-audit.mjs",
