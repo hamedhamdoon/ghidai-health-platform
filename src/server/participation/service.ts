@@ -6,6 +6,7 @@ import { encrypt,decrypt } from '../auth/crypto';
 import { withActor } from '../db/context';
 import { object,uuid,date,enrollmentInput,completionInput,revision,assertRevision,idempotency,assertReplay } from '../contracts/p2';
 import { localDate,localInstant,addDays,scheduleTasks,saveAllowed,type ScheduleTask } from './rules';
+import { recalculateDerived } from '../tracking/derived';
 
 const missing=():never=>{throw new AuthError('NOT_FOUND',404);};
 const conflict=(code='STATE_CONFLICT'):never=>{throw new AuthError(code,409);};
@@ -16,7 +17,9 @@ export class ParticipationService {
   await db.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`participant:${actor}`]);
   const receipt=method==='GET'?null:idempotency(key,'participation.command',{path,method,input,match});
   if(receipt){const old=(await db.query('SELECT * FROM "IdempotencyRecord" WHERE "userId"=$1 AND action=$2 AND key=$3',[actor,receipt.action,receipt.key])).rows[0];if(old){assertReplay(old.requestHash,receipt.requestHash);return JSON.parse(decrypt(old.responseEncrypted,this.auth.key));}}
-  const body=await this.command(db,path,method,input,actor,match),result={body};
+  let body=await this.command(db,path,method,input,actor,match);
+  if(path==='enrollments'&&method==='POST'&&body&&typeof body==='object'&&'id' in body){await recalculateDerived(db,actor);const current=(await db.query('SELECT revision FROM "Enrollment" WHERE id=$1 AND "userId"=$2',[body.id,actor])).rows[0];body={...body,revision:current.revision};}
+  const result={body};
   if(receipt){await db.query('INSERT INTO "IdempotencyRecord"("userId",action,key,"requestHash","responseEncrypted","expiresAt") VALUES($1,$2,$3,$4,$5,now()+interval \'24 hours\')',[actor,receipt.action,receipt.key,receipt.requestHash,encrypt(JSON.stringify(result),this.auth.key)]);await db.query('INSERT INTO "AuditLog"("actorId",action,"targetType","targetId","requestId","occurredAt","safeMetadata") VALUES($1,$2,\'Participation\',$3,$4,now(),\'{}\')',[actor,`P5_${method}_${path.split('/').at(-1)}`,body&&typeof body==='object'&&'id' in body?body.id:null,randomUUID()]);}
   return result;
  });});}

@@ -367,6 +367,8 @@ model DailyReview {
   recordId            String              @unique @db.Uuid
   recordKind          RecordKind          @default(REVIEW)
   localDate           DateTime            @db.Date
+  timezoneSnapshot    String              @default("UTC") @db.VarChar(64)
+  deletedAt           DateTime?           @db.Timestamptz(6)
   schemaVersionId     String              @db.Uuid
   notes               String?             @db.VarChar(2000)
   weightKg            Decimal?            @db.Decimal(5, 2)
@@ -468,6 +470,7 @@ model ExerciseLog {
   startsAt     DateTime     @db.Timestamptz(6)
   durationMin  Int
   localDate    DateTime     @db.Date
+  timezoneSnapshot String   @default("UTC") @db.VarChar(64)
   note         String?      @db.VarChar(2000)
   deletedAt    DateTime?    @db.Timestamptz(6)
   User         User         @relation(fields: [userId], references: [id], onUpdate: NoAction)
@@ -510,6 +513,7 @@ model HabitLog {
   habitId         String          @db.Uuid
   localDate       DateTime        @db.Date
   completedAt     DateTime        @db.Timestamptz(6)
+  deletedAt       DateTime?       @db.Timestamptz(6)
   User            User            @relation(fields: [userId], references: [id], onUpdate: NoAction)
   HabitDefinition HabitDefinition @relation(fields: [userId, habitId], references: [userId, id], onUpdate: NoAction)
 
@@ -1301,6 +1305,7 @@ model StepDayLog {
   timezoneSnapshot String       @db.VarChar(64)
   totalSteps       Int
   recordedAt       DateTime     @db.Timestamptz(6)
+  recordedForTime  DateTime     @db.Timestamptz(6)
   source           String
   deletedAt        DateTime?    @db.Timestamptz(6)
   User             User         @relation(fields: [userId], references: [id], onUpdate: NoAction)

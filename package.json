@@ -33,6 +33,8 @@
     "check:secrets": "node scripts/check-secrets.mjs",
     "test:p4": "tsx scripts/p4-test-schema.ts && tsx tests/integration/p4-programs.ts",
     "test:p5": "tsx scripts/participant-test-schema.ts 5 && tsx tests/integration/p5-participation.ts",
+    "test:p6": "tsx scripts/participant-test-schema.ts 6 && tsx tests/integration/p6-tracking.ts",
+    "test:participant:outages": "tsx tests/integration/participant-outages.ts",
     "db:migrate:p4:dev": "tsx scripts/p4-setup.ts development",
     "db:migrate:p4:test": "tsx scripts/p4-setup.ts test",
     "audit:p4": "node scripts/p4-audit.mjs",

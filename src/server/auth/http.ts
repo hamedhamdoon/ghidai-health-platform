@@ -8,6 +8,7 @@ import { AuthService } from './service';
 import { deliverMail } from './mail';
 import { ProgramService } from '../programs/service';
 import { ParticipationService } from '../participation/service';
+import { TrackingService } from '../tracking/service';
 const cookieOptions={httpOnly:true,secure:false,sameSite:'strict' as const,path:'/'};
 const names={session:'ghidai_session',preauth:'ghidai_preauth',csrf:'ghidai_csrf'};
 export function localOrigin(url:string):string {const parsed=new URL(url);if(parsed.protocol!=='http:'||parsed.hostname!=='127.0.0.1'||!['3000','3100'].includes(parsed.port))throw new AuthError('LOCAL_ONLY',403);return parsed.origin;}
@@ -37,7 +38,8 @@ export async function handle(request:NextRequest,{params}:{params:Promise<{path:
   }
   const p4=/^(admin|coach|content-revisions|programs)(\/|$)/.test(path);
   const participant=/^(participant|enrollments|today|occurrences)(\/|$)/.test(path);
-  const output=participant?await new ParticipationService(service).execute(path,request.method,request.method==='GET'?Object.fromEntries(request.nextUrl.searchParams):input,session,request.headers.get('if-match'),request.headers.get('idempotency-key')):p4?await new ProgramService(service).execute(path,request.method,input,session,request.headers.get('if-match'),request.headers.get('idempotency-key')):await service.execute(path,request.method,input,session,preauth,origin,request.headers.get('if-match'));
+  const tracking=/^(logs|habits|reviews)(\/|$)/.test(path);
+  const output=tracking?await new TrackingService(service).execute(path,request.method,request.method==='GET'?Object.fromEntries(request.nextUrl.searchParams):input,session,request.headers.get('if-match'),request.headers.get('idempotency-key'),request.headers.get('if-none-match')):participant?await new ParticipationService(service).execute(path,request.method,request.method==='GET'?Object.fromEntries(request.nextUrl.searchParams):input,session,request.headers.get('if-match'),request.headers.get('idempotency-key')):p4?await new ProgramService(service).execute(path,request.method,input,session,request.headers.get('if-match'),request.headers.get('idempotency-key')):await service.execute(path,request.method,input,session,preauth,origin,request.headers.get('if-match'));
   if(['auth/register','auth/password/forgot','auth/verify/resend','auth/email/change'].includes(path))await deliverMail(runtime.auth,runtime.key);
   const response=new NextResponse(output.status===204?null:JSON.stringify({data:output.body??{},meta:{requestId,serverTime:new Date().toISOString()}}),{status:output.status??200,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store'}});
   if(output.clear||output.preauth){response.cookies.set(names.session,'',{...cookieOptions,maxAge:0});response.cookies.set(names.preauth,'',{...cookieOptions,maxAge:0});}
