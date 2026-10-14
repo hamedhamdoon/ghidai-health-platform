@@ -1,0 +1,15 @@
+# P8 — Coach and Administration
+
+2026-10-14, Asia/Muscat. Local synthetic implementation only; A-11/A-12 remain open.
+
+`AdministrationService` uses session-derived VerifiedActor, PostgreSQL RLS, server validation, persistent rate budget, encrypted idempotency receipts, optimistic revisions and safe audit actions. Shared HTTP integration preserves P3 CSRF, loopback restriction, body limits and no-store responses. All mutations require fresh reauthentication; administrative mutations also require active MFA.
+
+Participant `/coaching` explicitly selects a coach, READ resources and expiry. The checkbox is mandatory and unchecked by default. Atomic SQL creates COACH Consent, CoachAssignment and AccessGrant. This UI deliberately permits at most 24 hours; SQL local maximum is 30 days. Consent has synthetic-local version and scope. Coach `/coach` lists valid assigned participants and displays only allowed resource projections. Progress is computed from real required occurrences excluding exclusions; no raw health note, weight or DailyReview scope is offered. Coach notes are separate CoachNote rows. Coaches never update personal logs. Withdrawal stops the next request; requests already executing can complete before withdrawal commits, as with other transaction-bound operations.
+
+`/admin` shows account role/status metadata, assignments, operational totals and audit metadata without health payloads. Local role changes target synthetic `@ghidai.test` accounts only; last active admin is protected and affected sessions/assignments are invalidated. An administrator cannot modify their own account through this UI/API; this avoids a cross-connection session-lock wait and leaves changes to another authorized administrator. Operational reasons are stored in audit rows. Existing P4 program/content editors retain publication, withdrawal and review gates. Sensitive reports, exceptional administrative health access and late corrections are visibly unavailable until owner approval. Production bootstrap and real coach/reviewer allocation are not implemented.
+
+P8 READ grants also require unexpired local staff capability at PostgreSQL `can_read`, so bypassing the API does not preserve access after capability expiry. Coach-note receipt replay rechecks current scope before decrypting the persisted response: withdrawn consent never restores old note data through an idempotency key.
+
+Routes: GET admin/users, PATCH admin/users/:id; GET admin/assignments, POST admin/assignments/:id/revoke; GET admin/operations, GET admin/audit; GET/POST coaching/assignments, POST coaching/assignments/:id/revoke; GET coach/participants, GET coach/participants/:id, POST coach/participants/:id/notes. All mutations require idempotency; updates/revoke/notes require If-Match. No schema migration history was changed.
+
+The integration owner maintains additive P8 SQL and shared routing/navigation. See P8-TEST-RESULTS for executed results. No P11/P12, public deployment, production policy approval, real health data or main merge is part of P8.
