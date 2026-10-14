@@ -1072,6 +1072,7 @@ model RecurrenceDefinition {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ReminderRule {
+  type             String     @default("DAILY_CHECK_IN")
   id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt        DateTime        @default(now()) @db.Timestamptz(6)
   updatedAt        DateTime        @default(now()) @db.Timestamptz(6)

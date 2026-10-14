@@ -1,0 +1,15 @@
+BEGIN;
+SET ROLE ghidai_owner;
+ALTER TABLE "ReminderRule" ADD COLUMN type text NOT NULL DEFAULT 'DAILY_CHECK_IN' CHECK(type IN('DAILY_CHECK_IN','DAILY_REVIEW'));
+ALTER TABLE "OutboxJob" DROP CONSTRAINT "OutboxJob_kind_check";
+ALTER TABLE "OutboxJob" ADD CONSTRAINT "OutboxJob_kind_check" CHECK(kind IN('EMAIL','PUSH','EXPORT','DELETE','RECALCULATE','IN_APP'));
+GRANT INSERT,UPDATE ON "ReminderRule","Notification","PrivacyRequest","OutboxJob" TO ghidai_app;
+CREATE POLICY p9_outbox_insert ON "OutboxJob" FOR INSERT TO ghidai_app WITH CHECK(active_actor() AND "userId"=actor_id() AND kind='IN_APP');
+CREATE POLICY p9_outbox_update ON "OutboxJob" FOR UPDATE TO ghidai_app USING(active_actor() AND "userId"=actor_id() AND kind='IN_APP') WITH CHECK(active_actor() AND "userId"=actor_id() AND kind='IN_APP');
+CREATE POLICY p9_audit_insert ON "AuditLog" FOR INSERT TO ghidai_app WITH CHECK(active_actor() AND "actorId"=actor_id() AND action LIKE 'P9_%');
+ALTER TABLE "NotificationPreference" ADD CONSTRAINT p9_quiet_pair CHECK(("quietStart" IS NULL)=("quietEnd" IS NULL));
+CREATE INDEX p9_reminder_enabled ON "ReminderRule"("userId",enabled);
+CREATE INDEX p9_notification_inbox ON "Notification"("userId","createdAt" DESC);
+CREATE INDEX p9_privacy_owner ON "PrivacyRequest"("userId","requestedAt" DESC);
+RESET ROLE;
+COMMIT;
