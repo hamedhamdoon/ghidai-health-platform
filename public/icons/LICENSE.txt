@@ -1,0 +1,9 @@
+GHIDAI PWA icons — original geometric raster design
+
+The files ghidai-192.png and ghidai-512.png were generated specifically for
+the GHIDAI project using original geometric shapes. They do not reproduce
+the six reference images or use an external trademark, illustration or font.
+
+Permission is granted to the GHIDAI project owner to use, copy, modify and
+distribute these original icon files as part of GHIDAI without a license fee.
+This declaration does not grant rights to unrelated reference assets or marks.
