@@ -1,5 +1,13 @@
 # Changelog
 
+## P8–P10 — 2026-10-14، local platform completion
+
+- موافقات مدرب صريحة ومحددة النطاق والمدة؛ فصل READ عن NOTE وربط الإضافة بالتعيين والموافقة المحددين؛ تقدم فعلي وملاحظات منفصلة وإدارة بيانات وصفية وحماية آخر مسؤول وتدقيق.
+- مركز تنبيهات وتفضيلات وأوقات هدوء وDST وOutbox محلي مع منع التكرار وإعادة المحاولة وفحص الموافقة؛ تصدير JSON/CSV مشفر ومحدود مع التحقق من الملكية وإعادة المصادقة؛ طلب حذف مؤجل وتمرين حذف سجل مشارك اصطناعي كامل في مخطط مستقل جديد.
+- RTLmanifest/originalicons/static-only worker/offline failure/logout purge/focus/motion وقياساتbrowser/DBفعلية.
+- ثلاث هجرات إضافية 015/016/017 مع حفظ التاريخية، ونقطة Commit لكل مرحلة ثم اختبارات انحدار شاملة؛ [الدليل والفجوات](docs/P8-P10-INTEGRATION-REPORT.md).
+- لاA-01..A-12 closure أوP11/P12 أوpublic/cloud/paid/main/productiondeletion/healthsync.
+
 ## P5–P7 — 2026-10-13، local participant experience
 
 - مشاركات وإصدارات ثابتة وأيام ومهام محفوظة، بداية مرنة/ثابتة، إتمام وتراجع وانسحاب مع التاريخ، وحالات مشاركة محددة.
@@ -14,8 +22,8 @@
 - مصادقة محلية فعلية بـArgon2id وopaque sessions وemail verification/reset وreauth وTOTP/recovery وCSRF/rate limiting.
 - Mailpit محلي مقيد loopback، encrypted outbox وإعادة محاولة؛ اختبار انقطاع واستعادة دون حذف موارد.
 - ملف عربي RTL وتفضيلات وأهداف اختيارية وموافقات قابلة للسحب، خلف VerifiedActor وRLS وPrisma.
-- ثلاث migrations إضافية؛ حفظ migrations P2 وAGENTS؛ RV03/04/07 مسوّاة ضمنP3 فقط.
-- اختبارات PostgreSQL/Playwright سلبية وتزامن وregression وتقارير تسليم؛ لاP4/mainmerge/cloud/deploy أوإغلاقA02/A08/A12.
+- ثلاث migrations إضافية؛ حفظ migrations P2 وAGENTS؛ RV-03/04/07 مسوّاة ضمنP3 فقط.
+- اختبارات PostgreSQL/Playwright سلبية وتزامن وregression وتقارير تسليم؛ لاP4/mainmerge/cloud/deploy أوإغلاقA-02/A-08/A-12.
 
 ## P2 — 2026-10-11
 

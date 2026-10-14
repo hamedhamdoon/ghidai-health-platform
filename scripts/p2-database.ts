@@ -33,7 +33,7 @@ export async function preflight(pool: Pool, isolatedRegression=false) {
   if(tables.includes('_prisma_migrations')) {
     const applied=(await pool.query('SELECT migration_name,checksum FROM _prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL')).rows;
     for(const record of applied) {
-      if(!/^20261011000[1-9]_p2_[a-z_]+$/.test(record.migration_name)&&!/^20261012000[1-9]_p[34]_[a-z_]+$/.test(record.migration_name)&&!/^20261012001[0-9]_p[567]_[a-z_]+$/.test(record.migration_name)&&!/^20261013001[56]_p[89]_[a-z_]+$/.test(record.migration_name))throw new Error('UNEXPECTED_MIGRATION');
+      if(!/^20261011000[1-9]_p2_[a-z_]+$/.test(record.migration_name)&&!/^20261012000[1-9]_p[34]_[a-z_]+$/.test(record.migration_name)&&!/^20261012001[0-9]_p[567]_[a-z_]+$/.test(record.migration_name)&&!/^20261013001[56]_p[89]_[a-z_]+$/.test(record.migration_name)&&!/^202610140017_p8_note_action$/.test(record.migration_name))throw new Error('UNEXPECTED_MIGRATION');
       const actual=createHash('sha256').update(readFileSync(`prisma/migrations/${record.migration_name}/migration.sql`)).digest('hex');
       if(actual!==record.checksum)throw new Error('MIGRATION_CHECKSUM_MISMATCH');
     }

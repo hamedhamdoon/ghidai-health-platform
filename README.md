@@ -1,6 +1,12 @@
-﻿# GHIDAI | غذائي قبل دوائي
+# GHIDAI | غذائي قبل دوائي
 
 A mobile-first digital health and lifestyle platform.
+
+## الحالة الأحدث — P8–P10 محليًا،2026-10-14
+
+إضافة متابعة مدرب بموافقة ونطاق وانتهاء، وإدارة حسابات اصطناعية دون وصول صحة عام، وتنبيهات داخل التطبيق بفحص محلي صريح، وخصوصية وتصدير JSON/CSV مشفر وخاص. طلب الحذف مؤجل؛اختبار الحذف علائقي في مخطط مستقل فقط. PWA/أصول عامة/offline messages وإتاحة وقياسات محلية؛لاoffline health queue أوWeb Push أومجدول إنتاجي. تفاصيل النتائج والقيود ونقاطGit في[تقرير التكامل](docs/P8-P10-INTEGRATION-REPORT.md) و[P8](docs/P8-HANDOFF.md)/[P9](docs/P9-HANDOFF.md)/[P10](docs/P10-HANDOFF.md).
+
+مع حاوياتGHIDAI والأسرار المحلية الحالية: `npm run db:migrate:platform:dev` و`npm run db:migrate:platform:test` ثم `npm run db:generate` و`npm run dev`. حسابي يربط موافقات المدربين والتنبيهات والخصوصية؛مساحات `/coach` و`/admin` محدودة بالصلاحية الاصطناعية. لا تعِد إنشاءtmpfs أوتحذف مخططات/Volumes. A-01..A-12 مفتوحة كليًا/جزئيًا؛لاP11/P12 أوإنتاج أوmain merge. الأقسام التالية تاريخ المراحل السابقة.
 
 ## الحالة الحالية — P5–P7 محليًا
 

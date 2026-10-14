@@ -1,5 +1,9 @@
 # معمارية P1 المنفذة
 
+## المعمارية الحالية P8–P10
+
+نفسNext.js/Prisma/PostgreSQL؛AdministrationService وP9Service من Route Handler بعد جلسةموثوقة. VerifiedActor وRLS/withActor يحكمان القراءة/الكتابة؛SQL policy helpers محدودة ومحلية. Coach health لاADMIN health bypass. outbox/notification بنفس معاملةactor وموافقةراجعة؛queue revision منفصل عنdelivery dedupe ثابت. exports bounded encrypted داخلPrivacyRequest لاobjectstore خارجي. service worker cache allowlist للأيقونات/offlineHTML فقط؛الصفحات/API/الجلسات لاcache. root يملكالمهاجرات/العقود. [الأدلة والحدود](P8-P10-INTEGRATION-REPORT.md) أحدث منالفقراتالتاريخية أدناه.
+
 ## ملحق المعمارية الحالية P3
 
 App Router يحتفظ بأساس P1، ويضيف صفحات الحساب وRoute Handlers تحت api/v1 وخدمات auth خادمية. ghidai_auth بوابة credentials محدودة منفصلة عن ghidai_app؛ الجلسة الموثوقة تنتج VerifiedActor، ثم RLS وSET LOCAL في معاملات pg/Prisma. Prisma يستخدم فعليًا لقراءة Profile. البريد Mailpit محلي مع encrypted AuthMail، وMFA challenge منفصل عن Session. تفاصيل الحدود والاعتمادات في [P3-AUTH-IMPLEMENTATION](P3-AUTH-IMPLEMENTATION.md). النص التالي سجل P1 التاريخي، وليس نفيًا للمصادقة المنفذة حاليًا.

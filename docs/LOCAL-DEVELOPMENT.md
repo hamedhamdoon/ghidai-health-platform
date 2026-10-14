@@ -1,5 +1,9 @@
 # GHIDAI — تشغيل P1 محليًا
 
+## أوامرالحالة الحالية P8–P10
+
+استخدمحاوياتGHIDAI الموجودةوالأسرارالمستثناة؛لاreset/drop/down-v/إعادةإنشاءtmpfs. `npm run db:migrate:platform:dev` و`npm run db:migrate:platform:test` و`npm run db:generate` ثم`npm run dev`. للقبول: `npm run check` ثم test:p2..p9 بالتسلسل؛`$env:GHIDAI_E2E_PORT='3100'; npm run test:platform:e2e`. لا تغيرP3_TEST_SCHEMA أثناءخادمقائم. `npm run test:platform:performance` يقيسخدماتمباشرةبمخططاختبار؛P10browser script يكتبقياساتهفي`.npm-cache` المستثنى. الأعطال منفصلةوتستعيدالحاوياتالاختباريةالمحددة. التعليماتالأقدمأدناهتاريخية؛[التكامل](P8-P10-INTEGRATION-REPORT.md) أحدثمرجع.
+
 العمل داخل `C:\Users\User\Desktop\platforms\Ghidai` فقط. Node 24 LTS، npm وDocker Desktop بوضع Linux containers. لا حاجة إلى حساب سحابي. لا تستخدم بيانات حقيقية.
 
 ```powershell

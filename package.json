@@ -36,7 +36,7 @@
     "test:p6": "tsx scripts/participant-test-schema.ts 6 && tsx tests/integration/p6-tracking.ts",
     "test:p7": "tsx scripts/participant-test-schema.ts 7 && tsx tests/integration/p7-analytics.ts",
     "test:p8": "tsx scripts/platform-test-schema.ts 8 && tsx tests/integration/p8-administration.ts",
-    "test:p9": "tsx scripts/platform-test-schema.ts 9 && tsx tests/integration/p9-privacy-notifications.ts && tsx tests/integration/p9-deletion.ts",
+    "test:p9": "tsx scripts/platform-test-schema.ts 9 && tsx tests/integration/p9-privacy-notifications.ts && tsx tests/integration/p9-deletion.ts && tsx tests/integration/p9-full-deletion.ts",
     "test:platform:e2e": "node scripts/platform-e2e.mjs",
     "test:platform:performance": "tsx scripts/platform-performance.ts",
     "test:platform:regression": "node scripts/platform-regression.mjs",

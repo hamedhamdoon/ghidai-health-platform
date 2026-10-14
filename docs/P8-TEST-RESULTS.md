@@ -5,7 +5,7 @@
 | Check | Executed result |
 |---|---|
 | Vitest `tests/unit/administration.test.ts` | 14/14 passed; explicit consent, unsafe/duplicate scopes, expiry, ownership injection, bounded notes and meaningful reasons |
-| Native PostgreSQL `tests/integration/p8-administration.ts` | 11/11 passed on isolated synthetic p3_test schema; no schema/volume removal |
+| Native PostgreSQL `tests/integration/p8-administration.ts` | 14/14 passed on isolated synthetic `p3_test_1791971765694`; no schema/volume removal |
 | E2E `tests/e2e/p8-administration.spec.ts` | 6/6 passed (31.3s), Chromium 360/768/1280; explicit grant, keyboard Enter submission, separate coach note, withdrawal, API denial, RTL, no horizontal overflow and zero axe WCAG violations |
 | Scoped ESLint | Passed (exit 0) for P8 service/contracts/components/unit/native/E2E |
 | Full typecheck/lint/build/regression | Integration owner runs once after shared integration and records final report |
@@ -19,3 +19,7 @@ A separate deterministic last-admin test temporarily marks other synthetic admin
 Corrected E2E rerun passed 6/6. Final native rerun on `p3_test_1791950751961` passed 11/11 including revoked-receipt protection and direct SQL denial after local capability expiry. No schema reset or historical fixture deletion occurred.
 
 Practical screen reader testing, two independent physical devices and production policies are not certified by these automated checks. Pending A-11/A-12 are preserved.
+
+Final additive migration 017 rerun passed 14/14: distinct NOTE consent/grant, READ retained after NOTE revocation, cached/new note denial, historical v1 READ-only consent, and new consent unable to resurrect an old revoked assignment or authorize raw SQL notes against its old consent. RLS binds the action to the exact assignment, consent, participant and actor; no existing consent was expanded. The 11-group runs above describe the earlier checkpoint.
+
+Final rebuilt E2E replay on `p3_test_1791972140888` passed all6 P8 cases at360/768/1280 within the48-case P8–P10 wave (1.3m), including the explicit reading-and-adding consent text.

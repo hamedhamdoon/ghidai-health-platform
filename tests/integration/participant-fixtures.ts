@@ -8,8 +8,9 @@ import {AuthService} from '../../src/server/auth/service';
 import {ProgramService} from '../../src/server/programs/service';
 import {digest,opaque,encrypt} from '../../src/server/auth/crypto';
 export type Row=QueryResultRow;
-export async function participantFixtures(){
- process.env.GHIDAI_AUTH_ENV='test';const config=localAuthConfig();if(config.schema==='public')throw new Error('ISOLATED_SCHEMA_REQUIRED');
+export async function participantFixtures(schemaOverride?:string){
+ if(schemaOverride!==undefined&&!/^p3_test_\d+$/.test(schemaOverride))throw new Error('ISOLATED_SCHEMA_REQUIRED');
+ process.env.GHIDAI_AUTH_ENV='test';const baseConfig=localAuthConfig(),config={...baseConfig,schema:schemaOverride??baseConfig.schema};if(config.schema==='public')throw new Error('ISOLATED_SCHEMA_REQUIRED');
  const options=`-c search_path=${config.schema},public`,timeouts={connectionTimeoutMillis:3000,query_timeout:5000,statement_timeout:5000};
  const runtime={key:config.key,auth:new Pool({connectionString:config.authUrl,options,max:4,...timeouts}),app:new Pool({connectionString:config.appUrl,options,max:4,...timeouts}),prisma:new PrismaClient({adapter:new PrismaPg({connectionString:config.appUrl,options,max:2,...timeouts},{schema:config.schema})})};
  const {pool:base,url}=await localPool('test');await base.end();const owner=new Pool({connectionString:url,options:`-c search_path=${config.schema},public`});

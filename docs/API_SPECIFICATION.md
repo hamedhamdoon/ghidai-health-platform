@@ -1,5 +1,9 @@
 # مواصفات API v1
 
+## ملحق التنفيذ P8/P9،2026-10-14
+
+P8 contracts and local gates في[P8-HANDOFF](P8-HANDOFF.md)؛P9 في[P9-HANDOFF](P9-HANDOFF.md). VerifiedActor/session/CSRF/RLS/own filters،mutations Idempotency-Key وإصداراتIf-Match حيثتعدل. مساراتcoaching/assignments وcoach/participants وadmin users/assignments/operations/audit؛notifications center/settings/rules/read/local-tick؛privacy view/consents/exports/:id/download/deletion/requests. export download يعيدJSON envelope معcontent خاصللعميل لإنشاءملفBlob،وليسURLعام؛freshauth/owner/15min local expiry. admin metadata ليستhealthaccess؛finaldelete/Push/jobsproduction غيرمتاحة. no-store لكلالردود. [تقريرالتكامل](P8-P10-INTEGRATION-REPORT.md) يحددالتشغيلالفعليةوالحدود.
+
 تحديث التنفيذ المحلي2026-10-13: عقود P3/P4 والمشارك P5–P7 منفذة ضمن حدودها الموثقة. جداول الإصدار1.0 أدناه خط أساس التصميم؛ ملحق P5–P7 المنفذ في نهاية الوثيقة و[تقرير التكامل](P5-P7-INTEGRATION-REPORT.md) يحددان الردود والقيود الحالية، ولا يفترض تنفيذ jobs أو cursor أو تصحيح إداري أو إنتاج من وصف التصميم.
 
 1.0 — 2026-10-11. عقود تصميمية، ليست endpoints منفذة. الأساس `/api/v1` و JSON UTF-8 و same-origin. [المتطلبات](PROJECT_REQUIREMENTS.md)، [البيانات](DATABASE_DESIGN.md)، [الشاشات](UX_UI_SPECIFICATION.md) تحدد المعنى. هوية المالك من session فقط؛ `userId` غير مقبول في عمليات self. UUID في path يحدد موردًا ويخضع للتفويض.

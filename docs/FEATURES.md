@@ -1,5 +1,18 @@
 # حالة وظائف GHIDAI
 
+## تحديث P8–P10،2026-10-14
+
+| الوحدة | التنفيذ/الحد الحالي |
+|---|---|
+| مدرب | موافقة صريحة ونطاقاتREAD وانتهاء/سحب؛ملاحظات منفصلة وتقدم فعلي؛اصطناعي فقط |
+| إدارة | حسابات وأدوار اصطناعية،آخرADMIN محمي،تعيينات/عمليات/audit؛لاhealth bypass أوتقارير حساسة |
+| تنبيهات | inbox/read/preferences/timezone/quiet/DST/outbox/dedup/retry؛فحص محلي صريح؛لاscheduler/Push إنتاجي |
+| خصوصية | عرض موافقات وفئات احتفاظ/سحب،export JSONCSV مشفر خاص+reauth/TTL،طلب حذف مؤجل؛تمرين علائقي منفصل |
+| PWA/UX | manifest/icons/install option/static allowlist/offline error/logout purge/focus/motion؛لاhealth offline queue |
+| إتاحة/أداء | تقاريراختبارات فعلية360/768/1280؛browser instrumentation/DB EXPLAIN؛قارئ شاشة عملي/هاتف فعلي غيرمثبتين |
+
+[التقرير الأحدث](P8-P10-INTEGRATION-REPORT.md) يحدد الفحوص والبوابات. A-01..A-12 محفوظة؛الجداول التالية تاريخية.
+
 ## الحالة الحالية — P5–P7، 2026-10-13
 
 الجدول التالي يحدد الوظائف الحالية؛ الجداول السابقة للمراحل أدناه سجلات تاريخية.

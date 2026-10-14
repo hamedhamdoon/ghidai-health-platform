@@ -5,4 +5,5 @@ for(const phase of [2,3,4,5,6,7,8,9]){
  const file={2:'p2-database',3:'p3-auth',4:'p4-programs',5:'p5-participation',6:'p6-tracking',7:'p7-analytics',8:'p8-administration',9:'p9-privacy-notifications'}[phase];
  const result=spawnSync(process.execPath,['node_modules/tsx/dist/cli.mjs',`tests/integration/${file}.ts`],{env:process.env,stdio:'inherit',windowsHide:true});if(result.status!==0)process.exit(result.status??1);
 }
-const deletion=spawnSync(process.execPath,['node_modules/tsx/dist/cli.mjs','tests/integration/p9-deletion.ts'],{env:process.env,stdio:'inherit',windowsHide:true});process.exit(deletion.status??1);
+const deletion=spawnSync(process.execPath,['node_modules/tsx/dist/cli.mjs','tests/integration/p9-deletion.ts'],{env:process.env,stdio:'inherit',windowsHide:true});if(deletion.status!==0)process.exit(deletion.status??1);
+const graph=spawnSync(process.execPath,['node_modules/tsx/dist/cli.mjs','tests/integration/p9-full-deletion.ts'],{env:process.env,stdio:'inherit',windowsHide:true});process.exit(graph.status??1);

@@ -1,5 +1,10 @@
 # GHIDAI — سجل القرارات
 
+ملحق P8–P10،2026-10-14: المالك أجاز الآليات المحلية بالتوازي ومالك تكامل واحد. READ للمدرب يتطلب موافقة صريحة وتعيينًا ونطاقًا وانتهاءً وصلاحية اصطناعية؛لاADMIN health bypass ولاDailyReview/weight scope جديد. التقارير الصحية الحساسة والتصحيح خارج النافذة محجوبان؛A-11/A-12 محفوظتان.
+
+RV-11: تصدير مشفر محدود بإعادة المصادقة/الملكية/انتهاء التنزيل، وتمرين حذف علائقي بمخطط جديد؛ليس سياسة retention/full production graph/backup restore ledger. A-07/A-08 مفتوحتان. RV-12: DST gap أول دقيقة صالحة،fold أول وقوع،quiet hours،stable delivery key/versioned queue،consent recheck،retry/expiry محلية15دقيقة/5محاولات. سياسةlag/coalescing/provider/scheduler A-09 تحتاج اعتمادًا. جميعA-01..A-12 محفوظة؛[الدليل](P8-P10-INTEGRATION-REPORT.md).
+
+
 ملحق P3 — 2026-10-12: نفذت المصادقة والملف بإعداد اختبار اصطناعي محلي معلن في [P3-AUTH-IMPLEMENTATION](P3-AUTH-IMPLEMENTATION.md). A-02/A-08/A-12 وجميع قرارات المالك الأخرى تحتفظ بحالتها؛ لا يفسر تنفيذ مدد الاختبار أوTOTP باعتباره موافقة إنتاج أوتسليم صلاحيات مسؤول. RV-04 سوي لتحديpreauth المحلي فقط، واسترداد المسؤول غير منفذ؛ RV-03 دورة تغيير البريد؛ RV-07 عقودP3 فقط. نهج roles المقيدة وSQL locks/migrations الإضافية قرار تقني روتيني لا تغيير للمعمارية الأساسية أوسياسات المالك.
 
 الإصدار 1.0 — 2026-10-11 (Asia/Muscat). التكليف: DESIGN REVIEW & IMPLEMENTATION READINESS. خط الأساس: Commit `1ea4e5e857eb1b61efa3d3da78537ee214ba5efb` على `feature/ghidai-system-design`.

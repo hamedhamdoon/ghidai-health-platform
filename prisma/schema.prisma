@@ -732,6 +732,7 @@ model Notification {
   @@unique([userId, dedupeKey])
   @@unique([userId, id])
   @@index([userId], map: "Notification_userId_fkey_idx")
+  @@index([userId, createdAt(sort: Desc)], map: "p9_notification_inbox")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -870,6 +871,7 @@ model PrivacyRequest {
   @@unique([userId, id])
   @@unique([userId, kind], map: "privacy_active", where: raw("(status = ANY (ARRAY['PENDING'::\"JobStatus\", 'RUNNING'::\"JobStatus\"]))"))
   @@index([userId], map: "PrivacyRequest_userId_fkey_idx")
+  @@index([userId, requestedAt(sort: Desc)], map: "p9_privacy_owner")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -1091,6 +1093,7 @@ model ReminderRule {
   @@index([taskDefinitionId], map: "ReminderRule_taskDefinitionId_fkey_idx")
   @@index([userId], map: "ReminderRule_userId_enrollmentId_fkey_idx")
   @@index([userId], map: "ReminderRule_userId_fkey_idx")
+  @@index([userId, enabled], map: "p9_reminder_enabled")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
