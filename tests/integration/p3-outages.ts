@@ -5,18 +5,22 @@ import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
 import { localPool } from '../../scripts/p2-database';
 import { localAuthConfig } from '../../src/server/auth/runtime';
+import { mkdirSync,openSync,closeSync,readFileSync } from 'node:fs';
+import { summarizeHttpMetrics } from '../../src/server/operations/telemetry';
 process.env.GHIDAI_AUTH_ENV='test';
 const cfg=localAuthConfig();if(cfg.schema==='public')throw new Error('ISOLATED_TEST_SCHEMA_REQUIRED');
 const probe=createServer();await new Promise<void>((resolve,reject)=>{probe.once('error',reject);probe.listen(3100,'127.0.0.1',()=>probe.close(()=>resolve()));});
 const {pool:base,url}=await localPool('test');await base.end();
 const admin=new Pool({connectionString:url,options:`-c search_path=${cfg.schema},public`});
 const origin='http://127.0.0.1:3100';
-const child=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','3100'],{env:{...process.env,GHIDAI_AUTH_ENV:'test'},windowsHide:true,stdio:'ignore'});
+mkdirSync('.npm-cache',{recursive:true});const metricLog=openSync('.npm-cache/p11-outage-http-metrics.jsonl','w');
+const child=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','3100'],{env:{...process.env,GHIDAI_AUTH_ENV:'test',GHIDAI_LOCAL_METRICS:'true'},windowsHide:true,stdio:['ignore',metricLog,metricLog]});
 let paused=false,mailPaused=false;
 function docker(args:string[]){const result=spawnSync('docker',args,{windowsHide:true,stdio:'ignore'});assert.equal(result.status,0,'Project-scoped Docker command failed');}
 const wait=()=>new Promise(resolve=>setTimeout(resolve,300));
 try {
  let ready=false;for(let i=0;i<100;i++){try{if((await fetch(`${origin}/api/health`,{signal:AbortSignal.timeout(1000)})).ok){ready=true;break;}}catch{}await wait();}assert(ready);
+ assert.equal((await fetch(`${origin}/api/ready`)).status,200);console.log('PASS P11 initial readiness: both restricted pools available.');
  const csrf=await (await fetch(`${origin}/api/v1/auth/csrf`)).json();
  const cookie=(await fetch(`${origin}/api/v1/auth/csrf`)).headers.get('set-cookie')!.split(';')[0];
  // Fetch a token for the exact nonce cookie used by the request.
@@ -34,11 +38,13 @@ try {
  docker(['pause','ghidai-p1-local-postgres-test-1']);paused=true;
  const unavailable=await fetch(`${origin}/api/v1/me`,{signal:AbortSignal.timeout(22000)});assert.equal(unavailable.status,503);const body=await unavailable.text();assert(!body.includes('postgresql://'));assert(!body.includes('passwordHash'));
  console.log('PASS actual PostgreSQL pause: safe 503, no secret in response.');
+ assert.equal((await fetch(`${origin}/api/health`)).status,200);const readiness=await fetch(`${origin}/api/ready`,{signal:AbortSignal.timeout(22000)});assert.equal(readiness.status,503);assert.deepEqual(await readiness.json(),{status:'unavailable'});console.log('PASS P11 liveness/readiness separation during actual DB outage.');
  docker(['unpause','ghidai-p1-local-postgres-test-1']);paused=false;
  assert.equal((await fetch(`${origin}/api/v1/me`,{signal:AbortSignal.timeout(22000)})).status,401);
+ assert.equal((await fetch(`${origin}/api/ready`,{signal:AbortSignal.timeout(22000)})).status,200);console.log('PASS P11 readiness recovery.');
  console.log('PASS database recovery: unauthenticated request correctly returns 401 after unpause; schemas retained.');
 }finally{
  if(paused)docker(['unpause','ghidai-p1-local-postgres-test-1']);
  if(mailPaused)docker(['unpause','ghidai-p1-local-mailpit-1']);
- child.kill();await admin.end().catch(()=>{});
+ child.kill();closeSync(metricLog);console.log('P11 measured outage HTTP summary',JSON.stringify(summarizeHttpMetrics(readFileSync('.npm-cache/p11-outage-http-metrics.jsonl','utf8'))));await admin.end().catch(()=>{});
 }

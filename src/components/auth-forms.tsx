@@ -2,22 +2,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-// Keep the same P4 receipt key after a failed response, so retrying a committed
-// request cannot create a second revision. Memory only; never persistent storage.
-const p4ReceiptKeys=new Map<string,string>();
-export class ApiError extends Error {constructor(public code:string,message:string,public status:number){super(message);}}
-export async function api(path:string,method='GET',body?:unknown,revision?:number) {
- let fingerprint:string|undefined;
- try {
- const headers:Record<string,string>={};
- if(method!=='GET'){const csrf=await fetch('/api/v1/auth/csrf',{cache:'no-store'});const data=await csrf.json();if(!csrf.ok)throw new Error(data.error?.message??'تعذر الاتصال.');headers['X-CSRF-Token']=data.data.csrfToken;headers['Content-Type']='application/json';if(method==='POST'){if(/^(admin|coach|content-revisions)(\/|$)/.test(path)){fingerprint=JSON.stringify({path,body,revision});const key=p4ReceiptKeys.get(fingerprint)??crypto.randomUUID();p4ReceiptKeys.set(fingerprint,key);headers['Idempotency-Key']=key;}else headers['Idempotency-Key']=crypto.randomUUID();}if(revision)headers['If-Match']=`"${revision}"`;}
- const response=await fetch(`/api/v1/${path}`,{method,headers,body:method==='GET'?undefined:JSON.stringify(body??{}),cache:'no-store'});
- const result=response.status===204?{data:{}}:await response.json();if(!response.ok)throw new ApiError(result.error?.code??'UNKNOWN',result.error?.message??'تعذر الاتصال بالخدمة.',response.status);if(/^auth\/(logout|login|mfa\/challenge|password\/reset)$/.test(path))p4ReceiptKeys.clear();return result.data;
- } catch(error){if(error instanceof TypeError||error instanceof SyntaxError)throw new Error('تعذر الاتصال بالخدمة. تحقق من الشبكة ثم أعد المحاولة.');throw error;}
-}
-export function Field({name,label,type='text',required=true,defaultValue,autoComplete,min,max,step}:{name:string;label:string;type?:string;required?:boolean;defaultValue?:string|number;autoComplete?:string;min?:number;max?:number;step?:number|'any'}) {
- return <label className="auth-field"><span>{label}</span><input name={name} type={type} required={required} defaultValue={defaultValue} autoComplete={autoComplete} min={min} max={max} step={step} minLength={type==='password'?12:undefined} maxLength={type==='password'?128:undefined} dir={['email','password','number'].includes(type)?'ltr':undefined}/></label>;
-}
+import { api } from './client-api';
+import { Field } from './form-field';
+export { api, ApiError } from './client-api';
+export { Field } from './form-field';
 export type AuthMode='register'|'login'|'verify'|'forgot-password'|'reset-password';
 const labels:Record<AuthMode,string>={register:'إنشاء حساب',login:'تسجيل الدخول',verify:'التحقق من البريد','forgot-password':'استعادة كلمة المرور','reset-password':'إعادة تعيين كلمة المرور'};
 export function AuthForm({mode}:{mode:AuthMode}) {

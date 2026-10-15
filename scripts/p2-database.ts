@@ -19,7 +19,8 @@ export async function localPool(environment: DatabaseEnvironment) {
   return { pool, url };
 }
 
-export async function preflight(pool: Pool) {
+export async function preflight(pool: Pool, isolatedRegression=false) {
+  if(isolatedRegression&&(await pool.query('SELECT current_database() AS db')).rows[0].db!=='ghidai_test')throw new Error('ISOLATED_TEST_DATABASE_REQUIRED');
   const tables = (await pool.query("SELECT tablename FROM pg_tables WHERE schemaname='public'")).rows.map(r => r.tablename);
   if (tables.length && !tables.includes('_prisma_migrations')) throw new Error('UNEXPECTED_DATABASE_CONTENT');
   const allowed = new Set([...readFileSync('prisma/migrations/202610110001_p2_foundation/migration.sql','utf8').matchAll(/CREATE TABLE "(\w+)"/g)].map(m=>m[1]));
@@ -27,12 +28,12 @@ export async function preflight(pool: Pool) {
   allowed.add('AuthChallenge'); allowed.add('AuthMail'); allowed.add('P4LocalCapability');
   for (const table of tables) {
     if(!allowed.has(table)) throw new Error('UNEXPECTED_DATABASE_TABLE');
-    if(table !== '_prisma_migrations' && (await pool.query(`SELECT EXISTS(SELECT 1 FROM "${table}" LIMIT 1) present`)).rows[0].present) throw new Error('NONEMPTY_DATABASE_REJECTED');
+    if(table !== '_prisma_migrations' && !(isolatedRegression&&table==='AuditLog') && (await pool.query(`SELECT EXISTS(SELECT 1 FROM "${table}" LIMIT 1) present`)).rows[0].present) throw new Error('NONEMPTY_DATABASE_REJECTED');
   }
   if(tables.includes('_prisma_migrations')) {
     const applied=(await pool.query('SELECT migration_name,checksum FROM _prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL')).rows;
     for(const record of applied) {
-      if(!/^20261011000[1-9]_p2_[a-z_]+$/.test(record.migration_name)&&!/^20261012000[1-9]_p[34]_[a-z_]+$/.test(record.migration_name))throw new Error('UNEXPECTED_MIGRATION');
+      if(!/^20261011000[1-9]_p2_[a-z_]+$/.test(record.migration_name)&&!/^20261012000[1-9]_p[34]_[a-z_]+$/.test(record.migration_name)&&!/^20261012001[0-9]_p[567]_[a-z_]+$/.test(record.migration_name)&&!/^20261013001[56]_p[89]_[a-z_]+$/.test(record.migration_name)&&!/^202610140017_p8_note_action$/.test(record.migration_name))throw new Error('UNEXPECTED_MIGRATION');
       const actual=createHash('sha256').update(readFileSync(`prisma/migrations/${record.migration_name}/migration.sql`)).digest('hex');
       if(actual!==record.checksum)throw new Error('MIGRATION_CHECKSUM_MISMATCH');
     }

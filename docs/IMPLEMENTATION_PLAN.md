@@ -1,5 +1,8 @@
 # خطة التنفيذ والتحقق والتشغيل
 
+تحديث تنفيذ2026-10-14: P8/P9/P10 نفذت بمسارات مستقلة ومالك تكامل واحد للمهاجرات والعقود. نقاطGit مستقلة؛الفحوص المرحلية ثم الانحدار الشامل في[تقرير التكامل](P8-P10-INTEGRATION-REPORT.md). المراحلP11/P12 لم تبدأ. بواباتمالك/قانون/صحةA-01..A-12 باقية؛الجدول الأصلي خطة وتاريخ وليس دليل تشغيل.
+
+
 1.0 — 2026-10-11. هذه خطة مستقبلية شاملة؛ لا يبدأ تنفيذ التطبيق دون تكليف لاحق. جميع R-* موصوفة في [المتطلبات](PROJECT_REQUIREMENTS.md) ومتتبعة في [السجل](REQUIREMENTS-TRACEABILITY.md). حالة جميع الوظائف: غير منفذة؛ حالة هذا الإصدار: مواصفات معدة للمراجعة. لا جدول زمني تعاقدي قبل معرفة الفريق واعتماد الفجوات.
 
 ## ترتيب الاعتماديات والقبول
@@ -16,7 +19,7 @@
 | P7 التقدم والتحفيز | P5/P6 + A-04 | BR calculators ، إحصاء فعلي ورسوم/جداول، awards/revoke/certificates | T-12/13 ، N=0 ، أهداف مختلفة، حذف يسحب استحقاقًا، لا رسومات وهمية |
 | P8 المدرب والإدارة | P3/P4/P6 | assignment-consent/scopes ، coach views/notes ، users/roles/reports/audit/operations | T-03/15 ، سحب الموافقة يمنع الطلب التالي، آخر ADMIN محمي |
 | P9 التنبيهات والخصوصية | P3/P5/P6 + A-07..11 | مركز تنبيهات، preferences ، outbox ، export/delete/ledger ، push إن دعم مجانيًا | T-14/16 ، duplicate jobs/quiet/DST ، private download ، استعادة لا تعيد محذوفًا |
-| P10 PWA و UX والأداء | جميع الشاشات | تثبيت، offline banner ، assets cache ، RTL/A11Y وتخفيف JS | T-19/22/23 ، widths360/768/1280 ، keyboard/screen reader ، Lighthouse ومقاييس فعلية |
+| P10 PWA و UX والأداء | جميع الشاشات | تثبيت، offline banner ، assets cache ، RTL/A-11Y وتخفيف JS | T-19/22/23 ، widths360/768/1280 ، keyboard/screen reader ، Lighthouse ومقاييس فعلية |
 | P11 تجهيز التشغيل | P2/P9/P10 + A-06/07/08/09 | host مجاني مجاز، DB مستقل، secrets ، backup scheduler/site ، runbooks ، فحص quotas | T-18/24 ، backup restore مثبت، no-card/no-autocharge ، لا نشر تلقائي |
 | P12 قبول وإصدار | P11 + موافقة نشر منفصلة | HTTPS domain مجاني، changelog ، release reviewed ، تقرير قبول | T-21: حسابان من جهازين مستقلين فعليًا، persistence/isolation ، موافقة دمج main منفصلة |
 
@@ -47,7 +50,7 @@ P8 إدارة التأليف الأساسية تبدأ مع P4 ، لكن اكت�
 | T-19 | جميع S-01..32/S-40..56: loading/empty/error/offline/success/forbidden ، حفظ فاشل لا يعرض نجاحًا، dailyactions≤2 نقرة، 5nav ، 360/768/1280 |
 | T-20 | CSRF/Origin ، stored/reflectedXSS ، unknownfield/role ، brute force/rate/capbody ، session fixation ، secret scan ، authorization في RSC/API و DB |
 | T-21 | typecheck/lint/build/unit/integration/E2E ، حسابان فعليان من جهازين مستقلين عبر HTTPS بعد الموافقة، حفظ/استرجاع بعد خروج، منعتبادل UUID ، تقرير إصدار ومراجعة |
-| T-22 | contrast/zoom200%/touch/focus/reducedmotion ، keyboard+screenreader ، textualcharts ، Lighthouse ودليلجهاز/شبكة و p95/API/JSbudget مقابل R22 |
+| T-22 | contrast/zoom200%/touch/focus/reducedmotion ، keyboard+screenreader ، textualcharts ، Lighthouse ودليلجهاز/شبكة و p95/API/JSbudget مقابل R-22 |
 | T-23 | installability على devices مدعومة، publicassetcache فقط، offlinehealthAPI لا ينجح، logout لا cache صحي، لا ادعاء sync |
 | T-24 | quotas70/85/95 ، cappedprovider503 ، gracefuldegrade ، nocharge/upgrade/card ، pgexport/h جرة trialsynthetic ، قانونومزود reviewgates |
 
@@ -59,17 +62,17 @@ Unit: domain calculators/validation/scheduling ؛ integration: PostgreSQL حقي
 
 | الخطر | الأثر | المعالجة / مسؤول |
 |---|---|---|
-| تعارض الغذاء/claims | ضرر أو وعود غير صحيحة | A01+content hash review ، مختص |
-| تسرب بين مستخدمين | خصوصية وأمن | RLS/ownerFK/scopedrepository/T03 ، أمن+DB |
-| حصص كوب/ملعقة مجهولة | بيانات/هدف غير صحيح | حجم صريح/لا conversion افتراضي/A05 ، مختص+UX |
-| late/timezone/DST | حساب streak خاطئ | PolicyVersion/snapshots/T12/14 ، backend |
+| تعارض الغذاء/claims | ضرر أو وعود غير صحيحة | A-01+content hash review ، مختص |
+| تسرب بين مستخدمين | خصوصية وأمن | RLS/ownerFK/scopedrepository/T-03 ، أمن+DB |
+| حصص كوب/ملعقة مجهولة | بيانات/هدف غير صحيح | حجم صريح/لا conversion افتراضي/A-05 ، مختص+UX |
+| late/timezone/DST | حساب streak خاطئ | PolicyVersion/snapshots/T-12/14 ، backend |
 | خطة مجانية غير مناسبة أو حد مفاجئ | توقف خدمة أو مخالفة شروط | تحقق استخدام/quotas ، alerts ، noautoupgrade ، المالك+تشغيل |
-| scheduler/mail مجاني غير كاف | reset/push غير يعمل | A09 بوابة إنتاج، fallback داخل التطبيق صريح، تشغيل |
+| scheduler/mail مجاني غير كاف | reset/push غير يعمل | A-09 بوابة إنتاج، fallback داخل التطبيق صريح، تشغيل |
 | RLS مع connection pool | context مستخدم سابق | SETLOCALtransaction/nonowner و testpool ، DB |
 | تغيير برنامج منشور | تاريخ إنجاز يتغير | versionimmutable وسحب سلامة مدقق، backend |
 | نسخ احتياطية غير قابلة للاستعادة | فقد بيانات | encryptedindependent و restoretest/RPO/RTO ، تشغيل |
-| قانون/نقل بيانات صحية | عدم أهلية الإنتاج | A07 تقييم مختص وتصريح عند انطباقه، مالك+قانوني |
-| ضعف اتصال/هاتف | إدخال مكرر أو نجاح زائف | idempotency ، حالات UX ، JSbudget/T19/22/23 ، frontend |
+| قانون/نقل بيانات صحية | عدم أهلية الإنتاج | A-07 تقييم مختص وتصريح عند انطباقه، مالك+قانوني |
+| ضعف اتصال/هاتف | إدخال مكرر أو نجاح زائف | idempotency ، حالات UX ، JSbudget/T-19/22/23 ، frontend |
 | وصول إداري واسع | كشف صحة دون حاجة | metadataonly/breakglassgrant منفصل و audit ، أمن |
 
 ## متطلبات النشر واستعادة الخدمة
@@ -82,6 +85,10 @@ Release: branchfeature/fix ، changelog ، requiredchecks/review ، موافقة
 
 نتيجة الفحص المنفذ في 2026-10-11: اكتملت الملفات الثمانية؛ نجح فحص 38 رابطًا محليًا ووجود R-01..24 وT-01..24، وتحليل IMG-01..06 وسجل DIF-01..17 والشاشات S-01..32 وS-40..56. فُحصت المصادر بصريًا وروجعت قواعد الحساب والنسخ والملكية. لم يتغير AGENTS.md أو README.md أو الصور. فحص Git للمسافات والنطاق مطلوب قبل Commit. هذه نتائج تحقق وثائق وليست اختبارات تطبيق.
 
-فحص اكتمال الملفات الثمانية، روابط Markdown المحلية، وجود كل R01..24 و T01..24 في التتبع، صورة مصدر لكل IMG01..06 ، اتساق قواعد required/optional/versions/ملكية، `git diff --check`، ونطاق diff وثائق فقط. سيُنشأ commit ويُدفع فرع feature بعد نجاح الفحوص. بيانات حالة Git النهائية في التقرير المرافق، لا ادعاء push داخل وثيقة قبل حدوثه.
+فحص اكتمال الملفات الثمانية، روابط Markdown المحلية، وجود كل R-01..24 و T-01..24 في التتبع، صورة مصدر لكل IMG01..06 ، اتساق قواعد required/optional/versions/ملكية، `git diff --check`، ونطاق diff وثائق فقط. سيُنشأ commit ويُدفع فرع feature بعد نجاح الفحوص. بيانات حالة Git النهائية في التقرير المرافق، لا ادعاء push داخل وثيقة قبل حدوثه.
 
 سجل تغيير 1.0: تحليل ست صور على حدة؛ 17 اختلافًا؛ متطلبات 24 مجموعة؛ مصفوفة صلاحيات؛ خريطة 49 شاشة/حالة؛ عقود API ؛ تصميم جداول وقيود؛ قواعد حساب صريحة؛ خطة مرحلية واختبارات ومخاطر وبوابات اعتماد. العدد 49=32 شاشة مشارك+17 مدرب/إدارة. الوظائف منفذة: لا شيء؛ جزئية: لا شيء؛ تصميمية: هذه الحزمة؛ جاهزية الإنتاج: غير جاهز؛ اختبارات التطبيق: لم تُشغّل ولا ينطبق إعلان نجاحها.
+
+## P11 authorization — 2026-10-15
+
+P11 local operational preparation is authorized from79752ab on feature/ghidai-p11-production-readiness. Provider assessment, fail-closed configuration contracts, isolated encrypted restore rehearsal, monitoring/runbooks, dependency review and performance measurements are integrated under one owner. [P11-HANDOFF](P11-HANDOFF.md) and [P11-TEST-RESULTS](P11-TEST-RESULTS.md) define actual engineering acceptance. A-01–A-12 and production runtime/provider/legal/content/independent-backup gates remain open; P12 requires a new instruction. No public/cloud/paid activation or main merge.

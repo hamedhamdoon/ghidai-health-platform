@@ -367,6 +367,8 @@ model DailyReview {
   recordId            String              @unique @db.Uuid
   recordKind          RecordKind          @default(REVIEW)
   localDate           DateTime            @db.Date
+  timezoneSnapshot    String              @default("UTC") @db.VarChar(64)
+  deletedAt           DateTime?           @db.Timestamptz(6)
   schemaVersionId     String              @db.Uuid
   notes               String?             @db.VarChar(2000)
   weightKg            Decimal?            @db.Decimal(5, 2)
@@ -468,6 +470,7 @@ model ExerciseLog {
   startsAt     DateTime     @db.Timestamptz(6)
   durationMin  Int
   localDate    DateTime     @db.Date
+  timezoneSnapshot String   @default("UTC") @db.VarChar(64)
   note         String?      @db.VarChar(2000)
   deletedAt    DateTime?    @db.Timestamptz(6)
   User         User         @relation(fields: [userId], references: [id], onUpdate: NoAction)
@@ -510,6 +513,7 @@ model HabitLog {
   habitId         String          @db.Uuid
   localDate       DateTime        @db.Date
   completedAt     DateTime        @db.Timestamptz(6)
+  deletedAt       DateTime?       @db.Timestamptz(6)
   User            User            @relation(fields: [userId], references: [id], onUpdate: NoAction)
   HabitDefinition HabitDefinition @relation(fields: [userId, habitId], references: [userId, id], onUpdate: NoAction)
 
@@ -728,6 +732,7 @@ model Notification {
   @@unique([userId, dedupeKey])
   @@unique([userId, id])
   @@index([userId], map: "Notification_userId_fkey_idx")
+  @@index([userId, createdAt(sort: Desc)], map: "p9_notification_inbox")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -866,6 +871,7 @@ model PrivacyRequest {
   @@unique([userId, id])
   @@unique([userId, kind], map: "privacy_active", where: raw("(status = ANY (ARRAY['PENDING'::\"JobStatus\", 'RUNNING'::\"JobStatus\"]))"))
   @@index([userId], map: "PrivacyRequest_userId_fkey_idx")
+  @@index([userId, requestedAt(sort: Desc)], map: "p9_privacy_owner")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -1068,6 +1074,7 @@ model RecurrenceDefinition {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ReminderRule {
+  type             String     @default("DAILY_CHECK_IN")
   id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt        DateTime        @default(now()) @db.Timestamptz(6)
   updatedAt        DateTime        @default(now()) @db.Timestamptz(6)
@@ -1086,6 +1093,7 @@ model ReminderRule {
   @@index([taskDefinitionId], map: "ReminderRule_taskDefinitionId_fkey_idx")
   @@index([userId], map: "ReminderRule_userId_enrollmentId_fkey_idx")
   @@index([userId], map: "ReminderRule_userId_fkey_idx")
+  @@index([userId, enabled], map: "p9_reminder_enabled")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -1301,6 +1309,7 @@ model StepDayLog {
   timezoneSnapshot String       @db.VarChar(64)
   totalSteps       Int
   recordedAt       DateTime     @db.Timestamptz(6)
+  recordedForTime  DateTime     @db.Timestamptz(6)
   source           String
   deletedAt        DateTime?    @db.Timestamptz(6)
   User             User         @relation(fields: [userId], references: [id], onUpdate: NoAction)

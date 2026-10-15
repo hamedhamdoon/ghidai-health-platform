@@ -1,0 +1,9 @@
+import { describe,it,expect } from 'vitest';
+import { addDays,localDate,localInstant,scheduleTasks,saveAllowed } from '../../src/server/participation/rules';
+describe('P5 immutable schedule calculations',()=>{
+ it('generates 7, 15 and 21 contiguous dates across calendar boundaries',()=>{for(const days of [7,15,21]){const dates=Array.from({length:days},(_,i)=>addDays('2026-12-27',i));expect(new Set(dates).size).toBe(days);expect(dates.at(-1)).toBe(addDays('2026-12-27',days-1));}});
+ it('resolves local Oman times and relative task anchors',()=>{const tasks=[{id:'a',scheduleKind:'AT',timeStart:'09:00:00',timeEnd:null,anchorTaskId:null,offsetMin:null},{id:'b',scheduleKind:'RELATIVE',timeStart:null,timeEnd:null,anchorTaskId:'a',offsetMin:30}];const schedule=scheduleTasks(tasks,'2026-10-12','Asia/Muscat');expect(schedule.get('a')!.scheduledAt!.toISOString()).toBe('2026-10-12T05:00:00.000Z');expect(schedule.get('b')!.scheduledAt!.toISOString()).toBe('2026-10-12T05:30:00.000Z');});
+ it('rejects cycles and nonexistent DST times',()=>{expect(()=>scheduleTasks([{id:'a',scheduleKind:'RELATIVE',timeStart:null,timeEnd:null,anchorTaskId:'a',offsetMin:5}],'2026-10-12','Asia/Muscat')).toThrow();expect(()=>localInstant('2026-03-08','02:30:00','America/New_York')).toThrow();});
+ it('selects earliest instant for repeated DST local time',()=>{expect(localInstant('2026-11-01','01:30:00','America/New_York').toISOString()).toBe('2026-11-01T05:30:00.000Z');});
+ it('enforces configurable synthetic save windows and snapshot dates',()=>{expect(localDate(new Date('2026-10-11T22:00:00Z'),'Asia/Muscat')).toBe('2026-10-12');expect(saveAllowed('2026-10-11','2026-10-12',1,'OPEN','ACTIVE')).toBe(true);expect(saveAllowed('2026-10-11','2026-10-12',0,'OPEN','ACTIVE')).toBe(false);expect(saveAllowed('2026-10-13','2026-10-12',1,'OPEN','ACTIVE')).toBe(false);expect(saveAllowed('2026-10-12','2026-10-12',1,'LOCKED','ACTIVE')).toBe(false);});
+});

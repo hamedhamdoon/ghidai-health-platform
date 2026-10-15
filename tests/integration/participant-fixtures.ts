@@ -1,0 +1,39 @@
+import {randomUUID,randomBytes} from 'node:crypto';
+import {Pool,type QueryResultRow} from 'pg';
+import {localPool} from '../../scripts/p2-database';
+import {localAuthConfig} from '../../src/server/auth/runtime';
+import {PrismaPg} from '@prisma/adapter-pg';
+import {PrismaClient} from '../../src/generated/prisma/client';
+import {AuthService} from '../../src/server/auth/service';
+import {ProgramService} from '../../src/server/programs/service';
+import {digest,opaque,encrypt} from '../../src/server/auth/crypto';
+export type Row=QueryResultRow;
+export async function participantFixtures(schemaOverride?:string){
+ if(schemaOverride!==undefined&&!/^p3_test_\d+$/.test(schemaOverride))throw new Error('ISOLATED_SCHEMA_REQUIRED');
+ process.env.GHIDAI_AUTH_ENV='test';const baseConfig=localAuthConfig(),config={...baseConfig,schema:schemaOverride??baseConfig.schema};if(config.schema==='public')throw new Error('ISOLATED_SCHEMA_REQUIRED');
+ const options=`-c search_path=${config.schema},public`,timeouts={connectionTimeoutMillis:3000,query_timeout:5000,statement_timeout:5000};
+ const runtime={key:config.key,auth:new Pool({connectionString:config.authUrl,options,max:4,...timeouts}),app:new Pool({connectionString:config.appUrl,options,max:4,...timeouts}),prisma:new PrismaClient({adapter:new PrismaPg({connectionString:config.appUrl,options,max:2,...timeouts},{schema:config.schema})})};
+ const {pool:base,url}=await localPool('test');await base.end();const owner=new Pool({connectionString:url,options:`-c search_path=${config.schema},public`});
+ const auth=new AuthService(runtime.auth,runtime.app,runtime.key,runtime.prisma),programs=new ProgramService(auth);
+ async function user(role='USER',zone='Asia/Muscat'){const id=randomUUID(),token=opaque();await owner.query('INSERT INTO "User"(id,"emailNormalized",role,status,"verifiedAt") VALUES($1,$2,$3,\'ACTIVE\',now())',[id,`${id}@ghidai.test`,role]);await owner.query('INSERT INTO "Profile"("userId","displayName",timezone,locale) VALUES($1,\'مشارك اصطناعي\',$2,\'ar\')',[id,zone]);await owner.query('INSERT INTO "Session"("userId","tokenHash","expiresAt","lastSeenAt","reauthenticatedAt","mfaVerifiedAt") VALUES($1,$2,now()+interval \'2 hours\',now(),now(),now())',[id,digest(token)]);if(role==='ADMIN')await owner.query('INSERT INTO "MfaCredential"("userId","secretEncrypted","recoveryHashes","enabledAt") VALUES($1,$2,\'[]\',now()-interval \'1 second\')',[id,encrypt(randomBytes(20).toString('hex'),runtime.key)]);if(role!=='USER')await owner.query('INSERT INTO "P4LocalCapability"("userId","expiresAt",purpose) VALUES($1,now()+interval \'2 hours\',\'SYNTHETIC_LOCAL_ONLY\')',[id]);return {id,token};}
+ const admin=await user('ADMIN'),reviewer=await user('COACH'),a=await user(),b=await user();
+ const command=async(path:string,method:string,input:unknown,token:string,r?:number)=>(await programs.execute(path,method,input,token,r?`"${r}"`:null,randomUUID())).body as Row;
+ const q=(await owner.query('INSERT INTO "ReviewerQualification"("reviewerId",scope,"evidenceReference","verifiedBy","validUntil",status) VALUES($1,\'GUIDANCE\',\'synthetic-local:participant-fixture\',$2,now()+interval \'2 hours\',\'ACTIVE\') RETURNING id',[reviewer.id,admin.id])).rows[0];
+ const allocation=await owner.connect();let policy:Row,schema:Row;const answers:{dimensionId:string;optionId:string}[]=[];
+ try{await allocation.query('BEGIN');await allocation.query("SELECT pg_advisory_xact_lock(hashtextextended(current_schema()||':fixture-versions',0))");
+ policy=(await allocation.query('INSERT INTO "PolicyVersion"(version,"lateWindowDays","dayBoundary","streakRule","certificateThreshold") SELECT COALESCE(max(version),0)+1,1,\'00:00\',\'{"syntheticOnly":true}\',50 FROM "PolicyVersion" RETURNING id')).rows[0];
+ schema=(await allocation.query('INSERT INTO "ReviewSchemaVersion"(version,name) SELECT COALESCE(max(version),0)+1,$1 FROM "ReviewSchemaVersion" RETURNING id',[`synthetic-local-participant-${randomUUID()}`])).rows[0];
+ for(const [index,key] of ['COMMITMENT','ENERGY','HUNGER','MOOD','GENERAL'].entries()){const d=(await allocation.query('INSERT INTO "ReviewDimension"("schemaId",key,label,"order") VALUES($1,$2,$3,$4) RETURNING id',[schema.id,key,({COMMITMENT:'الالتزام',ENERGY:'الطاقة',HUNGER:'الجوع',MOOD:'المزاج',GENERAL:'التقييم العام'} as Record<string,string>)[key],index+1])).rows[0];const options=[];for(const value of [1,2,3])options.push((await allocation.query('INSERT INTO "ReviewOption"("dimensionId",value,label) VALUES($1,$2,$3) RETURNING id',[d.id,value,`اختيار اصطناعي ${value}`])).rows[0]);answers.push({dimensionId:d.id,optionId:options[1].id});}
+ await allocation.query('UPDATE "ReviewSchemaVersion" SET status=\'PUBLISHED\' WHERE id=$1',[schema.id]);await allocation.query('COMMIT');
+ }catch(error){await allocation.query('ROLLBACK');throw error;}finally{allocation.release();}
+ let content=await command('admin/content','POST',{contentKey:`fixture-${randomUUID()}`,kind:'GUIDANCE',title:'مهمة محايدة للاختبار',bodyText:'محتوى اصطناعي لتنظيم اختبار البرنامج فقط.',sourceExtractIds:[]},admin.token);
+ content=await command(`content-revisions/${content.id}/submit`,'POST',{},admin.token,content.revision);content=await command(`content-revisions/${content.id}/review`,'POST',{decision:'APPROVED',rationale:'مراجعة اصطناعية فقط',contentHash:content.contentHash,qualificationId:q.id},reviewer.token,content.revision);
+ async function program(durationDays=7,startMode='FLEXIBLE',fixedStartDate?:string,quantitative=false,rules=false){const p=await command('admin/programs','POST',{slug:`synthetic-${randomUUID()}`,type:'CUSTOM'},admin.token);let v=await command(`admin/programs/${p.id}/versions`,'POST',{metadata:{title:`برنامج اختبار ${durationDays} ${randomUUID().slice(0,6)}`,descriptionRevisionId:content.id,durationDays,startMode,...(fixedStartDate?{fixedStartDate}:{}),policyVersionId:policy.id,reviewSchemaVersionId:schema.id}},admin.token,p.revision);
+  const tasks:Row[]=[{key:'manual',titleRevisionId:content.id,type:'MANUAL',required:true,order:1,scheduleKind:'AT',timeStart:'09:00',completionMode:'MANUAL'},{key:'optional',titleRevisionId:content.id,type:'HABIT',required:false,order:2,scheduleKind:'RELATIVE',anchorKey:'manual',offsetMin:30,completionMode:'MANUAL'}];
+  if(quantitative)for(const [i,metric] of ['WATER_ML','STEPS','EXERCISE_MIN','SLEEP_MIN'].entries())tasks.push({key:metric,titleRevisionId:content.id,type:['WATER','STEPS','EXERCISE','SLEEP'][i],required:true,order:i+3,scheduleKind:'NONE',completionMode:'THRESHOLD',metric,defaultTarget:[100,10,5,30][i]});
+  v=await command(`admin/program-versions/${v.id}/recurrence`,'PUT',{pattern:'EVERY_DAY',dayIndices:[],tasks},admin.token,v.revision);
+  if(rules){for(const type of ['FIRST_DAY','STREAK','COMPLETION']){const rule=(await owner.query('INSERT INTO "AchievementRuleVersion"(code,version,type,config,"contentRevisionId",status) VALUES($1,1,$2,$3,$4,\'PUBLISHED\') RETURNING id',[`synthetic-${randomUUID()}`,type,JSON.stringify({syntheticOnly:true,days:1,percentage:50}),content.id])).rows[0];await owner.query('INSERT INTO "ProgramAchievementRule"("versionId","ruleVersionId") VALUES($1,$2)',[v.id,rule.id]);}}
+  v=await command(`admin/program-versions/${v.id}/submit`,'POST',{},admin.token,v.revision);v=await command(`admin/program-versions/${v.id}/publish`,'POST',{confirmation:true,expectedContentHashes:{[content.id]:content.contentHash}},admin.token,v.revision);return {p,v};
+ }
+ return {runtime,owner,auth,programs,admin,reviewer,a,b,policy,schema,answers,content,command,program,user,async close(){await Promise.all([owner.end(),runtime.auth.end(),runtime.app.end(),runtime.prisma.$disconnect()]);}};
+}

@@ -1,5 +1,7 @@
 # نطاق التشغيل والنشر
 
+P8–P10 محليةفقط؛P11/P12 لمتبدأا. manifest/install/serviceworker ليستpublic deployment أوproduction acceptance. noofflinehealthqueue/noWebPush/nocontinuousscheduler. لاpaid/cloud/main/realdata أوproductionbootstrap. شروطالمزود/القانون/المحتوى/الاحتفاظ/النسخ/التشغيل لاتغلقهاfixture. [التكامل](P8-P10-INTEGRATION-REPORT.md) يحددجاهزيةالخطوةالمستقلةالتاليةوقيودها؛موافقةالنشرمستقلة.
+
 P3 كذلك **محلي فقط**. الحسابات والبريدالتجريبي تعمل وفق [P3-HANDOFF](P3-HANDOFF.md)؛ لا بريدإنتاج أوHTTPSعام أوcloud أوbootstrapإداري. الكوكي Secure=false محصور فيHTTPloopback، ولا يجوز نقله كما هو إلىإنتاج. قراراتA-02/A-08/A-12 وغيرها لم تغلق؛ النشر يحتاج تكليفًا وموافقة مستقلة. إعدادCImanual فقط ولم يشغّل فيP3؛ لاdeploymenttrigger.
 
 P1 محلي فقط؛ [LOCAL-DEVELOPMENT](LOCAL-DEVELOPMENT.md) يوضح التشغيل وإعادة الإنشاء. لا حساب أو استضافة سحابية أو قاعدة إنتاج أو نشر عام أو دمج main. خادما dev/start وCompose يستمعان على loopback.
@@ -11,3 +13,7 @@ CI workflow_dispatch دون push trigger أو deployment؛ حصة Actions الخ
 ## ملحق P4: تشغيل محلي فقط
 
 التكليف لا ينشر على الإنترنت ولا ينشئ خدمات. [P4-HANDOFF](P4-HANDOFF.md) يحدد تشغيل Docker الحالي والمهاجرات الإضافية والمصادر وحسابي اختبار مؤقتين. يحفظ ملف أسرار fixtures محليًا في .env.p4.fixtures-*.local المستثنى، ويمسحه المالك وفق سياسة احتفاظ لاحقة؛ لا تحذفه تلقائيًا. توقف Docker يفقد بيانات tmpfs الاختبارية؛ لا يعاد إيقافها أو إنشاؤها أثناء الجولات لتصفيرها. لا تعتبر هذه البيئة نسخة احتياطية أو قبول استعادة إنتاج.
+
+## P11 operations preparation — 2026-10-15
+
+The P11 instruction permits local preparation, not publication. [P11 configuration](P11-PRODUCTION-CONFIGURATION.md) explicitly disables production adapters; [hosting](P11-HOSTING-ASSESSMENT.md) has no approved complete zero-cost stack. [Runbooks](P11-MONITORING-RUNBOOK.md), [restore rehearsal](P11-BACKUP-RESTORE.md), [release gates](P11-RELEASE-GATES.md) and [handoff](P11-HANDOFF.md) govern any future proposal. Manual CI remains without push/deploy triggers; no host repository integration was enabled. Prior P11-not-started statements are historical.

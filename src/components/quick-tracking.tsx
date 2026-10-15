@@ -1,0 +1,10 @@
+'use client';
+import { useState,useRef } from 'react';
+import { Field } from './form-field';
+import { request } from './tracking-request';
+export function QuickTracking(){
+ const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
+ const pending=useRef(new Map<string,{path:string;method:string;body:unknown;revision?:number;create:boolean}>());
+ async function save(kind:'water'|'steps',totalSteps=0){setBusy(true);setError('');setMessage('');const slot=kind+':'+totalSteps;try{let prepared=pending.current.get(slot);if(!prepared){const now=new Date().toISOString();if(kind==='water')prepared={path:'logs/water',method:'POST',body:{amountMl:250,occurredAt:now},create:false};else{const {profile}=await request('me');const day=new Intl.DateTimeFormat('en-CA',{timeZone:profile.timezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());const current=await request('logs/steps/'+day);prepared={path:'logs/steps/'+day,method:'PUT',body:{totalSteps,recordedForTime:now},revision:current.log?.revision??current.revision,create:!current.log&&!current.revision};}pending.current.set(slot,prepared);}await request(prepared.path,prepared.method,prepared.body,prepared.revision,prepared.create);pending.current.delete(slot);window.dispatchEvent(new Event('ghidai:logs-saved'));setMessage(kind==='water'?'تم حفظ 250 ml من الماء.':'تم حفظ إجمالي الخطوات.');}catch(e){setError(e instanceof TypeError?'تعذر الاتصال بالخدمة. أعد المحاولة.':e instanceof Error?e.message:'تعذر حفظ البيانات.');}finally{setBusy(false);}}
+ return <section className="content-card auth-card" aria-busy={busy}><h2>تسجيل سريع</h2>{error&&<p role="alert">{error}</p>}{message&&<p role="status">{message}</p>}<button className="button" disabled={busy} onClick={()=>save('water')}>إضافة ماء 250 ml</button><form onSubmit={e=>{e.preventDefault();const data=new FormData(e.currentTarget);save('steps',Number(data.get('quickSteps')));}}><Field name="quickSteps" label="إجمالي خطوات اليوم" type="number" min={0} max={200000} defaultValue={0}/><button className="button" disabled={busy}>حفظ خطوات اليوم</button></form></section>;
+}

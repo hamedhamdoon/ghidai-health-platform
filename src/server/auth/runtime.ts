@@ -3,9 +3,11 @@ import { Pool } from 'pg';
 import { assertLocalAppDatabase } from '../db/local-database';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../../generated/prisma/client';
+import { assertLocalRuntime, operationEnvironment } from '../operations/config';
 export function localAuthConfig() {
+ assertLocalRuntime();
  if(process.env.GHIDAI_AUTH_ENV&&!['development','test'].includes(process.env.GHIDAI_AUTH_ENV))throw new Error('LOCAL_AUTH_ENV_REQUIRED');
- const environment=process.env.GHIDAI_AUTH_ENV==='test'?'test':'development';
+ const environment=operationEnvironment()==='test'?'test':'development';
  const secrets=config({path:`.env.p3.${environment}.local`,quiet:true}).parsed;
  const app=config({path:`.env.p2.${environment}.local`,quiet:true}).parsed;
  if(secrets?.P3_LOCAL_ONLY!=='true'||!/^[a-f0-9]{64}$/.test(secrets.P3_KEY)||!app)throw new Error('LOCAL_AUTH_REQUIRED');
@@ -18,6 +20,7 @@ export function localAuthConfig() {
 }
 let pools: {auth:Pool;app:Pool;key:Buffer;prisma:PrismaClient}|undefined;
 export function authRuntime() {
+ assertLocalRuntime();
  if(!pools){
   const c=localAuthConfig(),options=`-c search_path=${c.schema},public`;
   const timeouts={connectionTimeoutMillis:3000,query_timeout:5000,statement_timeout:5000,idle_in_transaction_session_timeout:15000};

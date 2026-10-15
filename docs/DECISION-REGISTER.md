@@ -1,5 +1,10 @@
 # GHIDAI — سجل القرارات
 
+ملحق P8–P10،2026-10-14: المالك أجاز الآليات المحلية بالتوازي ومالك تكامل واحد. READ للمدرب يتطلب موافقة صريحة وتعيينًا ونطاقًا وانتهاءً وصلاحية اصطناعية؛لاADMIN health bypass ولاDailyReview/weight scope جديد. التقارير الصحية الحساسة والتصحيح خارج النافذة محجوبان؛A-11/A-12 محفوظتان.
+
+RV-11: تصدير مشفر محدود بإعادة المصادقة/الملكية/انتهاء التنزيل، وتمرين حذف علائقي بمخطط جديد؛ليس سياسة retention/full production graph/backup restore ledger. A-07/A-08 مفتوحتان. RV-12: DST gap أول دقيقة صالحة،fold أول وقوع،quiet hours،stable delivery key/versioned queue،consent recheck،retry/expiry محلية15دقيقة/5محاولات. سياسةlag/coalescing/provider/scheduler A-09 تحتاج اعتمادًا. جميعA-01..A-12 محفوظة؛[الدليل](P8-P10-INTEGRATION-REPORT.md).
+
+
 ملحق P3 — 2026-10-12: نفذت المصادقة والملف بإعداد اختبار اصطناعي محلي معلن في [P3-AUTH-IMPLEMENTATION](P3-AUTH-IMPLEMENTATION.md). A-02/A-08/A-12 وجميع قرارات المالك الأخرى تحتفظ بحالتها؛ لا يفسر تنفيذ مدد الاختبار أوTOTP باعتباره موافقة إنتاج أوتسليم صلاحيات مسؤول. RV-04 سوي لتحديpreauth المحلي فقط، واسترداد المسؤول غير منفذ؛ RV-03 دورة تغيير البريد؛ RV-07 عقودP3 فقط. نهج roles المقيدة وSQL locks/migrations الإضافية قرار تقني روتيني لا تغيير للمعمارية الأساسية أوسياسات المالك.
 
 الإصدار 1.0 — 2026-10-11 (Asia/Muscat). التكليف: DESIGN REVIEW & IMPLEMENTATION READINESS. خط الأساس: Commit `1ea4e5e857eb1b61efa3d3da78537ee214ba5efb` على `feature/ghidai-system-design`.
@@ -84,3 +89,20 @@
 ## ملحق P4 — نطاق التسوية التقنية
 
 تكليف المالك يبدأ من P3 المعتمد، وينفذ محليًا فقط. RV-10 سوي للبرامج والإصدارات والمحتوى وفق جدول [P4-PROGRAM-ENGINE](P4-PROGRAM-ENGINE.md)؛ حالات المشاركة وقفل الأيام تبقى لـP5. RV-07 مطبق ضمن أوامر P4: If-Match وإيصالات Idempotency-Key وأقفال الآباء، دون تعديل سياسات المالك. المدد والحدود والأهداف والإدارة والتأهيل أمثلة اصطناعية محلية؛ لا تغلق A-01 أو A-05 أو A-10 أو A-12 أو أي قرار آخر. نشر المصادر الحقيقية والتحويلات غير المعتمدة وbootstrap الإنتاجي محجوب.
+
+## قرارات تنفيذ تقنية P5–P7 — 2026-10-13
+
+| المعرف / الفجوة | القرار التقني والأثر | إثباته وحدوده |
+|---|---|---|
+| P5-TEC-01 / RV-10 | الانضمام لنسخة ثابتة بمعاملة توليد كاملة؛ SCHEDULED→ACTIVE عند البداية، COMPLETED بعد المدة والنافذة، وWITHDRAWN يحتفظ بالسجل؛ قفل اليوم نهائي حسب شروطه | FK/قيود/أقفال خادم وقاعدة واختبارات P5؛ نافذة A-03 اختبارية فقط |
+| P6-TEC-01 / RV-07 | mutations بإيصال مرتبط بالفاعل/الجسم/precondition؛ singleton ينشأ If-None-Match:* ويعدل If-Match؛ تصحيح كمية يعيد DERIVED ثم الاستحقاق ذريًا | تزامن/replay وحذف منطقي/استعادة وLogRevision مشفر؛ لا تصحيح إداري خارج النافذة |
+| P6-TEC-02 / RV-08 | سجلات مستقلة بلا اشتراك، event UTC وسياق شخصي محفوظ، وتطابق كل مشاركة بمنطقتها المجمدة؛ إجمالي الخطوات يستبدل ولا يجمع، والنوم يوم الاستيقاظ | BR-01 صحح لإزالة المنع المتعارض؛ اختبار قبل الاشتراك والسفر وتعدد المشاركات؛ لا إعادة تفسير بيانات حقيقية |
+| P7-TEC-01 / RV-09 | الاستحقاق مشتق متزامن من المصدر بعد mutations وعند القراءة؛ aggregateRevision وإثبات C/N يتطابقان، والسحب يشمل award/certificate في المعاملة؛ التنزيل يعيد الفحص | SQL يرفض مصدرًا مزورًا وشهادة غير مستحقة؛ لا الاعتماد على outbox projection أو job قديم. تنفيذ scheduler غير داخل P7 |
+| P7-TEC-02 / A-03/A-04 | آلية RuleVersion وPolicyVersion قابلة للاختبار مع syntheticOnly وقاعدة محلية ومحتوى اصطناعي مراجع؛ شهادة JSON خاصة TEST- بوقت تحقق وإصدار مصدر | ليست عتبات معتمدة أو شهادة نهائية/عامة؛ تقييم خارج هذه البوابات محجوب |
+| P7-TEC-03 / fixtures | تاريخ اختبار اصطناعي يتطلب superuser وghidai_test ومخطط اختبار محفوظ وswitch محلي صريح، مع المجموعة الكاملة وقيود الملكية/المحتوى | الغياب/NULL لا يفعّل الاستثناء، وapp لا يكتسبه؛ لا تعديل snapshot قائم أو ترحيل سياسة صحية |
+
+الأسباب: حفظ نسخة المشارك، حل تعارض التسجيل المستقل، منع تكرار الإجماليات، ومنع شهادة stale بعد التصحيح. التفاصيل في [التكامل](P5-P7-INTEGRATION-REPORT.md) وتسليم المراحل؛ فحوص SQL وE2E مصدر القبول التقني. لا تغير هذه القرارات A-01..A-12، ولا يعتمد fixture نافذة يوم أو عتبة50 أو streak1. الإنتاج وP8 والنشر والدمج تحتاج تكليفها وبواباتها المستقلة.
+
+## P11 local operational decisions — 2026-10-15
+
+The owner authorizes P11 local preparation only; no A-01–A-12 status changes. Provider evidence/risks are refreshed in [hosting](P11-HOSTING-ASSESSMENT.md); no complete zero-cost stack is selected. Future environment contracts fail closed and production runtime remains disabled. Local encrypted restore exercises use a fresh target and ephemeral key, not durable production backup custody. Local telemetry is opt-in and contains status/duration only. Thresholds and rehearsal timings are engineering observations, not approved retention/SLA/RPO/RTO. [Release matrix](P11-RELEASE-GATES.md) records remaining authorities. P12 requires new owner instruction.

@@ -1,5 +1,9 @@
 # قاعدة بيانات GHIDAI — سجل الأساس P1 وملحق P2
 
+## الحالة الحالية P8/P9
+
+طُبقت 26 هجرة على قاعدتي التطوير والاختبار بعد التحقق من الهوية والبصمات. أضيفت 015 للمدرب والإدارة، و016 للتنبيهات والخصوصية، و017 لفصل READ عن NOTE وربط الإضافة بالتعيين والموافقة المحددين. لم تُعدل الهجرات التاريخية. تبقى قراءة التقدم محكومة بالموافقة، والإدارة محصورة في البيانات الوصفية، مع انتهاء الصلاحيات المحلية وحماية آخر مسؤول. أضيف نوع التذكير وفهارس مركز التنبيهات وطلبات الخصوصية وقواعد RLS للـOutbox. اختُبرت آلية حذف سجل مشارك اصطناعي كامل في مخطط GHIDAI جديد مستقل محفوظ؛ لم تُحذف بيانات التطوير أو المخططات السابقة، ولم تُعتمد سياسة حذف إنتاجية. [التكامل](P8-P10-INTEGRATION-REPORT.md) و[P9](P9-HANDOFF.md) يحددان الحدود.
+
 ## ملحق P3
 
 العدد الحالي70نموذجًا،12migration (9P2محفوظة +3إضافيةP3). AuthChallenge وAuthMail وحقول candidateEmail/preferences/MFA replay/setup expiry، ومفتاح مركب لملكية البريد والرمز. ghidai_auth غير مالك/غير superuser/غير bypass ولاhealth privileges، وghidai_app يظل RLS. Profile query عبرPrisma وwrites/goals/consents عبرمعاملاتSQLمقيدة. التفاصيل في [P3-AUTH-IMPLEMENTATION](P3-AUTH-IMPLEMENTATION.md). dev/test مستقلتان؛ fixtures فيschemasمعزولةمحفوظة ولاحذف أوreset. الفقرات التالية تاريخP1/P2.
@@ -19,3 +23,9 @@ check-database يفحص الآن identity وbaseline migrations وtemporary roun
 ## ملحق P4
 
 ست migrations إضافية 202610120004..202610120009؛ لا تعديل للمهاجرات التاريخية. أضيف P4LocalCapability وContentRevision.syntheticOnly وContentReview.qualificationSnapshot، وسياسات التأليف والنشر ومراجعة مستقلة وأقفال graph وثبات الهوية والدليل. تغيير صلاحية التأهيل لا يمحو حالته المحفوظة وقت القرار. [المراجعة](P4-CONTENT-REVIEW.md) و[الأمن](P4-SECURITY-VALIDATION.md). لا حذف مخططات الاختبار أو volumes؛ النسخ الجديدة معزولة ومحفوظة أثناء التشغيل.
+
+## إضافة P5–P7 المحلية — 2026-10-13
+
+Enrollment يحفظ النسخة والسياسة والمنطقة والأهداف؛ EnrollmentDay وTaskOccurrence تولدان ذريًا ويمنع تغيير snapshot. TaskCompletion يدوي أو مشتق من سجلات المستخدم، والتصحيح يعيد احتسابه دون ازدواج. السجلات الشخصية مستقلة؛ StepDayLog.recordedForTime مرساة UTC، وExerciseLog وDailyReview يحملان timezoneSnapshot، والحذف المنطقي يبقي revision وتاريخ LogRevision المشفر.
+
+AchievementRuleVersion مرتبطة قبل نشر البرنامج؛ AchievementAward وCertificate يطابقان aggregateRevision الحالي، والسحب يشملهما في معاملة المصدر. المهاجرات010–014 إضافية فقط: مشاركة، تتبع، استحقاق، انتهاء تمرين، ونموذج تقييم كامل منشور أو تاريخي خاص بالمالك. Published schema وأطفاله ثابتون بقيود P2؛ لا تظهر مسودة ناقصة. 23 مهاجرة مطبقة بمجموعتي GHIDAI المحليتين دون تعديل السابق أو حذف البيانات. [تفاصيل وأدلة التكامل](P5-P7-INTEGRATION-REPORT.md).
