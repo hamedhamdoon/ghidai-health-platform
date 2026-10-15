@@ -12,12 +12,19 @@ import { TrackingService } from '../tracking/service';
 import { AnalyticsService } from '../analytics/service';
 import { AdministrationService } from '../administration/service';
 import { P9Service } from '../notifications/service';
+import { emitHttpMetric } from '../operations/telemetry';
 const cookieOptions={httpOnly:true,secure:false,sameSite:'strict' as const,path:'/'};
 const names={session:'ghidai_session',preauth:'ghidai_preauth',csrf:'ghidai_csrf'};
 export function localOrigin(url:string):string {const parsed=new URL(url);if(parsed.protocol!=='http:'||parsed.hostname!=='127.0.0.1'||!['3000','3100'].includes(parsed.port))throw new AuthError('LOCAL_ONLY',403);return parsed.origin;}
 export function csrfValue(key:Buffer,nonce:string,bound:string,stamp:number){return `${stamp}.${sign(key,`${nonce}:${digest(bound)}:${stamp}`)}`;}
 export function validCsrf(key:Buffer,nonce:string,bound:string,value:string){const stamp=Number(value.split('.')[0]);return !!nonce&&Number.isSafeInteger(stamp)&&stamp<=Date.now()&&Date.now()-stamp<3600000&&equal(csrfValue(key,nonce,bound,stamp),value);}
-export async function handle(request:NextRequest,{params}:{params:Promise<{path:string[]}>}) {
+export async function handle(request:NextRequest,context:{params:Promise<{path:string[]}>}) {
+ const start=performance.now();
+ const response=await handleRequest(request,context);
+ emitHttpMetric(response.status,performance.now()-start);
+ return response;
+}
+async function handleRequest(request:NextRequest,{params}:{params:Promise<{path:string[]}>}) {
  const requestId=randomUUID();
  try {
   // Next may reconstruct request.url with localhost internally. Only the explicit loopback

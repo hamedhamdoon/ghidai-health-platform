@@ -1,0 +1,5 @@
+export type OperationalSnapshot = { databaseAvailable: boolean; failedJobs: number; overdueJobs: number; failedMail: number; backupAgeHours: number | null; diskFreeRatio: number; errorRate: number | null };
+export function operationalAlerts(s: OperationalSnapshot): string[] {
+  if (![s.failedJobs,s.overdueJobs,s.failedMail].every(n=>Number.isInteger(n)&&n>=0) || !Number.isFinite(s.diskFreeRatio) || s.diskFreeRatio<0 || s.diskFreeRatio>1 || (s.backupAgeHours!==null&&(!Number.isFinite(s.backupAgeHours)||s.backupAgeHours<0)) || (s.errorRate!==null&&(!Number.isFinite(s.errorRate)||s.errorRate<0||s.errorRate>1))) throw new Error('MONITOR_INPUT_REJECTED');
+  return [!s.databaseAvailable&&'DATABASE_UNAVAILABLE',s.failedJobs>0&&'JOB_FAILURE',s.overdueJobs>0&&'JOB_OVERDUE',s.failedMail>0&&'MAIL_FAILURE',s.backupAgeHours===null?'BACKUP_NOT_VERIFIED':s.backupAgeHours>24&&'BACKUP_STALE',s.diskFreeRatio<0.15&&'STORAGE_LOW',s.errorRate===null?'ERROR_RATE_NOT_MEASURED':s.errorRate>0.05&&'ERROR_RATE_HIGH'].filter((x):x is string=>typeof x==='string');
+}

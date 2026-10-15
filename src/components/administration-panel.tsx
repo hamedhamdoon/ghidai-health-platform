@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
-import {api} from './auth-forms';
+import { api } from './client-api';
 type User={id:string;role:string;status:string;revision:number};
 type Assignment={id:string;userId:string;coachId:string;revision:number;expiresAt:string;revokedAt:string|null};
 type Audit={id:string;action:string;occurredAt:string;targetType:string;reason:string|null};

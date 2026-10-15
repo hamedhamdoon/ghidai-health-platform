@@ -1,6 +1,6 @@
 'use client';
 import {useCallback,useEffect,useState,type FormEvent} from 'react';
-import {api} from './auth-forms';
+import { api } from './client-api';
 type Count={completed:number;required:number;percentage:number|null};
 type Enrollment={id:string;title:string;timezone:string;status:string;daily:({date:string}&Count)[];due:Count;weekly:Count;final:Count;streak:{current:number;longest:number};ended:boolean;elapsedDays:number;durationDays:number};
 type Metric={date:string;waterMl:number|null;steps:number|null;exerciseMin:number|null;sleepMin:number|null;reviewDimensions:{key:string;label:string;optionLabel:string;schemaVersionId:string}[]};

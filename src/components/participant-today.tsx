@@ -1,7 +1,7 @@
 'use client';
 import { useEffect,useState,useRef } from 'react';
 import Link from 'next/link';
-import { api } from './auth-forms';
+import { api } from './client-api';
 import {nextRequiredTask} from '@/lib/participant-next';
 type Task={id:string;title:string;type:string;revision:number;completed:boolean;completionMode:string;requiredSnapshot:boolean;scheduledAt:string|null;exclusionReason:string|null;targetSnapshot:string|null;orderSnapshot:number};
 type Day={id:string;localDate:string;dayIndex:number;tasks:Task[];enrollment:{id:string;title:string;timezoneSnapshot:string;status:string};saveWindow:{allowed:boolean;serverNow:string;referenceAt:string;sourceAvailable:boolean};counts:{completed:number;required:number;percent:number|null}};

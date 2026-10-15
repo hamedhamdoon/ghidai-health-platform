@@ -23,3 +23,7 @@
 ## ملحق تحقق P4 — 2026-10-12
 
 الأوامر والنتائج والإخفاقات المصححة والقيود في [P4-TEST-RESULTS](P4-TEST-RESULTS.md). PostgreSQL حقيقي خلف RLS وجلسات P3، مع اختبارات انحدار المراحل السابقة وChromium على العروض الثلاثة. تحذيرات التطوير الخمسة مفتوحة وموثقة في [P4-SECURITY-VALIDATION](P4-SECURITY-VALIDATION.md)، وفحص اعتماديات التشغيل صفر. لا تعد fixtures قبولًا صحيًا أو قانونيًا.
+
+## P11 evidence index — 2026-10-15
+
+Current executed P11 local regression, restore, security, outage and performance evidence: [P11-TEST-RESULTS](P11-TEST-RESULTS.md). Prior reports retain their historical results and are not counted as reruns. Production and external-device acceptance remain separate gates.

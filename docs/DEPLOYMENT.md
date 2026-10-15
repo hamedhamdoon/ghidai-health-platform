@@ -13,3 +13,7 @@ CI workflow_dispatch دون push trigger أو deployment؛ حصة Actions الخ
 ## ملحق P4: تشغيل محلي فقط
 
 التكليف لا ينشر على الإنترنت ولا ينشئ خدمات. [P4-HANDOFF](P4-HANDOFF.md) يحدد تشغيل Docker الحالي والمهاجرات الإضافية والمصادر وحسابي اختبار مؤقتين. يحفظ ملف أسرار fixtures محليًا في .env.p4.fixtures-*.local المستثنى، ويمسحه المالك وفق سياسة احتفاظ لاحقة؛ لا تحذفه تلقائيًا. توقف Docker يفقد بيانات tmpfs الاختبارية؛ لا يعاد إيقافها أو إنشاؤها أثناء الجولات لتصفيرها. لا تعتبر هذه البيئة نسخة احتياطية أو قبول استعادة إنتاج.
+
+## P11 operations preparation — 2026-10-15
+
+The P11 instruction permits local preparation, not publication. [P11 configuration](P11-PRODUCTION-CONFIGURATION.md) explicitly disables production adapters; [hosting](P11-HOSTING-ASSESSMENT.md) has no approved complete zero-cost stack. [Runbooks](P11-MONITORING-RUNBOOK.md), [restore rehearsal](P11-BACKUP-RESTORE.md), [release gates](P11-RELEASE-GATES.md) and [handoff](P11-HANDOFF.md) govern any future proposal. Manual CI remains without push/deploy triggers; no host repository integration was enabled. Prior P11-not-started statements are historical.

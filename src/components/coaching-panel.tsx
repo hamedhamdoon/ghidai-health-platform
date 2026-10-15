@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
-import {api} from './auth-forms';
+import { api } from './client-api';
 type Assignment={id:string;userId:string;coachId:string;revision:number;expiresAt:string;revokedAt:string|null;scope:{resources:string[];actions?:string[]}};
 type Detail={userId:string;revision:number;canAddNote:boolean;scope:{resources:string[];actions?:string[]};progress?:{id:string;status:string;days:number;required:number;completed:number}[];CoachNote?:{id:string;text:string}[];WaterLog?:{id:string;amountMl:number;localDate:string}[];StepDayLog?:{id:string;totalSteps:number;localDate:string}[];ExerciseLog?:{id:string;type:string;durationMin:number;localDate:string}[];SleepLog?:{id:string;startsAt:string;endsAt:string;wakeDate:string}[]};
 const choices={Progress:'تقدم المهام',WaterLog:'كميات الماء',StepDayLog:'الخطوات',ExerciseLog:'التمارين',SleepLog:'أوقات النوم',CoachNote:'قراءة وإضافة ملاحظات المدرب'};

@@ -88,3 +88,7 @@ Release: branchfeature/fix ، changelog ، requiredchecks/review ، موافقة
 فحص اكتمال الملفات الثمانية، روابط Markdown المحلية، وجود كل R-01..24 و T-01..24 في التتبع، صورة مصدر لكل IMG01..06 ، اتساق قواعد required/optional/versions/ملكية، `git diff --check`، ونطاق diff وثائق فقط. سيُنشأ commit ويُدفع فرع feature بعد نجاح الفحوص. بيانات حالة Git النهائية في التقرير المرافق، لا ادعاء push داخل وثيقة قبل حدوثه.
 
 سجل تغيير 1.0: تحليل ست صور على حدة؛ 17 اختلافًا؛ متطلبات 24 مجموعة؛ مصفوفة صلاحيات؛ خريطة 49 شاشة/حالة؛ عقود API ؛ تصميم جداول وقيود؛ قواعد حساب صريحة؛ خطة مرحلية واختبارات ومخاطر وبوابات اعتماد. العدد 49=32 شاشة مشارك+17 مدرب/إدارة. الوظائف منفذة: لا شيء؛ جزئية: لا شيء؛ تصميمية: هذه الحزمة؛ جاهزية الإنتاج: غير جاهز؛ اختبارات التطبيق: لم تُشغّل ولا ينطبق إعلان نجاحها.
+
+## P11 authorization — 2026-10-15
+
+P11 local operational preparation is authorized from79752ab on feature/ghidai-p11-production-readiness. Provider assessment, fail-closed configuration contracts, isolated encrypted restore rehearsal, monitoring/runbooks, dependency review and performance measurements are integrated under one owner. [P11-HANDOFF](P11-HANDOFF.md) and [P11-TEST-RESULTS](P11-TEST-RESULTS.md) define actual engineering acceptance. A-01–A-12 and production runtime/provider/legal/content/independent-backup gates remain open; P12 requires a new instruction. No public/cloud/paid activation or main merge.

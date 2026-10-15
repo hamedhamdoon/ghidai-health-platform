@@ -1,7 +1,7 @@
 'use client';
 import { useEffect,useState } from 'react';
 import Link from 'next/link';
-import { api } from './auth-forms';
+import { api } from './client-api';
 type Program={id:string;versionId:string;title:string;durationDays:number;startMode:string;fixedStartDate:string|null;description?:string};
 type Enrollment={id:string;title:string;status:string;revision:number;startDate:string;timezoneSnapshot:string;days?:{localDate:string;dayIndex:number;state:string}[]};
 export function ParticipantPrograms(){

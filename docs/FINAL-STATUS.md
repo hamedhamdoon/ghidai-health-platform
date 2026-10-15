@@ -27,3 +27,7 @@
 ## الحالة الحالية بعد P4 — 2026-10-12
 
 المحرك المحلي والواجهة الإدارية والمراجعة المستقلة منفذة؛ الأمثلة والنشر الاختباري محايدان واصطناعيان. [التسليم](P4-HANDOFF.md) يحدد الوظائف والمحجوبات والتشغيل، و[الاختبارات](P4-TEST-RESULTS.md) يثبت النتائج المنفذة. لا إعلان جاهزية إنتاج أو اكتمال المشروع؛ لا P5/P6 أو دمج main أو نشر عام. المحتوى الصحي الحقيقي والحقوق والتأهيل الإنتاجي وسياسة الأيام تحتاج اعتمادًا منفصلًا.
+
+## P11 current operational engineering — 2026-10-15
+
+P11 local preparation is implemented; its final execution and limitations are recorded in [P11-HANDOFF](P11-HANDOFF.md)/[P11-TEST-RESULTS](P11-TEST-RESULTS.md). Production adapter, complete approved zero-cost hosting, independent backup/key custody, external mail/jobs and all A-series approvals remain gates. No P12/public deployment/cloud/paid service/main merge. Earlier stage-only status is historical; do not infer launch readiness from build success.

@@ -169,3 +169,18 @@ R-01..17 لا وظائف منفذة. R-23 لا PWA/offline. نتائج هذا ا
 | R-21/R-23 / P0 | AG11/23/25؛ انحدار وفشل حفظ | scripts/participant-test-schema وparticipant-e2e وoutages | Type/Lint/Build/Unit/PG/E2E/503 ثم تعافٍ وإعادة حفظ | نتائج كل دورة في [التكامل](P5-P7-INTEGRATION-REPORT.md)؛ لا offline sync |
 
 RV-07/RV-08/RV-09 وحالات مشاركة RV-10 مسواة تقنيًا في النطاق الحالي. قبول التشغيل الحقيقي لسياساتها مستقل. R-14 وواجهات P8+ وR-16/18 الإنتاجية لا تتحول إلى مكتملة بهذا الجدول؛ جميع A-01..A-12 تحتفظ بحالتها.
+
+## P11 — Operational preparation (2026-10-15)
+
+Owner P11 instruction authorizes local synthetic engineering only. Exact baseline79752ab; branchfeature/ghidai-p11-production-readiness. A-01–A-12 remain OPEN. Final execution status is recorded in [P11 tests](P11-TEST-RESULTS.md), not inferred from code presence.
+
+| Requirement/source | Implementation evidence | Acceptance and scope |
+|---|---|---|
+| P11-01; owner§3, R-24 | P11-HOSTING-ASSESSMENT; official provider links | Current Free/card/domain/region/quotas/contracts/portability; no complete approved production stack |
+| P11-02; owner§4, R-03/R-20 | operations/config, auth/runtime, api/ready, next.config, config/production.env.example | Config rejection, generic readiness, local cookies retained only on loopback; production adapter disabled |
+| P11-03; owner§5, R-18/T-18 | operations/backup, p11-backup-rehearsal | New database only; encrypted logical archive, tampering rejection, counts/ownership/policies, restored auth/RLS/analytics; independent storage remains gate |
+| P11-04; owner§6, R-18/R-24 | operations/monitor, p11-monitor, P11-MONITORING-RUNBOOK | Aggregated failures/storage alerts and actual outage/recovery; manual invocation only |
+| P11-05; owner§7, R-20/T-20 | P11-SECURITY-REVIEW; lockfile and security tests | Official compatible patch review, audit residuals, secret scan and native RLS/auth/download regression |
+| P11-06; owner§8, R-22/T-22 | today route + isolated transport/quick controls; p11-browser-performance, p11-capacity | Measured bytes/LCP/CLS/HTTP concurrency/query/server resources; local evidence only |
+| P11-07; owner§9, R-21/R-24 | P11-RELEASE-GATES | A-01–12 authority unchanged; engineering versus actual launch explicit |
+| P11-08; owner§10–12, R-21/T-21 | P11-TEST-RESULTS/P11-HANDOFF | Mandatory local regression then scoped branch delivery; no main merge/deployment/P12 |

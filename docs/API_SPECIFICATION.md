@@ -207,3 +207,7 @@ RV-03 عولج لهذه الدورة؛ RV-04 تحدي محلي محدد دون �
 كل mutation مشاركة/تتبع تحتاج CSRF وIdempotency-Key UUID؛ المفتاح مرتبط بالفاعل وpath/method/input/preconditions. If-Match `"revision"` مطلوب للتعديل والحذف والتراجع، وIf-None-Match:* لإنشاء خطوات/تقييم/عادة يوم جديدة؛ إذا بقي singleton محذوف منطقيًا تستعاد بإصداره المحفوظ. غياب precondition يرجع428، الإصدار القديم أو مفتاح الجسم المختلف409، validation422، المورد غير المرئي404، وانقطاع DB503.
 
 أوامر P5–P7 الحالية تعيد نجاحًا200 مع JSON، بما فيه الحذف المنطقي وإصداره؛ ليست جميع رموز201/204 في جدول التصميم العام منفذة في هذه الخدمات. قوائم logs محدودة500 لكل نوع داخل الفترة وليست cursor API كاملة. تقارير تصحيح إداري خارج النافذة، محرر قواعد إنتاجي، شهادات PDF موقعة/عامة، وتنبيهات لم تنفذ بهذا النطاق؛ لا زر أو مسار يوحي بها. النتائج والانحدار والقيود في [التكامل](P5-P7-INTEGRATION-REPORT.md).
+
+## P11 local readiness endpoint
+
+`GET /api/health` remains liveness and does not check DB. New `GET /api/ready` is dynamic/no-store; it checks both restricted auth/app pools and returns `{status:"ready"}`/200 or `{status:"unavailable"}`/503 without SQL/credentials/schema/health details. Connectivity at one instant does not establish migrations/grants/mail/release acceptance. This remains loopback-only; production runtime selection fails closed. Opt-in local `/api/v1` telemetry reports only HTTP status/duration; no new public metrics endpoint was added. See [P11 configuration](P11-PRODUCTION-CONFIGURATION.md).

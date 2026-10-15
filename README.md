@@ -61,3 +61,7 @@ See [P3 implementation](docs/P3-AUTH-IMPLEMENTATION.md), [security validation](d
 ## P4 — المحرك المحلي (نقطة تاريخية)
 
 محرك البرامج والإصدارات والمحتوى والمراجعة والوجبات والبدائل منفذ على فرع P4. التشغيل والتأهيل الاصطناعي المؤقت، الاختبارات، والقيود في [P4-HANDOFF](docs/P4-HANDOFF.md). لا مشاركة أو جدول مستخدم فعلي أو P5/P6؛ المحتوى الحقيقي محجوب حتى اعتماد المالك والمختص.
+
+## P11 — local operational preparation
+
+P11 is now authorized and locally implemented; historical statements that P11 has not started describe earlier checkpoints. Current evidence/limitations: [P11 handoff](docs/P11-HANDOFF.md) and [tests](docs/P11-TEST-RESULTS.md). Production remains disabled, no provider is approved/activated and P12 has not started. Manual commands: `npm run config:production:check` validates injected future contracts only (missing values reject); `npm run ops:monitor -- test <isolated-schema>`; `npm run test:p11:backup`; browser/capacity commands require the built local app, available port3100 and fresh isolated schema. Do not run DB schema selection while a browser server is active.

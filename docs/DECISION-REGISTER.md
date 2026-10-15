@@ -102,3 +102,7 @@ RV-11: تصدير مشفر محدود بإعادة المصادقة/الملكي
 | P7-TEC-03 / fixtures | تاريخ اختبار اصطناعي يتطلب superuser وghidai_test ومخطط اختبار محفوظ وswitch محلي صريح، مع المجموعة الكاملة وقيود الملكية/المحتوى | الغياب/NULL لا يفعّل الاستثناء، وapp لا يكتسبه؛ لا تعديل snapshot قائم أو ترحيل سياسة صحية |
 
 الأسباب: حفظ نسخة المشارك، حل تعارض التسجيل المستقل، منع تكرار الإجماليات، ومنع شهادة stale بعد التصحيح. التفاصيل في [التكامل](P5-P7-INTEGRATION-REPORT.md) وتسليم المراحل؛ فحوص SQL وE2E مصدر القبول التقني. لا تغير هذه القرارات A-01..A-12، ولا يعتمد fixture نافذة يوم أو عتبة50 أو streak1. الإنتاج وP8 والنشر والدمج تحتاج تكليفها وبواباتها المستقلة.
+
+## P11 local operational decisions — 2026-10-15
+
+The owner authorizes P11 local preparation only; no A-01–A-12 status changes. Provider evidence/risks are refreshed in [hosting](P11-HOSTING-ASSESSMENT.md); no complete zero-cost stack is selected. Future environment contracts fail closed and production runtime remains disabled. Local encrypted restore exercises use a fresh target and ephemeral key, not durable production backup custody. Local telemetry is opt-in and contains status/duration only. Thresholds and rehearsal timings are engineering observations, not approved retention/SLA/RPO/RTO. [Release matrix](P11-RELEASE-GATES.md) records remaining authorities. P12 requires new owner instruction.

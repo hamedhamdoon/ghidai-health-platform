@@ -1,5 +1,13 @@
 # Changelog
 
+## P11 — 2026-10-15, local operations preparation
+
+- Add provider/zero-cost assessment, environment and secret contracts with production disabled, generic readiness and baseline security headers.
+- Add encrypted isolated PostgreSQL restore rehearsal, metadata/session/RLS/analytics verification, manual aggregate monitoring and recovery runbooks.
+- Patch Next.js and matching ESLint configuration to16.4.1 after official security review; preserve unresolved tooling advisories without suppression.
+- Isolate today route and quick tracking/API controls to reduce unrelated client code; add reproducible browser and authenticated HTTP capacity measurements.
+- Preserve A-01–A-12 approvals and separate engineering evidence from launch gates. Final actual checks and limitations: docs/P11-TEST-RESULTS.md and docs/P11-HANDOFF.md. No production/cloud/paid activation, P12, historical migration edits or main merge.
+
 ## P8–P10 — 2026-10-14، local platform completion
 
 - موافقات مدرب صريحة ومحددة النطاق والمدة؛ فصل READ عن NOTE وربط الإضافة بالتعيين والموافقة المحددين؛ تقدم فعلي وملاحظات منفصلة وإدارة بيانات وصفية وحماية آخر مسؤول وتدقيق.
