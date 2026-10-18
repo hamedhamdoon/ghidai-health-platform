@@ -2,7 +2,7 @@
 
 Acceptance began2026-10-15; final local review2026-10-18, Asia/Muscat. **LOCAL RELEASE CANDIDATE — PUBLIC LAUNCH BLOCKED**. This is a local review identifier for the private application (npm package remains0.1.0), not a published package, GitHub Release, public deployment or unconditional acceptance of every requirement. [Final acceptance](P12-FINAL-ACCEPTANCE-REPORT.md) determines which local acceptance conditions remain unresolved.
 
-Source baseline: approved P11 checkpoint `e12066f66b28a4e8220e6fd097e8115222752b30`; work branch `feature/ghidai-p12-final-acceptance`. Final tested commit and branch delivery receipt are supplied after actual Git verification. No tag is created: an additional release trigger is unnecessary while findings/approvals remain open. Existing `.github/workflows/p1-ci.yml` is manual `workflow_dispatch`, without push/tag/deploy triggers; it is unchanged.
+Source baseline: approved P11 checkpoint `e12066f66b28a4e8220e6fd097e8115222752b30`; work branch `feature/ghidai-p12-final-acceptance`. Review-package implementation9a5d15b89f0ed2d17e11420a742ce16cb0dc67a1 was pushed and remote SHA verified; the final report records the receipt and the handoff supplies the documentation-receipt SHA. No tag is created: an additional release trigger is unnecessary while findings/approvals remain open. Existing `.github/workflows/p1-ci.yml` is manual `workflow_dispatch`, without push/tag/deploy triggers; it is unchanged.
 
 ## Review package
 

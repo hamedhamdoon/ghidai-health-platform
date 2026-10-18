@@ -29,7 +29,7 @@ The P11 local L-01..L-09 approvals remain historical scoped evidence, not automa
 | L-06 | FAIL clean-security criterion:5High npm findings and adverse image scans; OS review NOT TESTED | Security/owner; independent risk/exposure treatment required before production |
 | L-07 | PASS123units/151native/147browser +7/9deletion groups; unimplemented requirement coverage remains FAIL/NOT TESTED | Engineering; existing suite pass is not unconditional full local acceptance |
 | L-08 | FAIL21LCP budgets in60visits; corrected standard CLS probe stopped at5/60,55NOT TESTED; successful capacity samples plus initial timeout retained | Engineering; repair recurrent navigation failures and complete standard metrics/repeated representative budget evidence |
-| L-09 | Final diff/secret scan and branch-only receipt required | Engineering; no launch authority |
+| L-09 | PASS281candidate secret scan, clean staged diff/protected paths, branch-only push and exact remote SHA; receipt in final report | Engineering safe delivery only; no full P12/public/main authority |
 | R-01 | BLOCKED A-01/05/10/12 | Reviewer/owner; real health/rights release |
 | R-02 | BLOCKED A-02/03/04/07/08/11 | Owner/legal; real policies/audience/access |
 | R-03 | BLOCKED no approved complete zero-cost provider combination | Owner/operator/legal; production hosting |
