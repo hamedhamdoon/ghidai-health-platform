@@ -1,5 +1,9 @@
 # نطاق التشغيل والنشر
 
+## P12 — نشر عام محجوب
+
+P12 معتمدة للقبول المحلي والمرشح فقط؛ [حزمة RC](P12-RELEASE-CANDIDATE.md) و[بوابات P12](P12-OPEN-ISSUES.md) أحدث من الفقرات التاريخية. لا خدمة سحابية أو إنتاج أو بيانات حقيقية أو نشر عام أو دمج main. فحص Node/PostgreSQL المعزول لا يغير البنية القائمة ولا يجيز ترقيتها. لا tag أو GitHub Release، وWorkflow اليدوي محفوظ دون trigger نشر.
+
 P8–P10 محليةفقط؛P11/P12 لمتبدأا. manifest/install/serviceworker ليستpublic deployment أوproduction acceptance. noofflinehealthqueue/noWebPush/nocontinuousscheduler. لاpaid/cloud/main/realdata أوproductionbootstrap. شروطالمزود/القانون/المحتوى/الاحتفاظ/النسخ/التشغيل لاتغلقهاfixture. [التكامل](P8-P10-INTEGRATION-REPORT.md) يحددجاهزيةالخطوةالمستقلةالتاليةوقيودها؛موافقةالنشرمستقلة.
 
 P3 كذلك **محلي فقط**. الحسابات والبريدالتجريبي تعمل وفق [P3-HANDOFF](P3-HANDOFF.md)؛ لا بريدإنتاج أوHTTPSعام أوcloud أوbootstrapإداري. الكوكي Secure=false محصور فيHTTPloopback، ولا يجوز نقله كما هو إلىإنتاج. قراراتA-02/A-08/A-12 وغيرها لم تغلق؛ النشر يحتاج تكليفًا وموافقة مستقلة. إعدادCImanual فقط ولم يشغّل فيP3؛ لاdeploymenttrigger.

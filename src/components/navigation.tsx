@@ -11,5 +11,5 @@ const destinations = [
 ];
 export function Navigation() {
   const pathname = usePathname();
-  return <nav className="navigation" aria-label="التنقل الرئيسي">{destinations.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={pathname === href ? 'page' : undefined}><Icon size={22} aria-hidden="true"/><span>{label}</span></Link>)}</nav>;
+  return <nav className="navigation" aria-label="التنقل الرئيسي">{destinations.map(({ href, label, icon: Icon }) => <Link key={href} href={href} prefetch={false} aria-current={pathname === href ? 'page' : undefined}><Icon size={22} aria-hidden="true"/><span>{label}</span></Link>)}</nav>;
 }

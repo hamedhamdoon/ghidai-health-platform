@@ -2,6 +2,10 @@
 
 A mobile-first digital health and lifestyle platform.
 
+## P12 — قبول محلي ومرشح مراجعة، 2026-10-18
+
+**LOCAL RELEASE CANDIDATE — PUBLIC LAUNCH BLOCKED**. أحدث حكم ونطاق الاختبارات في [تقرير القبول](docs/P12-FINAL-ACCEPTANCE-REPORT.md) و[نتائج الانحدار](docs/P12-REGRESSION-TEST-RESULTS.md). نجاح الرحلات الحالية لا يغلق فجوات التغذية للمشارك والتصحيح والتأليف الإداري أو الاعتمادات A-01–A-12. الفرع `feature/ghidai-p12-final-acceptance`؛ لا نشر عام أو إنتاج أو دمج main. الأقسام التالية تاريخية؛ تعليمات المرشح والاستعادة والبوابات في [حزمة RC المحلية](docs/P12-RELEASE-CANDIDATE.md).
+
 ## الحالة الأحدث — P8–P10 محليًا،2026-10-14
 
 إضافة متابعة مدرب بموافقة ونطاق وانتهاء، وإدارة حسابات اصطناعية دون وصول صحة عام، وتنبيهات داخل التطبيق بفحص محلي صريح، وخصوصية وتصدير JSON/CSV مشفر وخاص. طلب الحذف مؤجل؛اختبار الحذف علائقي في مخطط مستقل فقط. PWA/أصول عامة/offline messages وإتاحة وقياسات محلية؛لاoffline health queue أوWeb Push أومجدول إنتاجي. تفاصيل النتائج والقيود ونقاطGit في[تقرير التكامل](docs/P8-P10-INTEGRATION-REPORT.md) و[P8](docs/P8-HANDOFF.md)/[P9](docs/P9-HANDOFF.md)/[P10](docs/P10-HANDOFF.md).

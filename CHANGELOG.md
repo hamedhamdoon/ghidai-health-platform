@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-rc.1 — P12 local review candidate — 2026-10-18
+
+- Replayed local acceptance and documented R-01–R-24/T-01–T-24 with explicit partial, failed, blocked and untested scope; identified missing participant meal/alternative workflow despite passing existing admin nutrition tests.
+- Added preserved-output browser runner, sequential operations runner, expanded authenticated/public browser measurements, isolated Node24.22.0 and encrypted cross-cluster PostgreSQL17.11 restore rehearsal.
+- Retained full audit/image findings, storage inventory and approval-only cleanup plan, all authority/production gates and independent backup/device/security limitations.
+- Excluded generated ignored `.npm-cache` evidence/runtime files from source ESLint; no application/test assertion or npm security finding suppressed.
+- Disabled automatic prefetch on primary navigation/help links to avoid downloading other page modules before users navigate; real links and all five destinations remain functional. Final browser/performance evidence is recorded in P12 reports.
+- No public release/deployment, main merge, production/cloud activation, existing infrastructure upgrade, important-data cleanup, AGENTS edit or historical migration change. Package version stays0.1.0; this is the local candidate review identifier.
+
 ## P11 — 2026-10-15, local operations preparation
 
 - Add provider/zero-cost assessment, environment and secret contracts with production disabled, generic readiness and baseline security headers.

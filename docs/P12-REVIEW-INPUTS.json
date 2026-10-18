@@ -1,0 +1,305 @@
+{
+  "baseline": "e12066f66b28a4e8220e6fd097e8115222752b30",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 24007,
+      "sha256": "3a6f2949839164b72e3d4e1cd3cbb4095afe3275b9e3aeb4580a1820daf3e6b2"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 6270,
+      "sha256": "761b46c4410eba1c77a171729b8e49a8acea0187c9c6d9486aa67930fbd398cc"
+    },
+    {
+      "path": "README.md",
+      "bytes": 6480,
+      "sha256": "042e84f9f43d35daa8fcfb291899b3252b3a4ba7ff868f555eecca9a040383c6"
+    },
+    {
+      "path": "docs/API_SPECIFICATION.md",
+      "bytes": 28367,
+      "sha256": "98caed91715bd5552c8b1fb2a6941deecb0a6afcb4b000d8ee12b3722d5897c8"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "bytes": 4061,
+      "sha256": "83c005c92769cd3826467f38885e64d8c0baa2b47b44eba231a838ca640161d8"
+    },
+    {
+      "path": "docs/ASSET-LICENSES.md",
+      "bytes": 1438,
+      "sha256": "0cc39cf1e72e7a003fb7d1f2766993c4d9e472b5e936db2e20451bca264fa5b1"
+    },
+    {
+      "path": "docs/DATABASE.md",
+      "bytes": 5711,
+      "sha256": "54e3f038c7f9d40380f9f4515ca4cf6fe1c80608134103094ef65a57fbddd1d4"
+    },
+    {
+      "path": "docs/DATABASE_DESIGN.md",
+      "bytes": 19220,
+      "sha256": "7077df07f751a8ea58309bbf347567b01883170374a5fab75270f8082c4515d7"
+    },
+    {
+      "path": "docs/DECISION-REGISTER.md",
+      "bytes": 23651,
+      "sha256": "fafb807197df7c6100df96eb91b44141a104b8d34578a1fd0102a46a0ea6da56"
+    },
+    {
+      "path": "docs/DEPLOYMENT.md",
+      "bytes": 3302,
+      "sha256": "39820358f92569e17b21c29382c72099f18b5979a2d86311a931d88159b40972"
+    },
+    {
+      "path": "docs/FEATURES.md",
+      "bytes": 6280,
+      "sha256": "c3fe394592296f763e1c70a771d51b1590c724e570530f415122e47aea3336c1"
+    },
+    {
+      "path": "docs/FINAL-STATUS.md",
+      "bytes": 6018,
+      "sha256": "c276c7de694575b686fa00b99b1cc583ce2eaa7595358212d1a1f593d9d5f7cf"
+    },
+    {
+      "path": "docs/IMAGE_CONTENT_ANALYSIS.md",
+      "bytes": 20794,
+      "sha256": "edac34079caa1d5f42490bac36b1d7ca2929b396461bc40dfdc681bfca2c2a5f"
+    },
+    {
+      "path": "docs/IMPLEMENTATION-READINESS.md",
+      "bytes": 26370,
+      "sha256": "4e2191595c785efd5dda1260dfdb26bcf9a0e53d566e059f5b0bb7c5c68a7ec4"
+    },
+    {
+      "path": "docs/IMPLEMENTATION_PLAN.md",
+      "bytes": 15922,
+      "sha256": "e2ea32f28fd13ee60dfec78789b4b546aeb4aa5a69d3e4dcc09508affeb6070f"
+    },
+    {
+      "path": "docs/LOCAL-DEVELOPMENT.md",
+      "bytes": 4160,
+      "sha256": "36068a4e2f320a991540313ea8f3a36b38bcdeb0769b18b0983b364934d46fdb"
+    },
+    {
+      "path": "docs/P1-ENVIRONMENT-AUDIT.md",
+      "bytes": 3611,
+      "sha256": "6bb385082372a0ffc3a6cfb81b969aa99cbc5467cb2b8949722f30a6f5e26258"
+    },
+    {
+      "path": "docs/P1-IMPLEMENTATION-REPORT.md",
+      "bytes": 4524,
+      "sha256": "59dca5aed5d16cf254897a58fd017bdb056e1414a34fb8cb046919f1e19af308"
+    },
+    {
+      "path": "docs/P1-TEST-RESULTS.md",
+      "bytes": 5626,
+      "sha256": "4505ae96fb044b3ddcae22a1ae907b7c05a06b8cad266c835bf5144ac7f6cfaf"
+    },
+    {
+      "path": "docs/P10-HANDOFF.md",
+      "bytes": 3270,
+      "sha256": "b4971af1bedd75327320fd6e1640994e5cd6364dcb22be9b6c132429032f3f4a"
+    },
+    {
+      "path": "docs/P10-TEST-RESULTS.md",
+      "bytes": 6645,
+      "sha256": "19fd4942bc756f7043aa749353ecb0a9e0dc8b9b78083b14d18a4f9d805d8fce"
+    },
+    {
+      "path": "docs/P11-BACKUP-RESTORE.md",
+      "bytes": 13529,
+      "sha256": "d75f37664add9178f1529ad4a4e8229347284f2347ea834b578ff0e9d3f0acad"
+    },
+    {
+      "path": "docs/P11-HANDOFF.md",
+      "bytes": 5502,
+      "sha256": "250f0a67bfc59a8009b3df239c24290780abfef621ba895a4e32e6384119a3f6"
+    },
+    {
+      "path": "docs/P11-HOSTING-ASSESSMENT.md",
+      "bytes": 16105,
+      "sha256": "94b3709885cd50e5f36d2f8c230e7ecc7f83f57d96abbe4a5eedc5ba6cef36ab"
+    },
+    {
+      "path": "docs/P11-MONITORING-RUNBOOK.md",
+      "bytes": 9732,
+      "sha256": "2b5f4e4cd7c832af64ec8f20febd6a4e780d17ba2c211b3ea1ea086dff06cdc5"
+    },
+    {
+      "path": "docs/P11-PERFORMANCE-CAPACITY.md",
+      "bytes": 8411,
+      "sha256": "ee3434aa3106f0d6404c721eaded4f6086bd7c213d4b31f658b38032d9628bde"
+    },
+    {
+      "path": "docs/P11-PRODUCTION-CONFIGURATION.md",
+      "bytes": 7388,
+      "sha256": "46ae465c60e34b0c988126dfd6889fc50e8d53c0779bea19efb6a29ddd5e59fc"
+    },
+    {
+      "path": "docs/P11-RELEASE-GATES.md",
+      "bytes": 9933,
+      "sha256": "20c088054606e3d3565941d538206196c00507df87c05ee3446d88af0680b1e7"
+    },
+    {
+      "path": "docs/P11-SECURITY-REVIEW.md",
+      "bytes": 14734,
+      "sha256": "56cabc028bb34ed1fd7d96e5468337a51f064b04056632a2a0b833f6504e8fa3"
+    },
+    {
+      "path": "docs/P11-TEST-RESULTS.md",
+      "bytes": 5833,
+      "sha256": "a78434291dd8cf04e6add1fc35f91ab76ff42f727f5f4f4d8071e10809ad74e7"
+    },
+    {
+      "path": "docs/P2-DATABASE-IMPLEMENTATION.md",
+      "bytes": 7086,
+      "sha256": "c55a355168d11a8bb02d301b2d4b9c3693e285ac38c15fd779d4b153ba2b56c4"
+    },
+    {
+      "path": "docs/P2-HANDOFF.md",
+      "bytes": 2068,
+      "sha256": "db7fc504828539b12206a4b51201fefd4abee4e406ee3389c9c874b000d55b7f"
+    },
+    {
+      "path": "docs/P2-SECURITY-VALIDATION.md",
+      "bytes": 3694,
+      "sha256": "1225b22f0bab799bf4de31a06d2a1a31a8e33584065620a1fe762efb3edb4ed3"
+    },
+    {
+      "path": "docs/P2-TEST-RESULTS.md",
+      "bytes": 3668,
+      "sha256": "750839a9d86a5a854813ca4b3a082b4877c853934a8f6e27d89763b9e0bbd90b"
+    },
+    {
+      "path": "docs/P3-AUTH-IMPLEMENTATION.md",
+      "bytes": 8024,
+      "sha256": "4ceaef42ae84e4d3ce5dba3503fd71df0f5439fb87124d643498cdfc05f005f0"
+    },
+    {
+      "path": "docs/P3-HANDOFF.md",
+      "bytes": 5427,
+      "sha256": "a43161f8dc424d093c3052652389b44fe6e7b96c099ff3ea98bf7862ff276f5b"
+    },
+    {
+      "path": "docs/P3-SECURITY-VALIDATION.md",
+      "bytes": 4262,
+      "sha256": "3b7806c0222b4f739e22785d9e5e25fb17756a9f75821b1df7a8688965594883"
+    },
+    {
+      "path": "docs/P3-TEST-RESULTS.md",
+      "bytes": 5772,
+      "sha256": "bf2e07e697f8b906ae0dafab9b69c6c958c2f31bfe78ada9d546db6e35489446"
+    },
+    {
+      "path": "docs/P4-CONTENT-REVIEW.md",
+      "bytes": 5205,
+      "sha256": "254ba6b78d1c0065c38ced1dc46a85fce13bdc0b5ee1cd153a7f658a6ce5f3e2"
+    },
+    {
+      "path": "docs/P4-HANDOFF.md",
+      "bytes": 6073,
+      "sha256": "f85a240ddfac654b09114f9e6835a6dde6bdd805f3b2492e9f539b777f7d2354"
+    },
+    {
+      "path": "docs/P4-PROGRAM-ENGINE.md",
+      "bytes": 7324,
+      "sha256": "e1c52b2666f84eae899c0040031c24ba1b7ab647c83816c6b4d3f7b6f58b16f4"
+    },
+    {
+      "path": "docs/P4-SECURITY-VALIDATION.md",
+      "bytes": 3947,
+      "sha256": "3a64081d0b3edbd442159b4b2fee91fc8afd8d9f4972bda23b1941d019efdcba"
+    },
+    {
+      "path": "docs/P4-TEST-RESULTS.md",
+      "bytes": 6925,
+      "sha256": "375c454cdc8bdf51bf5eadc2b72f6acd5a96447ad178933b726f2c2ae76c7557"
+    },
+    {
+      "path": "docs/P5-HANDOFF.md",
+      "bytes": 4629,
+      "sha256": "55188168de1a17fca1bfd8d434135024f0332704da4eb5e9e1b0eb9891993dbf"
+    },
+    {
+      "path": "docs/P5-P7-INTEGRATION-REPORT.md",
+      "bytes": 14578,
+      "sha256": "eed6e6f3bcd6682d750f068062ed1a8bef97c0666c7b872ac90fe6245af26678"
+    },
+    {
+      "path": "docs/P5-TEST-RESULTS.md",
+      "bytes": 3708,
+      "sha256": "f8d63c3a6bd3a1e817a90de665719931312563dbeda5d1bedf152489c73f2636"
+    },
+    {
+      "path": "docs/P6-HANDOFF.md",
+      "bytes": 6281,
+      "sha256": "0ca9d204f20d134509ef9eeb4bc0fe381d7fa1ae907453536b78681839d568a6"
+    },
+    {
+      "path": "docs/P6-TEST-RESULTS.md",
+      "bytes": 6816,
+      "sha256": "8cf594d7a3b505dba7123ce84eee79f37826e9705a952a862aa7a772ef7f3749"
+    },
+    {
+      "path": "docs/P7-HANDOFF.md",
+      "bytes": 4602,
+      "sha256": "0e9ed088903efc60acbb26af69f6889c84cd1462f0518a66b220d9b437d9f315"
+    },
+    {
+      "path": "docs/P7-TEST-RESULTS.md",
+      "bytes": 3447,
+      "sha256": "1b417fb75c79f4f706523ddcf80850c63fe684265f02033b774f2625b5ca3f29"
+    },
+    {
+      "path": "docs/P8-HANDOFF.md",
+      "bytes": 3841,
+      "sha256": "e379bcf7d856279f5863381c3885a5e98d83357af7c8de9ac8a83e34863cde5c"
+    },
+    {
+      "path": "docs/P8-P10-INTEGRATION-REPORT.md",
+      "bytes": 11843,
+      "sha256": "3418b978886d6de7b7c51e403c5b4887235d89c2e02f2ab8cfa030dfc01f1693"
+    },
+    {
+      "path": "docs/P8-TEST-RESULTS.md",
+      "bytes": 3286,
+      "sha256": "f64bee8acadb7dc96ed432e8cb51d8997c3d819037b203331523a06891a549c2"
+    },
+    {
+      "path": "docs/P9-HANDOFF.md",
+      "bytes": 6641,
+      "sha256": "ec309ba78c6583a9f5b4fe960b718f6b1c183e2a3f028a533cf5ca97383cc26e"
+    },
+    {
+      "path": "docs/P9-TEST-RESULTS.md",
+      "bytes": 7122,
+      "sha256": "28dba3aab219e184b18aa66dd0f41f6394866767ef0307bc9d94940d9a753296"
+    },
+    {
+      "path": "docs/PROJECT_REQUIREMENTS.md",
+      "bytes": 20849,
+      "sha256": "7f52ac34eb988dc81e07dc58f74750ba90461f72da93aa7761ee2ce78830ccda"
+    },
+    {
+      "path": "docs/REQUIREMENTS-TRACEABILITY.md",
+      "bytes": 26593,
+      "sha256": "eb5ac91124960bcee3f85c377c6af90eceefa8d447d572a1c807276580638c6f"
+    },
+    {
+      "path": "docs/SYSTEM_ARCHITECTURE.md",
+      "bytes": 15775,
+      "sha256": "f6d2e1702a680a36fdff8f5fcac508d6a4e8a454e46cca03bac09dec2fa239d6"
+    },
+    {
+      "path": "docs/TEST-RESULTS.md",
+      "bytes": 4677,
+      "sha256": "1e9ce61747e6e2671b3580fcca7dd3d053b8bdafa8edf0985f92b7daf6218e70"
+    },
+    {
+      "path": "docs/UX_UI_SPECIFICATION.md",
+      "bytes": 18007,
+      "sha256": "f43be0dbb765bf34187217761c4fdaaf3eec557122b977fa2b4743f1fcb81660"
+    }
+  ]
+}
