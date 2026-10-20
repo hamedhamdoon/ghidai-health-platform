@@ -1,0 +1,4 @@
+import {readFileSync,readdirSync} from 'node:fs';
+import {localPool} from './p2-database';
+const {pool}=await localPool('test');const schema=`p3_test_${Date.now()}`;
+try{await pool.query(`CREATE SCHEMA "${schema}" AUTHORIZATION ghidai_owner; GRANT USAGE ON SCHEMA "${schema}" TO ghidai_app,ghidai_policy,ghidai_auth`);const db=await pool.connect();try{await db.query(`SET search_path="${schema}",public`);for(const migration of readdirSync('prisma/migrations').filter(n=>/^202610\d+_p[2-9]_/.test(n)||n==='202610180018_p12r1_meal_selection').sort())await db.query(readFileSync(`prisma/migrations/${migration}/migration.sql`,'utf8').replaceAll('public',schema));}finally{db.release();}process.env.P12R1_TEST_SCHEMA=schema;console.log(`P12R1 nutrition isolated schema preserved ${schema}`);await import('../tests/integration/p12r1-nutrition');}finally{await pool.end();}

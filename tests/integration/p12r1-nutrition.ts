@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
+import {participantFixtures,type Row} from './participant-fixtures';
+import {mealFixture} from './p12r1-meal-fixtures';
+const f=await participantFixtures(process.env.P12R1_TEST_SCHEMA);let passed=0;
+const check=async(name:string,fn:()=>Promise<void>)=>{await fn();console.log(`PASS P12R1 nutrition ${++passed}: ${name}`);};
+try{
+ const food=await mealFixture(f),path=`occurrences/${food.task.id}/meal`;
+ const call=async(method='GET',input:unknown={},token=f.a.token,r?:number,key=randomUUID())=>(await food.service.execute(path,method,input,token,r?`"${r}"`:null,key)).body as Row;
+ await check('enrolled version approved meal and ingredient quantities, no preference conflation',async()=>{const d=await call();assert.equal(d.choices.length,2);assert.equal(d.choices[0].ingredients[0].quantity,'1.25');assert.equal(d.selection,null);assert.equal((await f.owner.query('SELECT id FROM "TaskCompletion" WHERE "occurrenceId"=$1',[food.task.id])).rowCount,0);});
+ const input={alternativeMealId:food.meals[1].mealId},key=randomUUID();let saved:Row;
+ await check('selection PostgreSQL persistence and exact retry after lost response',async()=>{saved=await call('PUT',input,f.a.token,food.task.revision,key);assert.deepEqual(await call('PUT',input,f.a.token,food.task.revision,key),saved);assert.equal((await call()).selection.alternativeMealId,input.alternativeMealId);assert.equal((await f.owner.query('SELECT count(*)::int n FROM "MealSelection" WHERE "occurrenceId"=$1',[food.task.id])).rows[0].n,1);});
+ await check('owner isolation, owner injection, stale writer, wrong version alternative',async()=>{await assert.rejects(()=>call('GET',{},f.b.token));await assert.rejects(()=>call('PUT',input,f.b.token,saved.revision));await assert.rejects(()=>call('PUT',{...input,userId:f.b.id},f.a.token,saved.revision));await assert.rejects(()=>call('PUT',{alternativeMealId:randomUUID()},f.a.token,saved.revision));await assert.rejects(()=>call('PUT',{alternativeMealId:null},f.a.token,food.task.revision));});
+ await check('concurrent change permits one revision winner and manual completion stays separate',async()=>{const result=await Promise.allSettled([call('PUT',{alternativeMealId:null},f.a.token,saved.revision),call('PUT',{alternativeMealId:null},f.a.token,saved.revision)]);assert.equal(result.filter(r=>r.status==='fulfilled').length,1);assert.equal((await call()).selection.alternativeMealId,null);assert.equal((await f.owner.query('SELECT id FROM "TaskCompletion" WHERE "occurrenceId"=$1',[food.task.id])).rowCount,0);});
+ await check('native RLS denies other reader/writer',async()=>{const db=await f.runtime.app.connect();try{await db.query('BEGIN');await db.query("SELECT set_config('app.user_id',$1,true)",[f.b.id]);assert.equal((await db.query('SELECT id FROM "MealSelection" WHERE "occurrenceId"=$1',[food.task.id])).rowCount,0);assert.equal((await db.query('UPDATE "MealSelection" SET revision=revision+1 WHERE "occurrenceId"=$1',[food.task.id])).rowCount,0);}finally{await db.query('ROLLBACK');db.release();}});
+ await check('real alternative from another published version is rejected',async()=>{const foreign=await mealFixture(f,f.b.token);const current=await call();await assert.rejects(()=>call('PUT',{alternativeMealId:foreign.meals[1].mealId},f.a.token,current.revision));assert.equal((await call()).selection.alternativeMealId,null);});
+ await check('missing precondition and receipt payload reuse are rejected',async()=>{await assert.rejects(()=>call('PUT',input));await assert.rejects(()=>call('PUT',{alternativeMealId:null},f.a.token,food.task.revision,key));});
+ await check('withdrawn content cannot read or select',async()=>{const meal=food.meals[1];await f.command(`content-revisions/${meal.id}/withdraw`,'POST',{reason:'سحب اصطناعي لاختبار العزل'},f.admin.token,meal.revision);await assert.rejects(()=>call());await assert.rejects(()=>call('PUT',input,f.a.token,saved.revision+1));});
+ console.log(`PASS P12R1 nutrition integration ${passed} groups`);
+}finally{await f.close();}

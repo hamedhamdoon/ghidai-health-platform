@@ -8,10 +8,11 @@ import { withActor } from '../src/server/db/context';
 import { summarizeHttpMetrics } from '../src/server/operations/telemetry';
 const multiuser=process.argv[2]==='multiuser';
 if(process.argv[2]&&!multiuser)throw Error('UNSUPPORTED_LOCAL_MEASUREMENT');
-const metricPath=multiuser?'.npm-cache/p12/capacity-multiuser-http-metrics.jsonl':'.npm-cache/p12/capacity-http-metrics.jsonl';
+const evidenceDirectory=`.npm-cache/p12-r1/capacity-${Date.now()}-${multiuser?"multiuser":"single"}`;
+const metricPath=`${evidenceDirectory}/http-metrics.jsonl`;
 const probe=createServer();await new Promise<void>((resolve,reject)=>{probe.once('error',reject);probe.listen(3100,'127.0.0.1',()=>probe.close(()=>resolve()));});
 const f=await participantFixtures();
-mkdirSync('.npm-cache/p12',{recursive:true});
+mkdirSync(evidenceDirectory,{recursive:true});
 const metricLog=openSync(metricPath,'w');
 const child=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','3100'],{env:{...process.env,GHIDAI_AUTH_ENV:'test',GHIDAI_LOCAL_METRICS:'true'},windowsHide:true,stdio:['ignore',metricLog,metricLog]});
 let measurementStage='startup';
@@ -43,9 +44,9 @@ try{
  if(httpMetrics.total!==(multiuser?200:75))throw Error('HTTP_METRICS_SAMPLE_INCOMPLETE');
  directWriteTimes.sort((a,b)=>a-b);
  const directServiceWrites={scope:'sequential direct TrackingService calls, not HTTP',count:directWriteTimes.length,p50Ms:directWriteTimes[Math.floor(directWriteTimes.length*.5)],p95Ms:directWriteTimes[Math.ceil(directWriteTimes.length*.95)-1]};
- const report={measuredAt:new Date().toISOString(),scope:multiuser?'local synthetic HTTP authenticated reads; 20 independent sessions/1 water record each, 20 sequential warmups then 180 measured reads; not physical devices or production capacity':'local synthetic HTTP authenticated read load, 100 own water rows; 1 session, not independent users or production capacity',rows,httpMetrics,directServiceWrites,indexes,queryPlan:plan,database:resources,driverMemory:process.memoryUsage(),driverCpu:process.cpuUsage(),serverResources:{before,after:serverResources()},serverResourcesMeasured:true};
- mkdirSync('.npm-cache',{recursive:true});writeFileSync(multiuser?'.npm-cache/p12/capacity-multiuser-capacity.json':'.npm-cache/p12/capacity-capacity.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(rows.some(row=>row.failures))throw Error('HTTP_CAPACITY_SAMPLE_FAILED');
+ const report={evidenceDirectory,measuredAt:new Date().toISOString(),scope:multiuser?'local synthetic HTTP authenticated reads; 20 independent sessions/1 water record each, 20 sequential warmups then 180 measured reads; not physical devices or production capacity':'local synthetic HTTP authenticated read load, 100 own water rows; 1 session, not independent users or production capacity',rows,httpMetrics,directServiceWrites,indexes,queryPlan:plan,database:resources,driverMemory:process.memoryUsage(),driverCpu:process.cpuUsage(),serverResources:{before,after:serverResources()},serverResourcesMeasured:true};
+ mkdirSync('.npm-cache',{recursive:true});writeFileSync(`${evidenceDirectory}/capacity.json`,JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(rows.some(row=>row.failures))throw Error('HTTP_CAPACITY_SAMPLE_FAILED');
 }catch(error){
- writeFileSync(`.npm-cache/p12/capacity-failure-${Date.now()}.json`,JSON.stringify({measuredAt:new Date().toISOString(),multiuser,measurementStage,completedTiers,errorType:error instanceof Error?error.name:'UNKNOWN'},null,2));
+ writeFileSync(`${evidenceDirectory}/failure.json`,JSON.stringify({measuredAt:new Date().toISOString(),multiuser,measurementStage,completedTiers,errorType:error instanceof Error?error.name:'UNKNOWN'},null,2));
  throw Error('P12_CAPACITY_FAILED');
 }finally{child.kill();closeSync(metricLog);await f.close();}

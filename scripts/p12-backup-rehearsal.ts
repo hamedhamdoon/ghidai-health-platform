@@ -31,8 +31,8 @@ try{
  const containerPorts=docker(['inspect','--format','{{json .NetworkSettings.Ports}}','ghidai-p12-postgres-1711']).toString();
  assert(containerPorts.includes('"HostIp":"127.0.0.1","HostPort":"55434"'),'NEW_LOOPBACK_CONTAINER_REQUIRED');
  const schema=`p3_test_${Date.now()}`,q=`"${schema}"`;
- const migrationManifest=readdirSync('prisma/migrations').filter(n=>/^202610\d+_p[2-9]_/.test(n)).sort().map(name=>({name,sha256:createHash('sha256').update(readFileSync(`prisma/migrations/${name}/migration.sql`)).digest('hex')}));
- if(migrationManifest.length!==26)throw new Error('MIGRATION_MANIFEST_MISMATCH');
+ const migrationManifest=readdirSync('prisma/migrations').filter(n=>(/^202610\d+_p[2-9]_/.test(n)||/^202610(?:18001[89]|1[89]0020)_p12r1_/.test(n))).sort().map(name=>({name,sha256:createHash('sha256').update(readFileSync(`prisma/migrations/${name}/migration.sql`)).digest('hex')}));
+ if(migrationManifest.length!==29)throw new Error('MIGRATION_MANIFEST_MISMATCH');
  stage='migration-ledger-preflight';
  // Read only the canonical public ledger; only the new isolated mirror is writable here.
  const ledgerFilter='finished_at IS NOT NULL AND rolled_back_at IS NULL';
@@ -45,7 +45,7 @@ try{
  if(new Set(canonicalLedger.map(entry=>entry.migration_name)).size!==migrationManifest.length)throw new Error('MIGRATION_LEDGER_DUPLICATE');
  stage='schema';
  await pool.query(`CREATE SCHEMA ${q} AUTHORIZATION ghidai_owner; GRANT USAGE ON SCHEMA ${q} TO ghidai_app,ghidai_policy,ghidai_auth`);
- const schemaClient=await pool.connect();try{await schemaClient.query(`SET search_path=${q},public`);for(const migration of readdirSync('prisma/migrations').filter(n=>/^202610\d+_p[2-9]_/.test(n)).sort())await schemaClient.query(readFileSync(`prisma/migrations/${migration}/migration.sql`,'utf8').replaceAll('public',schema));
+ const schemaClient=await pool.connect();try{await schemaClient.query(`SET search_path=${q},public`);for(const migration of readdirSync('prisma/migrations').filter(n=>(/^202610\d+_p[2-9]_/.test(n)||/^202610(?:18001[89]|1[89]0020)_p12r1_/.test(n))).sort())await schemaClient.query(readFileSync(`prisma/migrations/${migration}/migration.sql`,'utf8').replaceAll('public',schema));
   await schemaClient.query('BEGIN ISOLATION LEVEL REPEATABLE READ');
   try{
    // LIKE preserves ledger shape/indexes without touching the existing public object.
@@ -129,10 +129,10 @@ try{
   assert.notEqual(freshToken,fixture.a.token);
   await service.transaction(async c=>assert.equal((await service.resolve(c,freshToken)).actor.id,fixture!.a.id));
   const actual=await new AnalyticsService(service).execute('analytics','GET',{},freshToken,null,null,new URLSearchParams());assert.deepEqual(actual,expected);const client=await app.connect();try{await client.query('BEGIN');await client.query("SELECT set_config('app.user_id',$1,true)",[fixture.b.id]);assert.equal((await client.query('SELECT id FROM "WaterLog" WHERE "userId"=$1',[fixture.a.id])).rowCount,0);assert.equal((await client.query('SELECT count(*)::int n FROM "WaterLog"')).rows[0].n,1);}finally{await client.query('ROLLBACK');client.release();}}finally{await Promise.all([app.end(),auth.end(),prisma.$disconnect()]);}
- const evidence={phase:'P12',syntheticOnly:true,targetContainer:'ghidai-p12-postgres-1711',destinationServer,targetDatabase:target,schema,version,server,tables:tables.length,rows,encryptedBytes:encrypted.length,sha256:backupDigest(encrypted),authenticatedCorruptionRejected:true,ownersPoliciesAndSchemaMatch:true,sourceMigrationManifest:migrationManifest,publicLedgerCounts,restoredMigrationLedger:true,migrationLedgerScope:'verified 26 canonical completed rows mirrored into new synthetic schema; historical source unchanged',restoredSession:true,restoredPasswordLogin:true,restoredRlsIsolation:true,restoredAnalyticsMatch:true,durationMs:Date.now()-started,productionRpoApproved:false,productionRtoApproved:false,keyPersisted:false,independentStorageTested:false};
- mkdirSync('.npm-cache/p12',{recursive:true});
- writeFileSync(`.npm-cache/p12/${target}.aesgcm`,encrypted,{flag:'wx'});
- writeFileSync('.npm-cache/p12/backup-evidence.json',JSON.stringify(evidence,null,2));
+ const evidence={phase:'P12-R1',syntheticOnly:true,targetContainer:'ghidai-p12-postgres-1711',destinationServer,targetDatabase:target,schema,version,server,tables:tables.length,rows,encryptedBytes:encrypted.length,sha256:backupDigest(encrypted),authenticatedCorruptionRejected:true,ownersPoliciesAndSchemaMatch:true,sourceMigrationManifest:migrationManifest,publicLedgerCounts,restoredMigrationLedger:true,migrationLedgerScope:'verified 29 canonical completed rows mirrored into new synthetic schema; historical source unchanged',restoredSession:true,restoredPasswordLogin:true,restoredRlsIsolation:true,restoredAnalyticsMatch:true,durationMs:Date.now()-started,productionRpoApproved:false,productionRtoApproved:false,keyPersisted:false,independentStorageTested:false};
+ mkdirSync('.npm-cache/p12-r1',{recursive:true});
+ writeFileSync(`.npm-cache/p12-r1/${target}.aesgcm`,encrypted,{flag:'wx'});
+ writeFileSync('.npm-cache/p12-r1/backup-evidence.json',JSON.stringify(evidence,null,2));
  console.log(JSON.stringify(evidence));
 }catch(error){const safeCode=error instanceof Error&&/^[A-Z0-9_]+$/.test(error.message)?error.message:'OPERATION_REJECTED';console.error(`FAIL P12_BACKUP_REHEARSAL stage=${stage} code=${safeCode}: no credentials or dump payload logged; any newly created isolated DB retained for inspection.`);process.exitCode=1;}
 finally{key.fill(0);await fixture?.close();await restored?.end();await pool.end();await destination.end();}

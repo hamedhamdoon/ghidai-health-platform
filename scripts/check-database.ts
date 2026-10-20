@@ -16,7 +16,7 @@ try {
   if (result[0]?.database !== expected) throw new Error('Unexpected database detected.');
   if (result[0].schemas !== 0n) {
     const migrations = await prisma.$queryRaw<{ migration_name:string;checksum:string }[]>`SELECT migration_name,checksum FROM _prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL`;
-    const expectedNames=readdirSync('prisma/migrations').filter(name=>/^202610\d+_p[2-7]_/.test(name));
+    const expectedNames=readdirSync('prisma/migrations').filter(name=>(/^202610\d+_p[2-9]_/.test(name)||/^2026101800(?:18|19|20)_p12r1_/.test(name)));
     if(migrations.length!==expectedNames.length)throw new Error('Unexpected migration baseline.');
     for(const migration of migrations){if(!expectedNames.includes(migration.migration_name)||createHash('sha256').update(readFileSync(`prisma/migrations/${migration.migration_name}/migration.sql`)).digest('hex')!==migration.checksum)throw new Error('Migration checksum mismatch.');}
   }

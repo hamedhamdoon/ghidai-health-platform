@@ -1,2 +1,5 @@
 prisma/migrations/**/*.sql text eol=lf
 prisma/migrations/migration_lock.toml text eol=lf
+# Preserve the exact bytes already applied and verified during P12-R1.
+prisma/migrations/202610180018_p12r1_meal_selection/migration.sql -text
+prisma/migrations/202610180020_p12r1_authoring_graph_fix/migration.sql -text

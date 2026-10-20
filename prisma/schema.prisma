@@ -1680,3 +1680,26 @@ model P4LocalCapability {
   purpose   String
   User      User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
 }
+
+model RemediationDraft {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @db.Timestamptz(6)
+  revision Int @default(1)
+  kind String
+  code String
+  version Int
+  authorId String @db.Uuid
+  status String @default("DRAFT")
+  document Json
+  contentHash String
+  reviewerId String? @db.Uuid
+  reviewReason String?
+  reviewedAt DateTime? @db.Timestamptz(6)
+  publishedId String? @db.Uuid
+  withdrawReason String?
+
+  @@unique([kind, code, version])
+  @@index([authorId], map: "RemediationDraft_author_idx")
+  @@index([reviewerId], map: "RemediationDraft_reviewer_idx")
+}

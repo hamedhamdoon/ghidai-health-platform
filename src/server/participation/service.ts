@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import {participantNutritionCommand} from './nutrition';
 import type { PoolClient } from 'pg';
 import { AuthService } from '../auth/service';
 import { AuthError } from '../auth/contracts';
@@ -61,6 +62,7 @@ export class ParticipationService {
    const old=(await db.query('SELECT id FROM "TaskCompletion" WHERE "occurrenceId"=$1 AND "userId"=$2',[id,actor])).rows[0];if(Boolean(old)!==d.completed){if(d.completed)await db.query('INSERT INTO "TaskCompletion"("userId","occurrenceId","completedAt","recordedAt","isLate",mode,"evidenceRevision") VALUES($1,$2,$3,now(),$4,\'MANUAL\',$5)',[actor,id,d.occurredAt,link.localDate<today,o.revision+1]);else await db.query('DELETE FROM "TaskCompletion" WHERE "occurrenceId"=$1 AND "userId"=$2',[id,actor]);await db.query('UPDATE "TaskOccurrence" SET revision=revision+1 WHERE id=$1 AND "userId"=$2',[id,actor]);await db.query('UPDATE "EnrollmentDay" SET revision=revision+1 WHERE id=$1 AND "userId"=$2',[day.id,actor]);await db.query('UPDATE "Enrollment" SET revision=revision+1 WHERE id=$1 AND "userId"=$2',[e.id,actor]);}
    return {id,completed:d.completed,revision:o.revision+(Boolean(old)!==d.completed?1:0),dayProgress:(await this.day(db,e,link.localDate,actor))!.counts};
   }
+  const nutrition=await participantNutritionCommand(db,path,method,input,actor,match,this);if(nutrition!==undefined)return nutrition;
   return missing();
  }
 }
