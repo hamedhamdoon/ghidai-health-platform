@@ -54,3 +54,20 @@ APPROVED local rows certify the executed engineering preparation/check only, not
 Record gate ID, scope/version, choice and alternatives, approving person/qualification, dated approval artifact, commands/test environment/commit and remaining limitations. The integrator may certify an executed local engineering check; cannot certify medical/legal/owner decisions. Keep failed and superseded evidence. A gate requiring multiple authorities closes only after all approvals. Do not replace OPEN with APPROVED because a fixture value was implemented or because a free pricing page exists.
 
 P11 engineering readiness and launch readiness are separate decisions: even a fully green local regression leaves public launch blocked by the decisions above. Missing provider evidence is documented without spending money or weakening security. Changes to target platform, audience or content require re-evaluating relevant gates.
+
+## P12-R1 scoped gate evidence — 2026-10-19
+
+This addendum preserves P11/P12 history; owner P12-R1 authorization permits one local synthetic remediation cycle only. Earlier R-12 start gating is historical: the owner explicitly commissioned P12 and P12-R1; it is not publication authority. A-01..A-12 remain OPEN.
+
+Final replay `.npm-cache/p12-r1/regression-1792385690605` passed 135 units, 172 PostgreSQL groups (151 + 8 nutrition + 13 administration), 7 relational deletion assertions, 9 full-graph groups, 162 E2E (147 + 15) and 11 outage/recovery groups. F01 is RESOLVED locally for synthetic participant preference selection; F03 is RESOLVED for synthetic rule/review-schema authoring. F02 remains PARTIAL: optional correction intake/cancellation exists, exceptional approval/application remains BLOCKED A-03/A-11, and historical personal logs are not frozen. F04 sensitive reporting stays BLOCKED A-11/legal review; A-03/A-04 real policies/thresholds stay OPEN.
+
+| Gate area | R1 effect |
+|---|---|
+| Local function/regression evidence | Expanded tested synthetic scope; original coverage retained, not replaced |
+| Performance | P12-P01 PARTIAL: final matrix 60/60 valid visits, 6 LCP >2500 ms, zero session-window CLS >0.1, zero NOT TESTED visits; remaining LCP failures retain the unchanged budget |
+| R-06 security | BLOCKED: unresolved High/Critical risks require independent security disposition; passing regression is not a clean vulnerability scan |
+| R-05 backup/recovery | Independent production storage/key custody/full-history/deletion-ledger recovery remain gated; synthetic restore does not close them |
+| R-07/R-08 practical acceptance | Automated RTL/keyboard/Axe/reduced-motion/CSS200% reflow are bounded evidence; actual screen reader/native zoom/independent physical devices remain NOT TESTED; public HTTPS unavailable without separate deployment authority |
+| R-10/R-11 publication/main | BLOCKED; no deployment or merge authorization |
+
+Do not infer unconditional technical or production acceptance from these counts. [R1 functional](P12-R1-FUNCTIONAL-RESULTS.md), [regression](P12-R1-REGRESSION-RESULTS.md), [security](P12-R1-SECURITY-REVIEW.md), [performance](P12-R1-PERFORMANCE-RESULTS.md) and [final handoff](P12-R1-FINAL-HANDOFF.md) retain the scoped evidence and remaining gates.

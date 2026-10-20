@@ -55,3 +55,17 @@ Additional engineering risks: five High npm development-chain findings without a
 Passing147 existing browser cases would establish their tested journeys, not fill these untested features. These findings prevent an unconditional claim of full functional completion and require explicit disposition before full P12 technical acceptance. No broad new feature is silently substituted for an acceptance review.
 
 Local tests may proceed on synthetic data despite production gates. A failing mandatory local assertion must be fixed and re-executed or reported as a local acceptance blocker. Missing approval is not a test failure; unavailable testing is NOT TESTED, never PASS.
+
+## P12-R1 disposition addendum — 2026-10-19
+
+Historical P12 findings above remain unchanged as baseline evidence. The final integrated replay is `.npm-cache/p12-r1/regression-1792385690605`.
+
+| Issue | R1 status | Evidence / remaining gate |
+|---|---|---|
+| P12-F01 | RESOLVED local synthetic | Participant enrolled-version meals/ingredients/alternatives with real PostgreSQL save/retrieval/change, revision/idempotency, owner/version/withdrawal isolation; 8 native groups plus browser journey at 3 widths including lost response, reload and password re-login |
+| P12-F02 | PARTIAL; exceptional operation BLOCKED | Own encrypted request snapshot/reason/status/time, duplicate protection and audited revision-guarded cancellation. No reviewer approve/reject/apply authority or exceptional atomic recalculation enabled pending A-03/A-11. Intake is optional; existing historical personal-log edits remain possible and can stale a pending snapshot. Withdrawn history tested; completed history NOT TESTED |
+| P12-F03 | RESOLVED local synthetic authoring | Versioned rule/review-schema draft→review→publish→withdraw, completeness/concurrency, exact reviewed graph binding and independent/revoked authority tested through native and UI→PostgreSQL/reload. A-03/A-04 real policy approval stays OPEN |
+| P12-F04 | BLOCKED | Safe disabled report contracts and negative disclosure tests; sensitive reporting requires A-11/legal approval; no production grouping threshold adopted |
+| P12-P01 | PARTIAL | Final matrix: 60/60 valid visits, 6 LCP >2500 ms, zero session-window CLS >0.1, zero NOT TESTED visits. Remaining LCP failures prevent full resolution; budgets unchanged and historical results preserved |
+
+Final replay passed 135 unit, 172 PostgreSQL groups (151 original + 21 new), 7 relational deletion assertions, 9 full-graph groups, 162 E2E (147 original + 15 new), and 11 outage/recovery groups. These tests do not resolve outstanding High/Critical dependency/container security risks, independent production backup/key/recovery gaps, actual screen-reader/physical-device acceptance or owner decisions. All A-01..A-12 remain OPEN. Public deployment and main merge remain prohibited. No unconditional local/full-release acceptance is asserted by this addendum. [R1 handoff](P12-R1-FINAL-HANDOFF.md) consolidates final gates.

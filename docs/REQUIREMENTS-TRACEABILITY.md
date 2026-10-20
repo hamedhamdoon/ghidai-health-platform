@@ -188,3 +188,17 @@ Owner P11 instruction authorizes local synthetic engineering only. Exact baselin
 | P11-06; owner§8, R-22/T-22 | today route + isolated transport/quick controls; p11-browser-performance, p11-capacity | Measured bytes/LCP/CLS/HTTP concurrency/query/server resources; local evidence only |
 | P11-07; owner§9, R-21/R-24 | P11-RELEASE-GATES | A-01–12 authority unchanged; engineering versus actual launch explicit |
 | P11-08; owner§10–12, R-21/T-21 | P11-TEST-RESULTS/P11-HANDOFF | Mandatory local regression then scoped branch delivery; no main merge/deployment/P12 |
+
+## P12-R1 scoped remediation traceability — 2026-10-19
+
+This addendum preserves the original P12 assessment. Owner instruction P12-R1 is the source; exact approved baseline is `4976b0df4657fdacf29c620a7453fb2b268b8587`. All A-01..A-12 decisions remain OPEN; synthetic implementation is not policy approval.
+
+| Requirement / priority | Responsible implementation and source | Direct acceptance evidence | R1 disposition |
+|---|---|---|---|
+| P12-F01 / R-07 / P0; owner P12-R1 §3 | Participation nutrition service, participant meal component/Today, additive migration018; enrolled immutable P4 graph | `tests/integration/p12r1-nutrition.ts`: 8 groups; `tests/e2e/p12r1-nutrition.spec.ts`: UI→API→PostgreSQL, response-loss retry, reload/password re-login, change, isolation/version/withdrawal/revision controls; 3 widths | RESOLVED local synthetic preference workflow; real health content remains blocked |
+| P12-F02 / R-06/R-15 / P1; owner §4 | Remediation corrections API/UI, encrypted previous row/proposal/revision, pending uniqueness/cancel; migration019 | 13 B native groups and impacted new browser cases include request/reload/cancel and withdrawn history; completed history not directly tested | PARTIAL; exceptional reviewer approval/rejection/application/recalculation BLOCKED A-03/A-11; intake is optional, not a historical-edit freeze |
+| P12-F03 / R-11/R-13 / P1; owner §5 | Remediation rule/review-schema authoring, immutable versions, reviewed materialized graph binding; migration019 | Native B + browser schema/STREAK author→independent reviewer→publish→PostgreSQL→reload→withdraw; native tamper/fake-reference/revocation checks | RESOLVED local synthetic authoring; real policy/threshold adoption remains OPEN A-03/A-04 |
+| P12-F04 / R-15 / P1; owner §6 | Disabled report route/contract; test-only synthetic aggregation/suppression | Negative access/disclosure and synthetic helper coverage; no sensitive report exposed | BLOCKED A-11 and legal review; no production minimum adopted |
+| P12-P01 / R-22 / P0; owner §7 | Performance instrumentation/remediation; final dedicated performance report | Final matrix: 60/60 valid visits, 6 LCP >2500 ms, zero session-window CLS >0.1, zero NOT TESTED visits | PARTIAL; remaining LCP failures retain the unchanged budget; historical failures preserved |
+
+Final integrated replay `.npm-cache/p12-r1/regression-1792385690605`: 135 units; 172 PostgreSQL groups = 151 original + 8 A + 13 B; 7 relational deletion assertions; 9 full-graph groups; 162 E2E = 147 original + 15 new; 11 outage/recovery groups, all PASS for executed scope. [R1 regression](P12-R1-REGRESSION-RESULTS.md) is the detailed ledger. High/Critical security risks and production/device/backup/owner gates prevent unconditional release acceptance.

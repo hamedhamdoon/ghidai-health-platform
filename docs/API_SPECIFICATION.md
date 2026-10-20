@@ -211,3 +211,11 @@ RV-03 عولج لهذه الدورة؛ RV-04 تحدي محلي محدد دون �
 ## P11 local readiness endpoint
 
 `GET /api/health` remains liveness and does not check DB. New `GET /api/ready` is dynamic/no-store; it checks both restricted auth/app pools and returns `{status:"ready"}`/200 or `{status:"unavailable"}`/503 without SQL/credentials/schema/health details. Connectivity at one instant does not establish migrations/grants/mail/release acceptance. This remains loopback-only; production runtime selection fails closed. Opt-in local `/api/v1` telemetry reports only HTTP status/duration; no new public metrics endpoint was added. See [P11 configuration](P11-PRODUCTION-CONFIGURATION.md).
+
+## P12-R1 local remediation contracts
+
+Authenticated `GET/PUT occurrences/:id/meal` derives the enrollment, program version and plan from the actor-owned occurrence. PUT accepts only `{alternativeMealId: UUID|null}`, requires occurrence `If-Match` and `Idempotency-Key`, and returns saved selection/revision metadata. GET returns currently approved synthetic content choices/ingredients. Selection is preference; manual consumption completion remains explicit. Unavailable/withdrawn content and cross-version alternatives are denied. No client userId or plan ID establishes authority.
+
+`GET/POST corrections` lists/creates own closed-window requests; POST accepts targetKind, targetId, full validated proposedPatch and reason, with target log If-Match/idempotency. Encrypted proposal includes prior row and expected revision. `POST corrections/:id/cancel` requires request revision. Duplicate pending requests conflict. Exceptional review/application routes remain denied pending A-03/A-11; no recalculation or original record change occurs on request/cancel.
+
+`GET/POST admin/authoring` and `coach/authoring`, `PATCH :id`, `POST :id/submit|review|publish|withdraw` manage synthetic versioned drafts. Independent active qualified reviewer and current local capability required; admin publication requires fresh MFA. Accepted definitions immutable; create next version for edits. Publish materializes exact reviewed graph transactionally, enforced in PostgreSQL. Sensitive `admin/reports` remains POLICY_NOT_APPROVED; test-only suppression helpers do not expose a report or adopt a production cohort minimum. A-03/A-04/A-11/A-12 stay OPEN.

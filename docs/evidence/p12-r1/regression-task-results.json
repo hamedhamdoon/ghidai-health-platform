@@ -1,0 +1,89 @@
+{
+  "node": "v24.22.0",
+  "results": [
+    {
+      "name": "canonical-test-setup",
+      "startedAt": "2026-10-19T04:54:50.606Z",
+      "finishedAt": "2026-10-19T04:54:55.522Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/canonical-test-setup.log"
+    },
+    {
+      "name": "database-probe",
+      "startedAt": "2026-10-19T04:54:55.566Z",
+      "finishedAt": "2026-10-19T04:54:57.126Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/database-probe.log"
+    },
+    {
+      "name": "native-original",
+      "startedAt": "2026-10-19T04:54:57.128Z",
+      "finishedAt": "2026-10-19T05:02:22.326Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/native-original.log"
+    },
+    {
+      "name": "native-nutrition-new",
+      "startedAt": "2026-10-19T05:02:22.328Z",
+      "finishedAt": "2026-10-19T05:02:32.496Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/native-nutrition-new.log"
+    },
+    {
+      "name": "native-administration-new",
+      "startedAt": "2026-10-19T05:02:32.499Z",
+      "finishedAt": "2026-10-19T05:02:42.197Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/native-administration-new.log"
+    },
+    {
+      "name": "auth-outages",
+      "startedAt": "2026-10-19T05:02:42.199Z",
+      "finishedAt": "2026-10-19T05:03:03.883Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/auth-outages.log"
+    },
+    {
+      "name": "participant-outages",
+      "startedAt": "2026-10-19T05:03:03.886Z",
+      "finishedAt": "2026-10-19T05:03:15.529Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/participant-outages.log"
+    },
+    {
+      "name": "restore",
+      "startedAt": "2026-10-19T05:03:15.531Z",
+      "finishedAt": "2026-10-19T05:03:30.582Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/restore.log"
+    },
+    {
+      "name": "browser",
+      "startedAt": "2026-10-19T05:03:30.584Z",
+      "finishedAt": "2026-10-19T05:10:34.520Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/browser.log"
+    },
+    {
+      "name": "capacity-schema",
+      "startedAt": "2026-10-19T05:10:34.522Z",
+      "finishedAt": "2026-10-19T05:10:37.401Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/capacity-schema.log"
+    },
+    {
+      "name": "capacity-single",
+      "startedAt": "2026-10-19T05:10:37.403Z",
+      "finishedAt": "2026-10-19T05:11:03.050Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/capacity-single.log"
+    },
+    {
+      "name": "capacity-multiuser",
+      "startedAt": "2026-10-19T05:11:03.052Z",
+      "finishedAt": "2026-10-19T05:11:15.721Z",
+      "exitCode": 0,
+      "log": ".npm-cache/p12-r1/regression-1792385690605/capacity-multiuser.log"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "cohort": "2026-10-20T04:12:02.077Z",
+  "buildId": "Bs3BkyVrKteoYc9ngLT1N",
+  "intended": 60,
+  "attempted": 60,
+  "valid": 60,
+  "notTested": 0,
+  "lcpOverBudget": 6,
+  "clsOverBudget": 0
+}

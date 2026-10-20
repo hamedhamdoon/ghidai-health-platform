@@ -32,3 +32,17 @@ This is an acceptance review of [R-01–R-24](PROJECT_REQUIREMENTS.md), [T-01–
 | 24 / 24 | No paid/cloud/card activation; portable Node/PostgreSQL and local quota thresholds | PASS no-spend boundary; BLOCKED approved hosting | A-06/07/08/09 and actual whole-system free quotas, region, safe cutoff and migration-to-provider tests open |
 
 The R/T numbers pair acceptance groups, not individual assertion totals. A local PASS is qualified by its scope and does not close the corresponding full requirement. Source/priority/implementation linkage remains in [traceability](REQUIREMENTS-TRACEABILITY.md). [Open issues](P12-OPEN-ISSUES.md) identifies release blockers and authority.
+
+## P12-R1 acceptance addendum — final integrated replay
+
+The original table records P12 history and is retained. This scoped update uses `.npm-cache/p12-r1/regression-1792385690605`, completed 2026-10-19, Asia/Muscat; it does not import prior test success.
+
+| Original issue / affected requirements | Updated local disposition | Evidence and continuing limits |
+|---|---|---|
+| P12-F01 / 07 | RESOLVED local synthetic | 8 new PostgreSQL groups and participant UI→API→PostgreSQL journey at 360/768/1280, identical-key lost-response retry, reload/password re-login, selection change and isolation/version/withdrawal/revision tests. Preference remains separate from manual consumption completion |
+| P12-F02 / 06,15 | PARTIAL; exceptional application BLOCKED | Requests preserve encrypted previous row/revision/proposal, reason/time/status and pending uniqueness/cancel. Approval/rejection/application/recalculation authority remains A-03/A-11. Intake does not freeze historical personal logs; pending snapshots may stale. Withdrawn historical intake directly tested; completed history NOT TESTED |
+| P12-F03 / 11,13,15 | RESOLVED synthetic authoring | Draft/version/completeness/independent review/publication/withdrawal, browser-to-DB/reload, native reviewed-graph and revoked-authority checks. A-03/A-04 real policies and thresholds remain OPEN |
+| P12-F04 / 15 | BLOCKED | Disabled report contract/route and negative disclosure tests only; A-11/legal approval absent, no real cohort threshold or personal health report |
+| P12-P01 / 22 | PARTIAL | Final matrix: 60/60 valid visits, 6 LCP >2500 ms, zero session-window CLS >0.1, zero NOT TESTED visits. Historical 21/60 LCP failures and incomplete historical standard CLS evidence remain preserved; budgets are unchanged |
+
+Executed final regression: 135 unit; 172 PostgreSQL groups (151 + 8 + 13); 7 relational deletion assertions; 9 full-graph deletion groups; 162 E2E (147 + 15); 11 outage/recovery groups, all PASS within executed scope. Keyboard/RTL/Axe/reduced motion/CSS200% reflow are automated local evidence; actual screen reader/native zoom/independent physical devices remain NOT TESTED. Security High/Critical findings remain unresolved and do not become PASS through regression. A-01..A-12 remain OPEN. No public deployment, main merge or unconditional acceptance follows. See [R1 functional](P12-R1-FUNCTIONAL-RESULTS.md), [regression](P12-R1-REGRESSION-RESULTS.md) and [handoff](P12-R1-FINAL-HANDOFF.md).

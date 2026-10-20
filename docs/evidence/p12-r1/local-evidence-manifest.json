@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-10-20T04:19:05.066Z",
+  "scope": "Local retained evidence. Hashes prove identity, not acceptance; failures are preserved. Source raw files remain ignored and must be retained independently.",
+  "files": [
+    {
+      "path": ".npm-cache/p12-r1/regression-1792385690605/results.json",
+      "bytes": 2937,
+      "sha256": "0d66ff86dc2b04ca10040d0a1f5ff53e63e3758e48b63fe19af1b1718da63fed"
+    },
+    {
+      "path": ".npm-cache/p12-r1/backup-evidence.json",
+      "bytes": 5253,
+      "sha256": "decbc050e2e56593c9a2a8db2cd6828c5866f382bdbe6b9a792e10bdc4dffe39"
+    },
+    {
+      "path": ".npm-cache/p12-r1/audit-final-full.json",
+      "bytes": 3161,
+      "sha256": "7d6169f77e967e4869c2a948655a1185241d6787e3f62c5369aaf93979cdc790"
+    },
+    {
+      "path": ".npm-cache/p12-r1/audit-final-runtime.json",
+      "bytes": 389,
+      "sha256": "3235aced710c8147c91a38a2ad503ceac7b52ec9f74c2c21d9a139dc199e7541"
+    },
+    {
+      "path": ".npm-cache/p12-r1/security-deduplicated.json",
+      "bytes": 62014,
+      "sha256": "18df09b4d5eee84f1a91efbb7959e71d014efdd436a9aacfdf30f11ae3190db8"
+    },
+    {
+      "path": ".npm-cache/p12-r1/storage-inventory-before-final.json",
+      "bytes": 5058,
+      "sha256": "2303b77dc40ce98ebffb81d46928f1dc4e59bb9fe785ee6f875366aef80c7881"
+    },
+    {
+      "path": ".npm-cache/p12-r1/storage-inventory.json",
+      "bytes": 7606,
+      "sha256": "c0f20ff88e822e22910629814951bd4c090b08e29405d5d4750869076a685660"
+    },
+    {
+      "path": ".npm-cache/p12-r1/monitor-final.json",
+      "bytes": 502,
+      "sha256": "8f2f7827cf1a3652a267d13db6594b25e6b2522318ef7b21d1eb1d13c9c7bd92"
+    },
+    {
+      "path": ".npm-cache/p12-r1/performance-final-oct20.json",
+      "bytes": 491624,
+      "sha256": "ad1e94c1bc6de636939fe5498a011872096920e82d7791270c5ff26a8a54bdb4"
+    },
+    {
+      "path": ".npm-cache/p12-r1/frozen-source-check.log",
+      "bytes": 2292,
+      "sha256": "567dc5d447ead4077a61aba2192fa8559aee069faffd913a75fdab878bf94f75"
+    },
+    {
+      "path": ".npm-cache/p12-r1/frozen-prisma-validate.log",
+      "bytes": 213,
+      "sha256": "e4108ba78472b137a498ab1ee564c97034394245a3834c63fc9678fb10132cc9"
+    },
+    {
+      "path": ".npm-cache/p12-r1/frozen-prisma-generate.log",
+      "bytes": 240,
+      "sha256": "a890404aec5893066e11385b8a259493cfce952458871a846506b3d88f84b4d6"
+    }
+  ]
+}

@@ -2,6 +2,10 @@
 
 A mobile-first digital health and lifestyle platform.
 
+## P12-R1 — 2026-10-20
+
+Latest local remediation: [handoff](docs/P12-R1-FINAL-HANDOFF.md), [functional evidence](docs/P12-R1-FUNCTIONAL-RESULTS.md), [regression](docs/P12-R1-REGRESSION-RESULTS.md). Frozen replay:135 units,172 PostgreSQL groups,7 relational assertions,9 full-graph groups,162 E2E and11 outage groups. Participant nutrition and synthetic authoring have direct acceptance evidence; exceptional corrections and sensitive reports remain restricted. Security, performance and operational gates prevent unconditional acceptance. All owner decisions remain OPEN; no public launch or main merge.
+
 ## P12 — قبول محلي ومرشح مراجعة، 2026-10-18
 
 **LOCAL RELEASE CANDIDATE — PUBLIC LAUNCH BLOCKED**. أحدث حكم ونطاق الاختبارات في [تقرير القبول](docs/P12-FINAL-ACCEPTANCE-REPORT.md) و[نتائج الانحدار](docs/P12-REGRESSION-TEST-RESULTS.md). نجاح الرحلات الحالية لا يغلق فجوات التغذية للمشارك والتصحيح والتأليف الإداري أو الاعتمادات A-01–A-12. الفرع `feature/ghidai-p12-final-acceptance`؛ لا نشر عام أو إنتاج أو دمج main. الأقسام التالية تاريخية؛ تعليمات المرشح والاستعادة والبوابات في [حزمة RC المحلية](docs/P12-RELEASE-CANDIDATE.md).
